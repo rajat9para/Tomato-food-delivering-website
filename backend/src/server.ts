@@ -42,6 +42,11 @@ app.use((req, res, next) => {
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to TOMATO Food Delivery API! 🍅 The server is running successfully.');
+});
+
 // Public endpoint for restaurant search (no auth required)
 app.get('/api/public/restaurants', async (req, res) => {
   try {
