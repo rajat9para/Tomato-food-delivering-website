@@ -12,15 +12,15 @@ import fs from 'fs';
 const app = express();
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../public/uploads');
+const uploadsDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log('📁 Created uploads directory:', uploadsDir);
 }
 
-// CORS configuration - Allow all origins
+// CORS configuration
 app.use(cors({
-  origin: true,
+  origin: process.env.FRONTEND_URL || true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 });
 
 // Static file serving
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Public endpoint for restaurant search (no auth required)
 app.get('/api/public/restaurants', async (req, res) => {
@@ -107,7 +107,7 @@ connectDB().then(() => {
     console.log('========================================');
     console.log(`🚀 Server: http://localhost:${PORT}`);
     console.log(`🌐 API: ${BASE_URL}`);
-    console.log(`📁 Uploads: ${path.join(__dirname, '../public/uploads')}`);
+    console.log(`📁 Uploads: ${path.join(__dirname, 'public/uploads')}`);
     console.log(`🗄️  Database: Connected`);
     console.log('========================================');
   });

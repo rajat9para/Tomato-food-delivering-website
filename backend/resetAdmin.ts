@@ -11,7 +11,7 @@ const resetAdmin = async () => {
     if (!mongoUri) {
       throw new Error('MONGODB_URI or MONGO_URI is not defined in the .env file');
     }
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri!);
     console.log('✅ Connected to MongoDB');
 
     const User = mongoose.model('User', new mongoose.Schema({
@@ -31,7 +31,7 @@ const resetAdmin = async () => {
 
     // Create fresh admin with correct password
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+
     await User.create({
       name: 'Admin',
       email: 'admin@tomato.com',
@@ -47,14 +47,14 @@ const resetAdmin = async () => {
     console.log('📧 Email: admin@tomato.com');
     console.log('🔑 Password: admin123');
     console.log('========================================');
-    
+
     // Verify password works
     const admin = await User.findOne({ email: 'admin@tomato.com' });
     if (admin && admin.password) {
       const isValid = await bcrypt.compare('admin123', admin.password as string);
       console.log('✅ Password verification:', isValid ? 'SUCCESS' : 'FAILED');
     }
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Error:', error);

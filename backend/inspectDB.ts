@@ -15,7 +15,7 @@ const inspectDB = async () => {
         }
 
         console.log('🔗 Connecting to:', mongoUri);
-        await mongoose.connect(mongoUri);
+        await mongoose.connect(mongoUri!);
         console.log('✅ Connected to MongoDB');
 
         const users = await User.find({}).lean();

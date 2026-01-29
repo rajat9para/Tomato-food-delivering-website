@@ -4,7 +4,7 @@ import Order from './models/Order';
 
 const completeLast = async () => {
     try {
-        await mongoose.connect(MONGODB_URI);
+        await mongoose.connect(MONGODB_URI!);
         const order = await Order.findOne().sort({ createdAt: -1 });
         if (order) {
             order.orderStatus = 'completed';

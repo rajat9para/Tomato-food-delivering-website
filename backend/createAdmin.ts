@@ -11,7 +11,7 @@ const createAdmin = async () => {
     if (!mongoUri) {
       throw new Error('MONGODB_URI or MONGO_URI is not defined in the .env file');
     }
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri!);
     console.log('✅ Connected to MongoDB');
 
     const User = mongoose.model('User', new mongoose.Schema({
@@ -32,7 +32,7 @@ const createAdmin = async () => {
     }
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+
     await User.create({
       name: 'Admin',
       email: 'admin@tomato.com',
@@ -48,7 +48,7 @@ const createAdmin = async () => {
     console.log('📧 Email: admin@tomato.com');
     console.log('🔑 Password: admin123');
     console.log('========================================');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Error:', error);

@@ -2,7 +2,12 @@ node_modules/
 dist/
 build/
 .env
+backend/.env
+frontend/.env
+.env*
 .DS_Store
 *.log
 .vscode/
 .idea/
+mongodb/
+foodimages/
