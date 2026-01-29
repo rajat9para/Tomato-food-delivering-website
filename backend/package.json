@@ -1,12 +1,13 @@
 {
   "name": "tomato-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "private": true,
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js || npx ts-node server.ts",
-    "create-admin": "ts-node createAdmin.ts"
+    "start": "node dist/server.js",
+    "create-admin": "ts-node src/createAdmin.ts"
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -26,6 +27,7 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/multer": "^1.4.11",
     "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.2"
   }

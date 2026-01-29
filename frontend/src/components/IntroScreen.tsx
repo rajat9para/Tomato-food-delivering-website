@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -29,7 +29,7 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
     return (
         <div className={`fixed inset-0 z-[9999] bg-white flex items-center justify-center transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="flex flex-col items-center gap-8 animate-fade-in px-6 text-center">
-                <div className="w-32 h-32 bg-white rounded-[2.5rem] shadow-[0_15px_40px_rgba(226,55,68,0.15)] p-4 border border-red-50 flex items-center justify-center">
+                <div className="w-32 h-32 bg-white rounded-[2.5rem] intro-logo-shadow p-4 border border-red-50 flex items-center justify-center">
                     <img src="/tomato-logo.png" alt="TOMATO" className="w-full h-full object-contain" />
                 </div>
                 <div className="space-y-3">

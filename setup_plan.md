@@ -1,37 +1,26 @@
-# Setup Plan: Professional Deployment
+# Final Step: Frontend Deployment (Vercel)
 
-This document outlines the steps to host the TOMATO platform on Vercel (Frontend) and Render (Backend).
+Now that your backend is live on Render, follow these steps to launch the website.
 
-## 1. Backend Deployment (Render)
-Render is ideal for Node.js backends.
+### 1. Vercel Configuration
+1. Go to [vercel.com](https://vercel.com) and click **"Add New"** -> **"Project"**.
+2. Import your GitHub repository.
+3. Click **"Edit"** next to **Root Directory** and select:
+   `Tomato-food-delivering-website/frontend`
+4. Expand the **Environment Variables** section and add:
+   - **Key**: `VITE_API_URL`
+   - **Value**: `https://your-tomato-backend.onrender.com/api` 
+   *(⚠️ Replace this with your actual Render URL and keep the `/api` at the end!)*
 
-**Steps:**
-1. Create a MongoDB Atlas cluster and get your connection string.
-2. Link your GitHub repository to Render.
-3. **Render Dashboard Settings:**
-   - **Root Directory**: `backend` (or `Tomato-food-delivering-website/backend` depending on your repo structure)
-   - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start` (I updated this to have a fallback!)
-5. **Environment Variables** in Render Dashboard:
-   - `MONGODB_URI`: `mongodb+srv://rajat9parasf_db_user:c9y7bX6CSXbT27hx@cluster0.omccwhv.mongodb.net/tomato?retryWrites=true&w=majority&appName=Cluster0`
-   - `JWT_SECRET`: `your_secure_random_string`
-   - `NODE_ENV`: `production`
-   - `FRONTEND_URL`: `https://your-tomato-app.vercel.app`
+### 2. Deploy
+1. Click **"Deploy"**.
+2. Once it's finished, you'll get a URL like `https://tomato-frontend.vercel.app`. **Copy this URL.**
 
-## 2. Frontend Deployment (Vercel)
-Vercel is optimized for Vite/React applications.
+### 3. Final Step: Link Back to Render
+To allow your frontend to talk to the backend securely (CORS):
+1. Go back to your **Render Dashboard**.
+2. Go to the **Environment** tab of your backend service.
+3. Find `FRONTEND_URL` and change its value to your new Vercel URL (e.g., `https://tomato-frontend.vercel.app`).
+4. Save changes.
 
-**Steps:**
-1. Link your GitHub repository to Vercel.
-2. Select the `frontend` folder as the root directory.
-3. **Environment Variables** in Vercel Dashboard:
-   - `VITE_API_URL`: `https://your-tomato-backend.onrender.com/api`
-4. **Build settings:**
-   - Framework Preset: `Vite`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-
-## 3. Mandatory Check
-- Ensure `backend/index.ts` uses `process.env.FRONTEND_URL` for CORS.
-- Ensure `frontend/src/utils/api.ts` uses `import.meta.env.VITE_API_URL`.
+**Congratulations! Your full-stack app is now live! 🍅🚀✨**
