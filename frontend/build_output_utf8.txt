@@ -1,0 +1,23 @@
+﻿
+> tomato-frontend@1.0.0 build
+> tsc && vite build
+
+src/App.tsx(4,1): error TS6133: 'useAuth' is declared but its value is never read.
+src/App.tsx(5,1): error TS6133: 'useEffect' is declared but its value is never read.
+src/components/CustomerSidebar.tsx(6,65): error TS6133: 'User' is declared but its value is never read.
+src/components/CustomerSidebar.tsx(13,10): error TS6133: 'loadingProfile' is declared but its value is never read.
+src/components/Footer.tsx(1,45): error TS6133: 'Users' is declared but its value is never read.
+src/pages/AdminDashboard.tsx(13,10): error TS6133: 'topRestaurants' is declared but its value is never read.
+src/pages/AdminDashboard.tsx(18,18): error TS6133: 'setSortBy' is declared but its value is never read.
+src/pages/CustomerBestDishes.tsx(5,10): error TS6133: 'Search' is declared but its value is never read.
+src/pages/CustomerBestDishes.tsx(5,36): error TS6133: 'Filter' is declared but its value is never read.
+src/pages/CustomerBestDishes.tsx(80,35): error TS6133: 'index' is declared but its value is never read.
+src/pages/CustomerGreatDeals.tsx(6,10): error TS6133: 'Search' is declared but its value is never read.
+src/pages/CustomerGreatDeals.tsx(6,36): error TS6133: 'Filter' is declared but its value is never read.
+src/pages/CustomerGreatDeals.tsx(83,35): error TS6133: 'index' is declared but its value is never read.
+src/pages/CustomerHome.tsx(8,10): error TS6133: 'Star' is declared but its value is never read.
+src/pages/CustomerHome.tsx(8,16): error TS6133: 'Clock' is declared but its value is never read.
+src/pages/CustomerHome.tsx(8,23): error TS6133: 'CheckCircle' is declared but its value is never read.
+src/pages/Landing.tsx(13,10): error TS6133: 'dishes' is declared but its value is never read.
+src/pages/Landing.tsx(13,18): error TS6133: 'setDishes' is declared but its value is never read.
+src/pages/Register.tsx(25,13): error TS6133: 'response' is declared but its value is never read.
