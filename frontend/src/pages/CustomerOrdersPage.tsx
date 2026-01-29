@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { CheckCircle, ShoppingBag, MapPin, Star, X } from 'lucide-react';
+import { CheckCircle, ShoppingBag, MapPin, X } from 'lucide-react';
 
 const CustomerOrdersPage = () => {
   const navigate = useNavigate();

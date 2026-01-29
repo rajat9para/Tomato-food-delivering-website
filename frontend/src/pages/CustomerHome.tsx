@@ -18,7 +18,7 @@ const CustomerHome = () => {
   const [activeTab, setActiveTab] = useState('browse');
   const [showCheckout, setShowCheckout] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [ratingOrderId, setRatingOrderId] = useState('');
+  const [ratingOrderId] = useState('');
   const [ratingValue, setRatingValue] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
