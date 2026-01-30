@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Preloader from './components/Preloader';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -61,6 +61,7 @@ function AppContent() {
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const handleLoadingComplete = useCallback(() => setIsLoading(false), []);
 
   return (
     <AuthProvider>
@@ -68,7 +69,7 @@ function App() {
         <BrowserRouter>
           <AppContent />
         </BrowserRouter>
-        {isLoading && <Preloader onComplete={() => setIsLoading(false)} />}
+        {isLoading && <Preloader onComplete={handleLoadingComplete} />}
       </CartProvider>
     </AuthProvider>
   );
