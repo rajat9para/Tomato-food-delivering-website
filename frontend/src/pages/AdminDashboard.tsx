@@ -194,11 +194,25 @@ const AdminDashboard = () => {
         <aside className="w-64 bg-white border-r-4 border-red-100 min-h-screen p-6 shadow-lg">
           <div className="space-y-3">
             {[{ name: 'dashboard', emoji: '📊' }, { name: 'restaurants', emoji: '🍽️' }, { name: 'users', emoji: '👥' }, { name: 'orders', emoji: '📦' }, { name: 'transactions', emoji: '💳' }].map((tab) => (
-              <button key={tab.name} onClick={() => { setActiveTab(tab.name); setSearchQuery(''); setUserSearchQuery(''); }} className={`w-full p-4 text-left rounded-lg font-bold text-lg transition relative ${activeTab === tab.name ? 'bg-red-600 text-white shadow-lg' : 'text-gray-700 hover:bg-red-50'}`}>
-                <span className="mr-2">{tab.emoji}</span>
-                {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
+              <button
+                key={tab.name}
+                onClick={() => { setActiveTab(tab.name); setSearchQuery(''); setUserSearchQuery(''); }}
+                className={`w-full p-4 text-left rounded-xl font-bold text-lg transition-all relative flex items-center gap-4 overflow-hidden group
+                  ${activeTab === tab.name
+                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200 translate-x-1'
+                    : 'text-gray-500 hover:bg-red-50 hover:text-red-600'
+                  }`}
+              >
+                {/* Active Indicator Line */}
+                {activeTab === tab.name && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20"></div>
+                )}
+
+                <span className={`text-2xl transition-transform group-hover:scale-110 ${activeTab === tab.name ? 'scale-110' : ''}`}>{tab.emoji}</span>
+                <span className="tracking-wide">{tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}</span>
+
                 {tab.name === 'restaurants' && pendingCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-pulse shadow-lg">
+                  <span className="ml-auto bg-white text-red-600 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm">
                     {pendingCount}
                   </span>
                 )}
@@ -213,53 +227,74 @@ const AdminDashboard = () => {
               <h2 className="text-4xl font-bold text-gray-900 mb-8">Dashboard Overview</h2>
 
               {/* Main KPI Cards */}
+              {/* Main KPI Cards - Masterpiece Theme (Red/White/Beige) */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-6 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">👥</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-90">Total Users</h3>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 bg-red-50 rounded-xl text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <span className="text-2xl">👥</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Total Users</h3>
+                    </div>
+                    <p className="text-4xl font-black text-gray-900">{stats.totalUsers || 0}</p>
                   </div>
-                  <p className="text-4xl font-black">{stats.totalUsers || 0}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">🍽️</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-90">Restaurants</h3>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 bg-red-50 rounded-xl text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <span className="text-2xl">🍽️</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Restaurants</h3>
+                    </div>
+                    <p className="text-4xl font-black text-gray-900">{stats.totalRestaurants || 0}</p>
                   </div>
-                  <p className="text-4xl font-black">{stats.totalRestaurants || 0}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-6 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">💰</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-90">{revenuePeriod.charAt(0).toUpperCase() + revenuePeriod.slice(1)} Revenue</h3>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 bg-red-50 rounded-xl text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <span className="text-2xl">💰</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">{revenuePeriod} Revenue</h3>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-bold text-red-500">₹</span>
+                      <p className="text-4xl font-black text-gray-900">
+                        {revenuePeriod === 'monthly' ? revenueData.monthlyPlatformRevenue?.toLocaleString() || 0 :
+                          revenuePeriod === 'yearly' ? revenueData.platformRevenue?.toLocaleString() || 0 :
+                            revenueData.platformRevenue?.toLocaleString() || 0}
+                      </p>
+                    </div>
+                    <p className="text-xs font-bold text-gray-400 mt-2">1% Fee per Order</p>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl">₹</span>
-                    <p className="text-4xl font-black">
-                      {revenuePeriod === 'monthly' ? revenueData.monthlyPlatformRevenue?.toLocaleString() || 0 :
-                        revenuePeriod === 'yearly' ? revenueData.platformRevenue?.toLocaleString() || 0 :
-                          revenueData.platformRevenue?.toLocaleString() || 0}
-                    </p>
-                  </div>
-                  <p className="text-[10px] opacity-80 mt-1 font-bold">1% Fee per Order</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">🧾</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-90">{revenuePeriod.charAt(0).toUpperCase() + revenuePeriod.slice(1)} GST</h3>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 bg-red-50 rounded-xl text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <span className="text-2xl">🧾</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">{revenuePeriod} GST</h3>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-bold text-red-500">₹</span>
+                      <p className="text-4xl font-black text-gray-900">
+                        {revenuePeriod === 'monthly' ? revenueData.monthlyGstCollection?.toLocaleString() || 0 :
+                          revenuePeriod === 'yearly' ? revenueData.gstCollection?.toLocaleString() || 0 :
+                            revenueData.gstCollection?.toLocaleString() || 0}
+                      </p>
+                    </div>
+                    <p className="text-xs font-bold text-gray-400 mt-2">1% GST Total</p>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl">₹</span>
-                    <p className="text-4xl font-black">
-                      {revenuePeriod === 'monthly' ? revenueData.monthlyGstCollection?.toLocaleString() || 0 :
-                        revenuePeriod === 'yearly' ? revenueData.gstCollection?.toLocaleString() || 0 :
-                          revenueData.gstCollection?.toLocaleString() || 0}
-                    </p>
-                  </div>
-                  <p className="text-[10px] opacity-80 mt-1 font-bold">1% GST Total</p>
                 </div>
               </div>
 
@@ -346,46 +381,46 @@ const AdminDashboard = () => {
                 <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 shadow-sm">
                   <h3 className="text-2xl font-black text-gray-900 mb-6">Revenue Breakdown</h3>
                   <div className="space-y-4">
-                    <div className="p-4 bg-green-50 rounded-2xl border border-green-100">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-green-600 uppercase">Today's Platform Fee</span>
-                        <span className="text-sm font-black text-green-600">₹{revenueData.todayPlatformRevenue?.toLocaleString() || 0}</span>
+                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Today's Platform Fee</span>
+                        <span className="text-sm font-black text-gray-900">₹{revenueData.todayPlatformRevenue?.toLocaleString() || 0}</span>
                       </div>
-                      <div className="text-[10px] text-green-500 font-bold">GST: ₹{revenueData.todayGstCollection?.toLocaleString() || 0}</div>
+                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.todayGstCollection?.toLocaleString() || 0}</div>
                     </div>
 
-                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-blue-600 uppercase">Weekly Platform Fee</span>
-                        <span className="text-sm font-black text-blue-600">₹{revenueData.weeklyPlatformRevenue?.toLocaleString() || 0}</span>
+                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Weekly Platform Fee</span>
+                        <span className="text-sm font-black text-gray-900">₹{revenueData.weeklyPlatformRevenue?.toLocaleString() || 0}</span>
                       </div>
-                      <div className="text-[10px] text-blue-500 font-bold">GST: ₹{revenueData.weeklyGstCollection?.toLocaleString() || 0}</div>
+                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.weeklyGstCollection?.toLocaleString() || 0}</div>
                     </div>
 
-                    <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-purple-600 uppercase">Monthly Platform Fee</span>
-                        <span className="text-sm font-black text-purple-600">₹{revenueData.monthlyPlatformRevenue?.toLocaleString() || 0}</span>
+                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Monthly Platform Fee</span>
+                        <span className="text-sm font-black text-gray-900">₹{revenueData.monthlyPlatformRevenue?.toLocaleString() || 0}</span>
                       </div>
-                      <div className="text-[10px] text-purple-500 font-bold">GST: ₹{revenueData.monthlyGstCollection?.toLocaleString() || 0}</div>
+                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.monthlyGstCollection?.toLocaleString() || 0}</div>
                     </div>
 
                     <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-red-600 uppercase">All-Time Platform Fee</span>
+                        <span className="text-xs font-black text-red-600 uppercase tracking-widest">All-Time Revenue</span>
                         <span className="text-sm font-black text-red-600">₹{revenueData.platformRevenue?.toLocaleString() || 0}</span>
                       </div>
-                      <div className="text-[10px] text-red-500 font-bold">GST: ₹{revenueData.gstCollection?.toLocaleString() || 0}</div>
+                      <div className="text-[10px] text-red-400 font-bold">GST: ₹{revenueData.gstCollection?.toLocaleString() || 0}</div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-4">
                       <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                        <span className="block text-[10px] font-black text-orange-600 uppercase mb-1">Pending Restaurants</span>
+                        <span className="block text-[10px] font-black text-orange-600 uppercase mb-1">Pending Requests</span>
                         <span className="text-2xl font-black text-orange-700">{stats.pendingRestaurants || 0}</span>
                       </div>
-                      <div className="p-4 bg-teal-50 rounded-2xl border border-teal-100">
-                        <span className="block text-[10px] font-black text-teal-600 uppercase mb-1">Orders Today</span>
-                        <span className="text-2xl font-black text-teal-700">{stats.ordersToday || 0}</span>
+                      <div className="p-4 bg-gray-900 rounded-2xl text-white">
+                        <span className="block text-[10px] font-black text-gray-400 uppercase mb-1">Orders Today</span>
+                        <span className="text-2xl font-black text-white">{stats.ordersToday || 0}</span>
                       </div>
                     </div>
                   </div>
