@@ -65,15 +65,10 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <>
-          {isLoading ? (
-            <Preloader onComplete={() => setIsLoading(false)} />
-          ) : (
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          )}
-        </>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+        {isLoading && <Preloader onComplete={() => setIsLoading(false)} />}
       </CartProvider>
     </AuthProvider>
   );

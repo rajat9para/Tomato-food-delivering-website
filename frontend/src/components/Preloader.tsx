@@ -109,7 +109,7 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [onComplete]);
 
     const createParticles = () => {
         if (!particlesRef.current) return;
