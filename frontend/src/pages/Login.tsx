@@ -33,7 +33,10 @@ const Login = () => {
     } catch (err: any) {
       console.error('❌ [LOGIN DEBUG] Error caught:', err);
       if (err.code === 'ERR_NETWORK') {
-        setError('Network error. Check if backend is running on port 5000.');
+        const isDev = import.meta.env.DEV;
+        setError(isDev
+          ? 'Network error. Check if backend is running on port 5000.'
+          : 'Network error. Unable to connect to server. Please try again later.');
       } else if (err.response) {
         console.error('💩 [LOGIN DEBUG] Error response:', err.response.status, err.response.data);
         if (err.response.status === 401) {
