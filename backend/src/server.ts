@@ -21,11 +21,18 @@ if (!fs.existsSync(uploadsDir)) {
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow all Vercel deployments (previews and production)
+      if (origin && origin.endsWith('.vercel.app')) {
+        callback(null, true);
+        return;
+      }
+
       const allowedOrigins = [
         "http://localhost:5173",
         "http://localhost:5174",
-        process.env.FRONTEND_URL?.replace(/\/$/, "") // Remove trailing slash if present
-      ].filter(Boolean); // Remove undefined values
+        "http://localhost:5175",
+        process.env.FRONTEND_URL?.replace(/\/$/, "")
+      ].filter(Boolean);
 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
