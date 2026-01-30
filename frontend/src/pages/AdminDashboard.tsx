@@ -42,11 +42,12 @@ const AdminDashboard = () => {
     loadData();
     loadPendingCount();
     const interval = setInterval(() => {
-      loadPendingCount();
-      if (activeTab === 'dashboard') {
-        loadData();
+      // Polling optimization: Only poll if tab is active and visible
+      if (document.visibilityState === 'visible') {
+        loadPendingCount();
+        if (activeTab === 'dashboard') loadData();
       }
-    }, 15000);
+    }, 30000); // Increased to 30s to reduce load
     return () => clearInterval(interval);
   }, [activeTab, sortBy, searchQuery, userSearchQuery, userSortBy, revenuePeriod]);
 
@@ -97,24 +98,37 @@ const AdminDashboard = () => {
     }
   };
 
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
   const updateRestaurant = async (id: string, update: any) => {
+    if (processingId) return;
+    setProcessingId(id);
     try {
       await api.patch(`/admin/restaurants/${id}`, update);
-      loadData();
-    } catch (error) {
+      // Optimistic update or reload
+      setRestaurants(prev => prev.map(r => r._id === id ? { ...r, ...update } : r));
+      loadData(); // Background refresh
+    } catch (error: any) {
       console.error('Error updating restaurant:', error);
+      alert('Failed to update: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const removeRestaurant = async (id: string) => {
-    if (window.confirm('Remove this restaurant?')) {
-      try {
-        await api.delete(`/admin/restaurants/${id}`);
-        alert('Restaurant removed!');
-        loadData();
-      } catch (error: any) {
-        alert('Error: ' + (error.response?.data?.message || 'Failed'));
-      }
+    if (!window.confirm('Remove this restaurant?')) return;
+    if (processingId) return;
+
+    setProcessingId(id);
+    try {
+      await api.delete(`/admin/restaurants/${id}`);
+      setRestaurants(prev => prev.filter(r => r._id !== id));
+      alert('Restaurant removed!');
+    } catch (error: any) {
+      alert('Error: ' + (error.response?.data?.message || 'Failed'));
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -416,9 +430,36 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4"><span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${r.approvalStatus === 'approved' ? 'bg-green-600' : r.approvalStatus === 'pending' ? 'bg-yellow-600' : 'bg-red-600'}`}>{r.approvalStatus}</span></td>
                         <td className="p-4 font-bold text-red-600">{r.rating?.toFixed(1) || 0}</td>
-                        <td className="p-4">{r.approvalStatus === 'pending' ? (<div className="flex gap-2"><button onClick={() => updateRestaurant(r._id, { approvalStatus: 'approved' })} className="bg-green-600 text-white text-sm py-1 px-3 rounded">Approve</button><button onClick={() => updateRestaurant(r._id, { approvalStatus: 'rejected' })} className="bg-red-600 text-white text-sm py-1 px-3 rounded">Reject</button></div>) : <span className="text-gray-400 text-sm">-</span>}</td>
+                        <td className="p-4">
+                          {r.approvalStatus === 'pending' ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => updateRestaurant(r._id, { approvalStatus: 'approved' })}
+                                disabled={processingId === r._id}
+                                className={`text-white text-sm py-1 px-3 rounded transition-colors ${processingId === r._id ? 'bg-gray-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'}`}
+                              >
+                                {processingId === r._id ? '...' : 'Approve'}
+                              </button>
+                              <button
+                                onClick={() => updateRestaurant(r._id, { approvalStatus: 'rejected' })}
+                                disabled={processingId === r._id}
+                                className={`text-white text-sm py-1 px-3 rounded transition-colors ${processingId === r._id ? 'bg-gray-400 cursor-wait' : 'bg-red-600 hover:bg-red-700'}`}
+                              >
+                                {processingId === r._id ? '...' : 'Reject'}
+                              </button>
+                            </div>
+                          ) : <span className="text-gray-400 text-sm">-</span>}
+                        </td>
                         <td className="p-4"><button onClick={() => setMailModal({ open: true, restaurantId: r._id, ownerEmail: r.ownerId?.email || '' })} className="bg-blue-600 text-white text-sm py-1 px-3 rounded flex items-center gap-1"><Mail size={14} /> Mail</button></td>
-                        <td className="p-4"><button onClick={() => removeRestaurant(r._id)} className="bg-red-700 text-white text-sm py-1 px-3 rounded">Remove</button></td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => removeRestaurant(r._id)}
+                            disabled={processingId === r._id}
+                            className={`text-white text-sm py-1 px-3 rounded transition-colors ${processingId === r._id ? 'bg-gray-400 cursor-wait' : 'bg-red-700 hover:bg-red-800'}`}
+                          >
+                            {processingId === r._id ? '...' : 'Remove'}
+                          </button>
+                        </td>
                       </tr>
                     )) : (<tr><td colSpan={8} className="p-8 text-center text-gray-500">No restaurants found</td></tr>)}
                   </tbody>
