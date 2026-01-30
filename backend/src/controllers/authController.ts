@@ -77,15 +77,17 @@ export const login = async (req: Request, res: Response) => {
     email = email?.trim();
     console.log('🔐 [LOGIN DEBUG] Attempt for:', email);
 
+    console.log('📦 [LOGIN DEBUG] Full Body:', JSON.stringify(req.body, null, 2));
+
     if (!email || !password) {
-      console.log('❌ [LOGIN DEBUG] Missing email or password');
-      return res.status(400).json({ message: 'Email and password required' });
+      console.log('❌ [LOGIN DEBUG] Missing email or password. Received:', { email, passwordReceived: !!password });
+      return res.status(400).json({ message: 'Email and password required (Backend validated)' });
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      console.log('❌ [LOGIN DEBUG] User not found in DB:', email);
-      return res.status(400).json({ message: 'Invalid email or password' });
+      console.log('❌ [LOGIN DEBUG] User NOT FOUND in DB for email:', email);
+      return res.status(400).json({ message: `User not found: ${email}` });
     }
 
     console.log('👤 [LOGIN DEBUG] User found:', { id: user._id, role: user.role, status: user.status });
@@ -109,12 +111,16 @@ export const login = async (req: Request, res: Response) => {
     }
 
     console.log('🔑 [LOGIN DEBUG] Comparing passwords...');
+    // Log length of passwords to check for whitespace issues without revealing secrets
+    console.log(`🔑 [LOGIN DEBUG] Input URL length: ${password.length}, Stored Hash length: ${user.password.length}`);
+
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('📊 [LOGIN DEBUG] Password match result:', isMatch);
 
     if (!isMatch) {
       console.log('❌ [LOGIN DEBUG] Password mismatch for:', email);
-      return res.status(400).json({ message: 'Invalid email or password' });
+      // Temporarily explicit for debugging
+      return res.status(400).json({ message: 'Password incorrect (Verify casing/spaces)' });
     }
 
     const secret = process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_in_production';
