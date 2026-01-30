@@ -3,9 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import GlobalBackground from '../components/GlobalBackground';
-import DishCarousel from '../components/DishCarousel';
 import SkeletonCard from '../components/SkeletonCard';
-import { ShoppingCart } from 'lucide-react';
 
 const CustomerHome = () => {
   const { logout, name } = useAuth();
@@ -18,7 +16,7 @@ const CustomerHome = () => {
   const [activeTab, setActiveTab] = useState('browse');
   const [showCheckout, setShowCheckout] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [ratingOrderId] = useState('');
+  const [ratingOrderId, _setRatingOrderId] = useState('');
   const [ratingValue, setRatingValue] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -561,9 +559,9 @@ const CustomerHome = () => {
                       <div className="flex flex-col items-end">
                         <span className="text-3xl font-black text-primary">₹{order.totalAmount}</span>
                         <span className={`mt-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm border ${order.orderStatus === 'pending' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
-                            order.orderStatus === 'preparing' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-                              order.orderStatus === 'ready' ? 'bg-green-50 border-green-200 text-green-700' :
-                                'bg-gray-50 border-gray-200 text-gray-700'
+                          order.orderStatus === 'preparing' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                            order.orderStatus === 'ready' ? 'bg-green-50 border-green-200 text-green-700' :
+                              'bg-gray-50 border-gray-200 text-gray-700'
                           }`}>
                           {order.orderStatus}
                         </span>

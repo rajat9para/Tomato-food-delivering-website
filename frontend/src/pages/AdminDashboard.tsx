@@ -72,10 +72,13 @@ const AdminDashboard = () => {
         let url = '/admin/restaurants';
         if (searchQuery) url = `/admin/restaurants/search?query=${searchQuery}`;
         const { data } = await api.get(url);
-        // Sort: pending first, then approved, then rejected
+        // Sort: pending first (newest at top), then approved, then rejected
         const sorted = data.sort((a: any, b: any) => {
           const order = { pending: 0, approved: 1, rejected: 2 };
-          return order[a.approvalStatus as keyof typeof order] - order[b.approvalStatus as keyof typeof order];
+          const statusDiff = order[a.approvalStatus as keyof typeof order] - order[b.approvalStatus as keyof typeof order];
+          if (statusDiff !== 0) return statusDiff;
+          // Secondary sort: newest first within same status
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
         setRestaurants(sorted);
       } else if (activeTab === 'users') {
@@ -101,15 +104,22 @@ const AdminDashboard = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const updateRestaurant = async (id: string, update: any) => {
-    if (processingId) return;
+    if (processingId) return; // Prevent double-clicks
     setProcessingId(id);
+
+    // Store original for rollback on error
+    const originalRestaurants = [...restaurants];
+
+    // Optimistic update immediately for instant feedback
+    setRestaurants(prev => prev.map(r => r._id === id ? { ...r, ...update } : r));
+
     try {
       await api.patch(`/admin/restaurants/${id}`, update);
-      // Optimistic update or reload
-      setRestaurants(prev => prev.map(r => r._id === id ? { ...r, ...update } : r));
-      loadData(); // Background refresh
+      // Success - no need to call loadData(), optimistic update is already applied
     } catch (error: any) {
       console.error('Error updating restaurant:', error);
+      // Rollback on error
+      setRestaurants(originalRestaurants);
       alert('Failed to update: ' + (error.response?.data?.message || error.message));
     } finally {
       setProcessingId(null);

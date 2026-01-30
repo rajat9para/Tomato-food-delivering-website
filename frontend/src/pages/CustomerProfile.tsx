@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import axios from 'axios';
 import { User, Camera, Save, X, MapPin, Phone, Wallet, Clock, Shield, CheckCircle, AlertCircle, Crown, Zap, Star } from 'lucide-react';
 
 interface UserData {
@@ -109,20 +108,21 @@ const CustomerProfile = () => {
         formDataToSend.append('profilePhoto', profilePhoto);
       }
 
-      const token = localStorage.getItem('token');
-      const response = await axios.put('/api/customer/profile', formDataToSend, {
+      // FIX: Use the configured 'api' instance instead of raw axios
+      const response = await api.put('/customer/profile', formDataToSend, {
         headers: {
-          'Authorization': token ? `Bearer ${token}` : undefined,
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      // FIX: Ensure photo preview persists - only update if new photo returned
       if (response.data.user?.profilePhoto) {
         setPreviewPhoto(response.data.user.profilePhoto);
         updateAuthProfile(response.data.user.profilePhoto, response.data.user.premiumMember);
       }
+      // Keep existing preview if no new photo was uploaded and none returned
 
-      setProfilePhoto(null);
+      setProfilePhoto(null); // Clear staged file, but keep preview
       showNotification('success', 'Profile updated successfully!');
 
     } catch (error: any) {

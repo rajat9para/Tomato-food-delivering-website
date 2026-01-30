@@ -495,7 +495,7 @@ const OwnerDashboard = () => {
 
               {showAddFood && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-                  <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] max-w-4xl w-full animate-scale-in border border-white/20 overflow-hidden">
+                  <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in border border-white/20">
                     <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-10 flex justify-between items-center relative overflow-hidden">
                       <div className="absolute -top-10 -right-10 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
                       <div>
