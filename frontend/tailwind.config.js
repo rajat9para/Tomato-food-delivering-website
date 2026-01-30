@@ -23,8 +23,7 @@ export default {
         footer: '#1A1A1A',
       },
       fontFamily: {
-        sans: ['Lato', 'system-ui', 'sans-serif'],
-        display: ['Lato', 'system-ui', 'sans-serif'],
+        sans: ['Lato', 'sans-serif'],
       },
       fontSize: {
         'hero': ['3.5rem', { lineHeight: '1.1', fontWeight: '700' }],
