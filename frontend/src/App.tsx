@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import TomatoIntro from './components/TomatoIntro';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -58,12 +61,20 @@ function AppContent() {
 }
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <TomatoIntro key="intro" onComplete={() => setIsLoading(false)} />
+          ) : (
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          )}
+        </AnimatePresence>
       </CartProvider>
     </AuthProvider>
   );
