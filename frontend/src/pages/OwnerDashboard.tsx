@@ -495,125 +495,129 @@ const OwnerDashboard = () => {
 
               {showAddFood && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
-                  <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto animate-scale-in">
-                    {/* Header - Compact */}
-                    <div className="bg-primary text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                  <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in border border-white/30">
+                    {/* Header - Compact & Elegant */}
+                    <div className="bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                       <div>
-                        <h3 className="text-xl font-bold">{editingFood ? 'Edit Dish' : 'Add New Dish'}</h3>
-                        <p className="text-red-100 text-sm opacity-80">Fill in the details below</p>
+                        <h3 className="text-lg font-bold">{editingFood ? 'Edit Dish' : 'Add New Dish'}</h3>
+                        <p className="text-white/70 text-xs">Fill in the details below</p>
                       </div>
                       <button
                         onClick={cancelEdit}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200"
                       >
-                        <X size={18} />
+                        <X size={16} />
                       </button>
                     </div>
 
-                    {/* Form - Compact */}
-                    <div className="p-6 space-y-4">
-                      {/* Dish Name */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Dish Name</label>
-                        <input
-                          type="text"
-                          placeholder="Enter dish name"
-                          value={newFood.name}
-                          onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white outline-none transition-all text-sm font-medium"
-                        />
-                      </div>
-
-                      {/* Category & Price Row */}
+                    {/* Form - Horizontal 2-column layout */}
+                    <div className="p-5">
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Category</label>
-                          <select
-                            value={newFood.category}
-                            onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium appearance-none cursor-pointer"
-                          >
-                            <option>Main Course</option>
-                            <option>Appetizer</option>
-                            <option>Dessert</option>
-                            <option>Beverage</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Price (₹)</label>
-                          <input
-                            type="number"
-                            placeholder="0"
-                            value={newFood.price}
-                            onChange={(e) => setNewFood({ ...newFood, price: e.target.value })}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
-                        <textarea
-                          placeholder="Brief description of your dish"
-                          value={newFood.description}
-                          onChange={(e) => setNewFood({ ...newFood, description: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium h-20 resize-none"
-                        />
-                      </div>
-
-                      {/* Discount */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Discount (%)</label>
-                        <input
-                          type="number"
-                          placeholder="0"
-                          value={newFood.discount}
-                          onChange={(e) => setNewFood({ ...newFood, discount: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
-                        />
-                      </div>
-
-                      {/* Image Upload - Compact */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Photos</label>
-                        <label className="w-full h-24 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
-                          <Camera className="text-gray-400 group-hover:text-primary transition-colors" size={24} />
-                          <span className="text-gray-500 text-xs mt-1 group-hover:text-primary transition-colors">Click to upload (max 4)</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleImageSelect}
-                            className="hidden"
-                          />
-                        </label>
-                        {selectedImages.length > 0 && (
-                          <div className="mt-3 flex gap-2 flex-wrap">
-                            {selectedImages.map((file, idx) => (
-                              <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ))}
+                        {/* Left Column */}
+                        <div className="space-y-3">
+                          {/* Dish Name */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Dish Name</label>
+                            <input
+                              type="text"
+                              placeholder="Enter name"
+                              value={newFood.name}
+                              onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white outline-none transition-all text-sm"
+                            />
                           </div>
-                        )}
+
+                          {/* Category */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                            <select
+                              value={newFood.category}
+                              onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm appearance-none cursor-pointer"
+                            >
+                              <option>Main Course</option>
+                              <option>Appetizer</option>
+                              <option>Dessert</option>
+                              <option>Beverage</option>
+                            </select>
+                          </div>
+
+                          {/* Price */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Price (₹)</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={newFood.price}
+                              onChange={(e) => setNewFood({ ...newFood, price: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            />
+                          </div>
+
+                          {/* Discount */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Discount (%)</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={newFood.discount}
+                              onChange={(e) => setNewFood({ ...newFood, discount: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="space-y-3">
+                          {/* Description */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                            <textarea
+                              placeholder="Brief description"
+                              value={newFood.description}
+                              onChange={(e) => setNewFood({ ...newFood, description: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm h-20 resize-none"
+                            />
+                          </div>
+
+                          {/* Photos Upload */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Photos</label>
+                            <label className="w-full h-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group gap-2">
+                              <Camera className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
+                              <span className="text-gray-500 text-xs group-hover:text-primary transition-colors">Upload images</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageSelect}
+                                className="hidden"
+                              />
+                            </label>
+                            {selectedImages.length > 0 && (
+                              <div className="mt-2 flex gap-1.5 flex-wrap">
+                                {selectedImages.map((file, idx) => (
+                                  <div key={idx} className="w-10 h-10 rounded-md overflow-hidden border border-gray-200">
+                                    <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Buttons - Compact */}
-                      <div className="flex gap-3 pt-2">
+                      {/* Buttons Row */}
+                      <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
                         <button
                           onClick={addFood}
-                          className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-semibold text-sm transition-all hover:shadow-lg active:scale-[0.98]"
+                          className="flex-1 bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 hover:shadow-lg active:scale-[0.98]"
                         >
                           {editingFood ? 'Save Changes' : 'Add Dish'}
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-semibold text-sm transition-all"
+                          className="px-5 bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
                         >
                           Cancel
                         </button>

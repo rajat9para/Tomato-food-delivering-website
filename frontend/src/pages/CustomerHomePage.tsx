@@ -604,34 +604,56 @@ const CustomerHomePage = () => {
       </div>
 
       {showCheckout && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-          <div className="bg-white p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] max-w-md w-full animate-scale-in border border-white/20">
-            <h3 className="text-3xl font-extrabold text-gray-900 mb-10 text-center tracking-tight">Choose Payment Method</h3>
-            <div className="space-y-5">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-lg flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-scale-in border border-white/40">
+            {/* Header */}
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">Payment Method</h3>
+            <p className="text-gray-500 text-sm text-center mb-8">Select how you'd like to pay</p>
+
+            <div className="space-y-3">
+              {/* UPI Button */}
               <button
                 onClick={() => checkout('UPI')}
                 disabled={checkoutLoading}
-                className="w-full bg-[#E23744] hover:bg-[#c82d39] text-white py-5 rounded-2xl font-black text-xl transition-all shadow-xl hover:shadow-[#E23744]/30 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 tracking-tighter"
+                className="w-full bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {checkoutLoading ? 'Processing...' : 'Pay with UPI'}
+                {checkoutLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    Processing...
+                  </span>
+                ) : 'Pay with UPI'}
               </button>
+
+              {/* Card Button */}
               <button
                 onClick={() => checkout('Card')}
                 disabled={checkoutLoading}
-                className="w-full bg-white border-4 border-[#E23744] text-[#E23744] py-5 rounded-2xl font-black text-xl transition-all shadow-lg hover:bg-[#E23744]/5 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 tracking-tighter"
+                className="w-full bg-white border-2 border-[#E23744] text-[#E23744] py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:bg-red-50 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {checkoutLoading ? 'Processing...' : 'Credit / Debit Card'}
               </button>
+
+              {/* COD Button */}
               <button
                 onClick={() => checkout('COD')}
                 disabled={checkoutLoading}
-                className="w-full bg-white border-2 border-[#E23744]/20 hover:border-[#E23744] text-gray-800 hover:text-[#E23744] py-5 rounded-2xl font-black text-xl transition-all shadow-lg transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 tracking-tighter"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {checkoutLoading ? 'Processing...' : 'Cash on Delivery'}
               </button>
+
+              {/* Divider */}
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+              </div>
+
+              {/* Cancel Button */}
               <button
                 onClick={() => setShowCheckout(false)}
-                className="w-full bg-red-50 hover:bg-red-100 text-[#E23744] py-4 rounded-2xl font-bold text-lg transition-all border border-red-100 mt-2"
+                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3 rounded-xl font-medium text-sm transition-all duration-200"
               >
                 Cancel
               </button>
