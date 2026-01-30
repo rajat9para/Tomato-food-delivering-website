@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import TomatoIntro from './components/TomatoIntro';
+import Preloader from './components/Preloader';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -66,15 +65,15 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AnimatePresence mode="wait">
+        <>
           {isLoading ? (
-            <TomatoIntro key="intro" onComplete={() => setIsLoading(false)} />
+            <Preloader onComplete={() => setIsLoading(false)} />
           ) : (
             <BrowserRouter>
               <AppContent />
             </BrowserRouter>
           )}
-        </AnimatePresence>
+        </>
       </CartProvider>
     </AuthProvider>
   );

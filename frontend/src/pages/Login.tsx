@@ -25,7 +25,7 @@ const Login = () => {
       console.log('✅ [LOGIN DEBUG] Response received:', response.status, response.data);
 
       const { data } = response;
-      login(data.token, data.role, data.userId, data.name);
+      login(data.token, data.role, data.userId, data.name, data.profilePhoto, data.premiumMember);
 
       if (data.role === 'admin') navigate('/admin/dashboard');
       else if (data.role === 'owner') navigate('/owner/dashboard');
@@ -54,97 +54,103 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <GlobalBackground />
 
-      {/* Left Side Red Tags */}
-      <div className="fixed left-0 top-0 h-full w-24 bg-gradient-to-r from-red-600 to-red-500 flex flex-col items-center justify-center gap-8 z-0 shadow-2xl">
-        <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-4xl font-black tracking-wider">TOMATO</div>
-          <div className="text-xs font-bold mt-2 tracking-widest">FOOD ORDER</div>
-        </div>
-        <div className="w-16 h-1 bg-white/30 rounded-full"></div>
-        <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-2xl font-bold">FAST</div>
-          <div className="text-xs font-semibold">DELIVERY</div>
-        </div>
-      </div>
-
-      <div className="relative z-10 bg-white p-10 rounded-2xl shadow-2xl w-[450px] border border-gray-100 ml-24">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-md">
-            <span className="text-2xl font-bold text-white">T</span>
+      <div className="relative z-10 w-full max-w-[440px] animate-scale-in">
+        <div className="glass-card p-10 rounded-[2.5rem] border-white/40 shadow-2xl relative overflow-hidden">
+          {/* Subtle logo in background */}
+          <div className="absolute top-[-20px] right-[-20px] opacity-5 pointer-events-none">
+            <img src="/tomato-logo.png" alt="" className="w-40 h-40 rotate-12" />
           </div>
-          <h1 className="text-3xl font-bold text-primary">TOMATO</h1>
-        </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-3 text-center">Welcome Back</h2>
-        <p className="text-gray-600 text-center mb-8">Login to your account</p>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label className="block text-gray-800 font-bold mb-2">Email Address</label>
-            <div className="relative">
-              <input
-                type={showEmail ? 'text' : 'email'}
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowEmail(!showEmail)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showEmail ? '👁️' : '👁️‍🗨️'}
-              </button>
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-dark rounded-3xl flex items-center justify-center shadow-xl mb-4 transform hover:rotate-6 transition-transform duration-300">
+              <img src="/tomato-logo.png" alt="T" className="w-12 h-12 brightness-0 invert" />
             </div>
+            <h1 className="text-4xl font-black text-gray-900 tracking-tighter mb-2">Welcome Back</h1>
+            <p className="text-gray-500 font-medium">Login to explore deliciousness</p>
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-800 font-bold mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-lg font-bold text-lg transition shadow-lg hover:shadow-xl disabled:opacity-50"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
 
-        <div className="mt-8 text-center border-t border-gray-200 pt-6">
-          <p className="text-gray-600 mb-4">Don't have an account?</p>
-          <div className="flex gap-3">
-            <Link to="/register/customer" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition text-center">
-              Customer
-            </Link>
-            <Link to="/register/owner" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition text-center">
-              Owner
-            </Link>
+          {error && (
+            <div className="bg-red-50/80 backdrop-blur-sm border border-red-100 text-red-600 p-4 rounded-xl mb-8 text-sm font-semibold flex items-center gap-3 animate-shake">
+              <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Email Address</label>
+              <div className="relative group">
+                <input
+                  type={showEmail ? 'text' : 'email'}
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-5 py-4 bg-white/50 backdrop-blur-sm border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 pr-12 font-medium"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEmail(!showEmail)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors duration-200"
+                >
+                  {showEmail ? 'Hide' : 'Show'}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Password</label>
+              <div className="relative group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-5 py-4 bg-white/50 backdrop-blur-sm border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 pr-12 font-medium"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors duration-200"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-5 rounded-2xl font-bold text-xl transition-all duration-300 shadow-xl shadow-red-200/50 hover:shadow-2xl hover:shadow-red-300/50 hover:-translate-y-1 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Logging in...
+                </>
+              ) : 'Login'}
+            </button>
+          </form>
+
+          <div className="mt-10 text-center">
+            <p className="text-gray-500 font-medium mb-6">Don't have an account?</p>
+            <div className="flex gap-4">
+              <Link to="/register/customer" className="flex-1 py-4 bg-white border-2 border-gray-100 text-gray-700 rounded-2xl font-bold hover:border-primary hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md active:scale-95 text-center">
+                Customer
+              </Link>
+              <Link to="/register/owner" className="flex-1 py-4 bg-white border-2 border-gray-100 text-gray-700 rounded-2xl font-bold hover:border-primary hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md active:scale-95 text-center">
+                Owner
+              </Link>
+            </div>
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <span className="w-8 h-[1px] bg-gray-200"></span>
+              <span>Tomato Food Delivery</span>
+              <span className="w-8 h-[1px] bg-gray-200"></span>
+            </div>
           </div>
         </div>
       </div>

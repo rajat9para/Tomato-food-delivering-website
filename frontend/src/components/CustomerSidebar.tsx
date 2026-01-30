@@ -3,15 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useEffect } from 'react';
 import api from '../utils/api';
-import { Home, Star, Search, ShoppingCart, ShoppingBag, LogOut } from 'lucide-react';
+import { Home, Star, Search, ShoppingCart, ShoppingBag, LogOut, User, ChevronRight, Zap } from 'lucide-react';
+import { getImageUrl } from '../utils/formatters';
 
 const CustomerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, name, profilePhoto, premiumMember, updateProfile } = useAuth();
   const { cart } = useCart();
-
-  // Load profile data on mount
   useEffect(() => {
     loadProfileData();
   }, []);
@@ -30,68 +29,65 @@ const CustomerSidebar = () => {
   const cartItemCount = cart.length;
 
   const menuItems = [
-    { path: '/customer/home', label: 'Home', icon: Home, badge: null },
-    { path: '/customer/best-restaurants', label: 'Best Restaurants', icon: Star, badge: null },
-    { path: '/customer/best-dishes', label: 'Great Deals', icon: Search, badge: null },
+    { path: '/customer/home', label: 'Discovery', icon: Home, badge: null },
+    { path: '/customer/best-restaurants', label: 'Top Rated', icon: Star, badge: null },
+    { path: '/customer/best-dishes', label: 'Best Deals', icon: Search, badge: null },
     { path: '/customer/cart', label: 'My Cart', icon: ShoppingCart, badge: cartItemCount },
-    { path: '/customer/orders', label: 'My Orders', icon: ShoppingBag, badge: null },
+    { path: '/customer/orders', label: 'Order History', icon: ShoppingBag, badge: null },
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white to-gray-50 border-r-2 border-primary/20 shadow-2xl z-40">
-      {/* Logo Section */}
-      <div className="p-6 border-b border-primary/10 bg-gradient-to-r from-primary to-primary-dark text-white">
-        <div className="flex items-center gap-3">
-          <div className="bg-white rounded-full p-2 border-2 border-white shadow-lg">
-            <img src="/tomato-logo.png" alt="TOMATO" className="w-8 h-8 object-contain" />
+    <div className="fixed left-0 top-0 h-screen w-80 glass border-r border-white/40 shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display">
+      {/* Premium Logo Section */}
+      <div className="p-10">
+        <div
+          className="flex items-center gap-4 cursor-pointer group"
+          onClick={() => navigate('/customer/home')}
+        >
+          <div className="w-12 h-12 bg-primary rounded-[1.2rem] flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-all duration-500 shadow-primary/20">
+            <img src="/tomato-logo.png" alt="T" className="w-8 h-8 brightness-0 invert" />
           </div>
-          <h1 className="text-2xl font-bold italic text-white drop-shadow-lg">TOMATO</h1>
+          <div>
+            <h1 className="text-3xl font-black text-primary tracking-tighter leading-none">tomato</h1>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] ml-1">Premium Edition</span>
+          </div>
         </div>
-        <p className="text-sm opacity-90 mt-2">Delicious food awaits</p>
       </div>
 
-      {/* User Info */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      {/* Profile Card - Masterpiece Style */}
+      <div className="px-6 mb-10">
         <div
-          className="flex items-center gap-3 cursor-pointer hover:bg-gray-100 rounded-xl p-2 transition relative"
           onClick={() => navigate('/customer/profile')}
+          className="relative glass-card p-6 rounded-[2.5rem] border-white/60 shadow-xl cursor-pointer group overflow-hidden hover:shadow-primary/10 transition-all duration-500"
         >
-          {/* Premium Badge */}
-          {premiumMember && (
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg z-10">
-              ⭐ Premium
-            </div>
-          )}
+          <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
 
-          {/* Profile Photo with Premium Border */}
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ${premiumMember
-            ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 p-[3px] shadow-lg shadow-yellow-500/50'
-            : 'bg-gradient-to-br from-primary to-primary-dark'
-            }`}>
-            <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
-              {profilePhoto ? (
-                <img
-                  src={profilePhoto}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-lg">
-                  {name?.charAt(0).toUpperCase() || 'U'}
+          <div className="flex items-center gap-5 relative z-10">
+            <div className={`w-16 h-16 rounded-[1.5rem] p-1 ${premiumMember ? 'bg-gradient-to-tr from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30' : 'bg-gray-100'} transition-transform group-hover:scale-105 duration-500`}>
+              <div className="w-full h-full rounded-[1.3rem] bg-white overflow-hidden shadow-inner flex items-center justify-center">
+                {profilePhoto ? (
+                  <img src={getImageUrl(profilePhoto)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="text-gray-300" size={32} />
+                )}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Welcome back</p>
+              <h3 className="font-black text-gray-950 truncate text-xl tracking-tight pr-4">{name || 'Guest'}</h3>
+              {premiumMember && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Zap size={12} className="text-yellow-500 fill-yellow-500" />
+                  <span className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Premium Member</span>
                 </div>
               )}
             </div>
-          </div>
-
-          <div>
-            <p className="font-semibold text-gray-900">Welcome back,</p>
-            <p className="text-primary font-bold">{name}</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="p-4 space-y-2">
+      <nav className="flex-1 px-6 space-y-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -99,32 +95,40 @@ const CustomerSidebar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 relative ${isActive
-                ? 'bg-primary text-white shadow-lg transform scale-105'
-                : 'text-gray-700 hover:bg-primary/10 hover:text-primary hover:shadow-md'
+              className={`w-full group px-8 py-5 rounded-[1.8rem] flex items-center gap-5 transition-all duration-500 relative overflow-hidden ${isActive
+                ? 'bg-gray-950 text-white shadow-2xl shadow-black/20'
+                : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                 }`}
             >
-              <Icon size={24} strokeWidth={2} />
-              <span className="font-semibold text-lg">{item.label}</span>
-              {/* Notification Badge for Cart */}
+              {isActive && (
+                <div className="absolute left-0 top-0 bottom-0 w-2 bg-primary"></div>
+              )}
+              <Icon size={24} className={`transition-transform duration-500 ${isActive ? 'scale-110' : 'group-hover:rotate-12 group-hover:scale-110'}`} />
+              <span className="font-black text-lg tracking-tight">{item.label}</span>
+
               {item.badge !== null && item.badge > 0 && (
-                <span className="absolute -top-1 left-9 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold animate-pulse">
-                  {item.badge > 9 ? '9+' : item.badge}
-                </span>
+                <div className="ml-auto w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg animate-bounce">
+                  {item.badge}
+                </div>
+              )}
+
+              {isActive && (
+                <ChevronRight size={18} className="ml-auto opacity-40" />
               )}
             </button>
           );
         })}
       </nav>
 
-      {/* Logout Button */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
+      {/* Logout - Premium Floating Style */}
+      <div className="p-8">
         <button
           onClick={() => { logout(); navigate('/login'); }}
-          className="w-full flex items-center gap-4 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+          className="w-full relative group/logout h-16 bg-white border-2 border-gray-100 rounded-3xl flex items-center justify-center gap-4 transition-all duration-500 hover:bg-red-500 hover:border-red-500 group overflow-hidden"
         >
-          <LogOut size={20} />
-          <span className="font-semibold">Logout</span>
+          <LogOut size={22} className="text-gray-400 group-hover/logout:text-white group-hover/logout:rotate-12 transition-all duration-500 relative z-10" />
+          <span className="font-black text-gray-500 group-hover/logout:text-white transition-all duration-500 relative z-10">Sign Out</span>
+          <div className="absolute inset-0 bg-red-500 translate-y-full group-hover/logout:translate-y-0 transition-transform duration-500"></div>
         </button>
       </div>
     </div>

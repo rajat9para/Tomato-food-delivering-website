@@ -5,6 +5,7 @@ import api from '../utils/api';
 import { Camera, X } from 'lucide-react';
 import GlobalBackground from '../components/GlobalBackground';
 import ImageCarousel from '../components/ImageCarousel';
+import { getImageUrl } from '../utils/formatters';
 
 const OwnerDashboard = () => {
   const { logout, name } = useAuth();
@@ -356,7 +357,7 @@ const OwnerDashboard = () => {
             </div>
             <div className="hidden md:flex items-center gap-3">
               {restaurant?.imageUrl ? (
-                <img src={restaurant.imageUrl} alt={restaurant.name} className="w-10 h-10 object-cover rounded-full border-2 border-primary" />
+                <img src={getImageUrl(restaurant.imageUrl)} alt={restaurant.name} className="w-10 h-10 object-cover rounded-full border-2 border-primary" />
               ) : restaurant ? (
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white text-lg font-bold border-2 border-primary">
                   {restaurant.name.charAt(0).toUpperCase()}

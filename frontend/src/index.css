@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
 
 @tailwind base;
@@ -27,7 +28,7 @@
 
 html,
 body {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Outfit', sans-serif;
   color: var(--text-primary);
   background-color: var(--background);
   /* Masterpiece Mobile Optimization */
@@ -43,16 +44,17 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Lato', 'Poppins', sans-serif;
-  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 p,
 span,
 a,
 button {
-  font-family: 'Lato', 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 @keyframes slideInUp {
@@ -171,6 +173,37 @@ button {
 
 .animate-rotate-3d {
   animation: rotate3d 6s ease-in-out infinite;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(226, 55, 68, 0.08);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.premium-shadow {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.premium-red-shadow {
+  box-shadow: 0 15px 35px rgba(226, 55, 68, 0.2);
 }
 
 .image-container {

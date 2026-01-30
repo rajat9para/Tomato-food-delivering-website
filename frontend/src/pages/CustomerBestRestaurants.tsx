@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import SkeletonCard from '../components/SkeletonCard';
-import { Star, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Star, TrendingUp, ChevronRight, Crown } from 'lucide-react';
+import { getImageUrl } from '../utils/formatters';
 
 const CustomerBestRestaurants = () => {
   const location = useLocation();
@@ -40,7 +41,6 @@ const CustomerBestRestaurants = () => {
 
   const filterRestaurantsByDish = async () => {
     try {
-      // Filter restaurants that have the specific dish
       const filtered = [];
       for (const restaurant of restaurants) {
         try {
@@ -63,103 +63,123 @@ const CustomerBestRestaurants = () => {
   };
 
   return (
-    <div className="p-8">
-      <div className="mb-8 text-center">
-        {dishName && (
-          <button
-            onClick={() => navigate('/customer/home')}
-            className="mb-4 text-gray-600 hover:text-primary flex items-center gap-2 transition"
-          >
-            <ArrowLeft size={20} />
-            Back to Home
-          </button>
-        )}
-        <h1 className="text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-4">
-          <TrendingUp className="text-primary" size={48} />
-          {dishName ? `Restaurants with "${dishName}"` : 'Best Restaurants'}
-        </h1>
-        <p className="text-xl text-gray-600 mb-6">
-          {dishName
-            ? `Find restaurants serving ${dishName} in your area`
-            : 'Discover the highest-rated restaurants in your area'
-          }
-        </p>
-        {dishName && (
-          <div className="flex justify-center gap-4 mb-8">
+    <div className="pb-20 animate-fade-in font-display">
+      <div className="mb-16">
+        <button
+          onClick={() => navigate('/customer/home')}
+          className="mb-10 group px-6 py-3 bg-white border-2 border-gray-100 rounded-2xl text-gray-500 hover:text-primary hover:border-primary/20 transition-all duration-300 font-black flex items-center gap-3 shadow-sm"
+        >
+          <span className="group-hover:-translate-x-1 transition-transform">←</span> Home
+        </button>
+
+        <div className="flex flex-col md:flex-row items-end justify-between gap-10">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-6 mb-6">
+              <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary shadow-2xl shadow-primary/10">
+                <TrendingUp size={40} />
+              </div>
+              <h1 className="text-6xl md:text-8xl font-black text-gray-950 tracking-tighter leading-none">
+                {dishName ? dishName : 'Best Eats'}
+              </h1>
+            </div>
+            <p className="text-2xl text-gray-500 font-medium leading-relaxed italic pr-10">
+              {dishName
+                ? `Discover the finest kitchens serving authentic ${dishName} near you.`
+                : 'We curated the highest-rated dining experiences for your refined taste.'
+              }
+            </p>
+          </div>
+
+          <div className="flex glass p-2 rounded-3xl border-white/60 shadow-xl">
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-6 py-3 rounded-xl font-bold text-lg transition shadow-lg ${sortBy === 'rating'
-                  ? 'bg-primary text-white shadow-xl transform scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200'
+              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'rating'
+                ? 'bg-gray-950 text-white shadow-2xl'
+                : 'text-gray-400 hover:text-primary'
                 }`}
             >
-              Sort by Rating
+              Top Rating
             </button>
             <button
               onClick={() => setSortBy('price')}
-              className={`px-6 py-3 rounded-xl font-bold text-lg transition shadow-lg ${sortBy === 'price'
-                  ? 'bg-primary text-white shadow-xl transform scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200'
+              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'price'
+                ? 'bg-gray-950 text-white shadow-2xl'
+                : 'text-gray-400 hover:text-primary'
                 }`}
             >
-              Sort by Price
+              Budget First
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <SkeletonCard key={i} />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {filteredRestaurants.map((r: any, index: number) => (
             <div
               key={r._id}
-              className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 border-2 border-gray-100 relative"
-              onClick={() => {
-                // Navigate to home and select this restaurant
-                navigate('/customer/home', { state: { selectedRestaurant: r } });
-              }}
+              className="group relative glass-card rounded-[3.5rem] overflow-hidden hover:shadow-[0_45px_90px_rgba(0,0,0,0.12)] transition-all duration-700 cursor-pointer transform hover:-translate-y-4 border-white/60"
+              onClick={() => navigate('/customer/home', { state: { selectedRestaurant: r } })}
             >
-              {/* Rank Badge - Only show for top 3 */}
+              {/* Premium Rank Badge */}
               {index < 3 && (
-                <div className="absolute top-4 left-4 z-10">
-                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg flex items-center gap-2">
-                    👑
-                    <span>#{index + 1}</span>
+                <div className="absolute top-8 left-8 z-20">
+                  <div className="bg-white/90 backdrop-blur-xl px-5 py-2.5 rounded-2xl font-black text-lg shadow-2xl flex items-center gap-2 border border-white">
+                    {index === 0 && <Crown size={22} className="text-yellow-500 fill-yellow-500" />}
+                    {index === 1 && <Crown size={22} className="text-gray-400 fill-gray-400" />}
+                    {index === 2 && <Crown size={22} className="text-orange-400 fill-orange-400" />}
+                    <span className="text-gray-950 tracking-tighter">#{index + 1}</span>
                   </div>
                 </div>
               )}
 
-              <div className="h-64 relative overflow-hidden">
+              <div className="h-80 relative overflow-hidden">
                 {r.coverImage ? (
-                  <img
-                    src={r.coverImage}
-                    alt={r.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={getImageUrl(r.coverImage)} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                    <span className="text-6xl font-bold text-primary">{r.name.charAt(0).toUpperCase()}</span>
+                  <div className="w-full h-full bg-gradient-to-br from-primary/5 to-orange-50 flex items-center justify-center">
+                    <img src="/tomato-logo.png" alt="" className="w-32 h-32 opacity-10" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-full text-lg font-bold shadow-lg flex items-center gap-1">
-                  <Star size={16} />
-                  <span>{r.rating?.toFixed(1) || '3.0'}</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div className="absolute top-8 right-8">
+                  <div className="glass px-5 py-2.5 rounded-2xl text-white font-black flex items-center gap-2 shadow-2xl border-white/20">
+                    <Star size={20} className="text-yellow-400 fill-yellow-400" />
+                    <span className="text-lg">{r.rating?.toFixed(1) || '4.0'}</span>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-10 left-10 right-10">
+                  <h3 className="text-4xl font-black text-white tracking-tighter leading-none mb-3 drop-shadow-2xl">{r.name}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
+                      {r.cuisineType?.[0] || 'Gourmet'}
+                    </span>
+                    <span className="text-white/60 font-bold text-sm">•</span>
+                    <span className="text-white/80 font-bold text-sm">{r.totalReviews || 0} Reviews</span>
+                  </div>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{r.name}</h3>
-                <p className="text-gray-600 text-base mb-4">{r.cuisineType?.join(', ') || 'Multi-Cuisine'}</p>
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <span className="text-gray-500 text-sm">{r.totalReviews || 0} reviews</span>
-                  <span className="text-primary font-bold text-lg">View Menu →</span>
+              <div className="p-10 pt-8">
+                <div className="flex items-center justify-between mb-8 opacity-60 group-hover:opacity-100 transition-opacity">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Pricing</span>
+                    <span className="font-black text-gray-950">₹300 for two</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Availability</span>
+                    <span className="font-black text-green-500">Live Now</span>
+                  </div>
                 </div>
+                <button className="w-full py-5 bg-gray-950 text-white rounded-[1.8rem] font-black text-lg group-hover:bg-primary transition-all duration-300 shadow-2xl flex items-center justify-center gap-3 group/btn relative overflow-hidden">
+                  <span className="relative z-10">Experience Menu</span>
+                  <ChevronRight size={22} className="relative z-10 group-hover/btn:translate-x-2 transition-transform" />
+                  <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
               </div>
             </div>
           ))}
@@ -167,17 +187,22 @@ const CustomerBestRestaurants = () => {
       )}
 
       {filteredRestaurants.length === 0 && !loading && (
-        <div className="text-center py-16">
-          <Star size={64} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-600 mb-2">
-            {dishName ? `No Restaurants Found for "${dishName}"` : 'No Restaurants Found'}
+        <div className="text-center py-32 glass rounded-[5rem] border-white shadow-inner animate-fade-in mt-12">
+          <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-lg">
+            <Star size={64} className="text-gray-200" />
+          </div>
+          <h3 className="text-4xl font-black text-gray-400 tracking-tighter mb-4">
+            End of the road
           </h3>
-          <p className="text-gray-500">
-            {dishName
-              ? 'Try searching for a different dish or check back later.'
-              : 'Check back later for the best-rated restaurants in your area.'
-            }
+          <p className="text-gray-300 font-bold uppercase tracking-[0.2em] text-xs">
+            No restaurants matching your refined criteria were found.
           </p>
+          <button
+            onClick={() => navigate('/customer/home')}
+            className="mt-12 px-12 py-5 bg-primary text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-primary/20 hover:scale-110 active:scale-95 transition-all"
+          >
+            Reset Filters
+          </button>
         </div>
       )}
     </div>

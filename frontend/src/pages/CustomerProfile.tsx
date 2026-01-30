@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { User, Camera, Save, X, MapPin, Phone, Wallet, Clock, Shield, CheckCircle, AlertCircle, Crown, Zap, Star } from 'lucide-react';
+import { getImageUrl } from '../utils/formatters';
 
 interface UserData {
   name: string;
@@ -237,7 +238,7 @@ const CustomerProfile = () => {
                   }`}>
                   {previewPhoto ? (
                     <img
-                      src={previewPhoto.startsWith('data:') ? previewPhoto : `${previewPhoto}`}
+                      src={getImageUrl(previewPhoto)}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />

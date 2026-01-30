@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, X, Camera, Send } from 'lucide-react';
+import { Star, X, Camera, Send, Check } from 'lucide-react';
 import api from '../utils/api';
 
 interface RatingBannerProps {
@@ -14,6 +14,7 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
     const [ratingImages, setRatingImages] = useState<File[]>([]);
     const [submittingRating, setSubmittingRating] = useState(false);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [hoverRating, setHoverRating] = useState(0);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -26,7 +27,6 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
             const newImages = [...ratingImages, ...files];
             setRatingImages(newImages);
 
-            // Create previews
             const newPreviews = files.map(file => URL.createObjectURL(file));
             setImagePreviews([...imagePreviews, ...newPreviews]);
         }
@@ -38,7 +38,6 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
         setRatingImages(newImages);
 
         const newPreviews = [...imagePreviews];
-        // Revoke URL to avoid memory leak
         URL.revokeObjectURL(newPreviews[index]);
         newPreviews.splice(index, 1);
         setImagePreviews(newPreviews);
@@ -59,8 +58,6 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-
-            // alert('Thank you for your rating!'); // Removing alert for smoother UI flow if parent handles it
             onSuccess();
         } catch (error: any) {
             console.error('Rating submission failed:', error);
@@ -73,93 +70,110 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
     if (!order) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-gray-100 overflow-hidden relative animate-scale-in">
+        <div className="relative glass-card p-10 rounded-[3.5rem] shadow-3xl border-white/60 overflow-hidden font-display">
+            {/* Background Orbs */}
+            <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-[-50px] left-[-50px] w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
-                {/* Header */}
-                <div className="bg-[#D32F2F] p-6 flex justify-between items-center text-white">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm shadow-inner">
-                            <Star size={24} fill="currentColor" className="text-white" />
-                        </div>
-                        <div>
-                            <h3 className="font-extrabold text-2xl leading-none mb-1">Rate Order</h3>
-                            <p className="text-sm opacity-90 font-medium">{order.restaurantId?.name || 'Restaurant'}</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    >
-                        <X size={24} />
-                    </button>
+            {/* Header */}
+            <div className="flex justify-between items-start mb-10 relative z-10">
+                <div>
+                    <h3 className="text-4xl font-black text-gray-950 tracking-tighter leading-none mb-1">How was it?</h3>
+                    <p className="text-gray-500 font-bold text-sm">Rating your order from <span className="text-primary">{order.restaurantId?.name}</span></p>
                 </div>
+                <button
+                    onClick={onClose}
+                    className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-gray-400 hover:text-primary hover:rotate-90 transition-all border-white shadow-xl"
+                >
+                    <X size={24} />
+                </button>
+            </div>
 
-                {/* Content */}
-                <div className="p-6 bg-[#FAFAFA]">
-                    {/* Star Rating */}
-                    <div className="flex justify-center gap-3 mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+            {/* Content */}
+            <div className="space-y-8 relative z-10">
+                {/* Masterpiece Star Interaction */}
+                <div className="flex flex-col items-center gap-4 py-8 glass rounded-[2.5rem] border-white/40 shadow-inner">
+                    <div className="flex gap-4">
                         {[1, 2, 3, 4, 5].map((star) => (
                             <button
                                 key={star}
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
                                 onClick={() => setRatingValue(star)}
-                                className="transition-transform hover:scale-110 focus:outline-none"
+                                className="relative transition-all duration-300 transform hover:scale-125 hover:-translate-y-2 focus:outline-none group"
                             >
                                 <Star
-                                    size={32}
-                                    className={`${star <= ratingValue ? 'fill-[#D32F2F] text-[#D32F2F]' : 'text-gray-300'}`}
-                                    strokeWidth={1.5}
+                                    size={56}
+                                    className={`transition-all duration-300 ${star <= (hoverRating || ratingValue)
+                                            ? 'fill-yellow-400 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.4)]'
+                                            : 'text-gray-200'
+                                        }`}
+                                    strokeWidth={2}
                                 />
+                                {star <= (hoverRating || ratingValue) && (
+                                    <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-20 animate-pulse"></div>
+                                )}
                             </button>
                         ))}
                     </div>
+                    <span className="text-sm font-black uppercase tracking-[0.3em] text-gray-400">
+                        {ratingValue === 5 ? 'Masterpiece' : ratingValue === 4 ? 'Excellent' : ratingValue === 3 ? 'Good' : ratingValue === 2 ? 'Fair' : 'Poor'}
+                    </span>
+                </div>
 
-                    {/* Review Text */}
+                {/* Review Message */}
+                <div className="relative">
                     <textarea
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Tell us what you loved... (optional)"
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:border-[#D32F2F] focus:ring-1 focus:ring-[#D32F2F] outline-none text-gray-700 bg-white mb-4 resize-none h-24 text-sm shadow-sm"
+                        placeholder="Write a little story about your meal..."
+                        className="w-full p-8 bg-white/50 backdrop-blur-md border-2 border-transparent border-white/60 rounded-[2rem] focus:border-primary/20 focus:bg-white focus:outline-none transition-all duration-300 text-gray-900 font-medium placeholder:text-gray-400 min-h-[150px] shadow-inner text-lg"
                     />
+                </div>
 
-                    {/* Image Upload */}
-                    <div className="mb-6">
-                        <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide">
-                            {imagePreviews.map((preview, idx) => (
-                                <div key={idx} className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 group">
-                                    <img src={preview} alt="preview" className="w-full h-full object-cover" />
-                                    <button
-                                        onClick={() => removeImage(idx)}
-                                        className="absolute top-0.5 right-0.5 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X size={12} />
-                                    </button>
-                                </div>
-                            ))}
-                            {imagePreviews.length < 5 && (
-                                <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#D32F2F] hover:bg-red-50 transition-colors">
-                                    <Camera size={20} className="text-gray-400" />
-                                    <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
-                                </label>
-                            )}
-                        </div>
+                {/* Image Gallery & Upload */}
+                <div className="space-y-4">
+                    <div className="flex flex-wrap gap-4">
+                        {imagePreviews.map((preview, idx) => (
+                            <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-2xl group cursor-zoom-in">
+                                <img src={preview} alt="preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        ))}
+                        {imagePreviews.length < 5 && (
+                            <label className="w-24 h-24 flex flex-col items-center justify-center glass border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-primary/40 hover:bg-white/50 transition-all group">
+                                <Camera size={28} className="text-gray-300 group-hover:text-primary transition-colors" />
+                                <span className="text-[10px] font-black text-gray-400 mt-2 uppercase">Add Photos</span>
+                                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+                            </label>
+                        )}
                     </div>
+                </div>
 
-                    {/* Actions */}
-                    <button
-                        onClick={handleSubmit}
-                        disabled={submittingRating}
-                        className="w-full bg-[#D32F2F] hover:bg-[#b71c1c] text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
+                {/* Submit Action */}
+                <button
+                    onClick={handleSubmit}
+                    disabled={submittingRating}
+                    className="w-full group relative h-20 bg-gray-950 text-white rounded-[2rem] font-black text-xl transition-all duration-500 shadow-3xl hover:shadow-primary/30 hover:bg-primary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                >
+                    <div className="relative z-10 flex items-center justify-center gap-4">
                         {submittingRating ? (
-                            'Submitting...'
+                            <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                         ) : (
                             <>
-                                <Send size={16} /> SUBMIT FEEDBACK
+                                <span>Share My Feedback</span>
+                                <Send size={24} className="group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
                             </>
                         )}
-                    </button>
-                </div>
+                    </div>
+                    <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+                <p className="text-center text-[10px] font-black text-gray-300 uppercase tracking-widest">Your review helps our community grow</p>
             </div>
         </div>
     );

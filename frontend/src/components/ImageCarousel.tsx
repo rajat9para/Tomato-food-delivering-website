@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getImageUrl } from '../utils/formatters';
 
 interface ImageCarouselProps {
   images: string[];
@@ -17,23 +18,6 @@ const ImageCarousel = ({ images, alt }: ImageCarouselProps) => {
 
     return () => clearInterval(interval);
   }, [images.length]);
-
-  // Get image URL - handle both local paths and full URLs
-  const getImageUrl = (img: string) => {
-    if (!img) return '';
-    if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('/')) {
-      return img;
-    }
-    // If it's a relative path from backend
-    if (img.startsWith('/uploads/')) {
-      return `http://localhost:5000${img}`;
-    }
-    // If it's a foodimages path
-    if (img.includes('foodimages') || img.includes('foodimages')) {
-      return img.startsWith('/') ? img : `/${img}`;
-    }
-    return img;
-  };
 
   // Fallback images from foodimages folder if no images provided
   const fallbackImages = [

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getImageUrl } from '../utils/formatters';
 
 interface DishCarouselProps {
   images: string[];
@@ -38,7 +39,7 @@ const DishCarousel = ({ images, alt }: DishCarouselProps) => {
   return (
     <div className="relative w-full h-full group overflow-hidden">
       <img
-        src={images[currentIndex]}
+        src={getImageUrl(images[currentIndex])}
         alt={`${alt} ${currentIndex + 1}`}
         className="w-full h-full object-cover transition-opacity duration-500"
         loading="lazy"

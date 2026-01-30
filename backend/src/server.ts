@@ -11,11 +11,11 @@ import fs from 'fs';
 
 const app = express();
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'public/uploads');
+// Ensure uploads directory exists - standardized to project root
+const uploadsDir = path.join(process.cwd(), 'public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('📁 Created uploads directory:', uploadsDir);
+  console.log('📁 Created uploads directory at project root:', uploadsDir);
 }
 
 app.use(
@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 // Static file serving
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));
 
 // Root route
 app.get('/', (req, res) => {

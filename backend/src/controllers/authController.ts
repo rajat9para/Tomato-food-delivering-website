@@ -138,7 +138,9 @@ export const login = async (req: Request, res: Response) => {
       token,
       role: user.role,
       userId: user._id,
-      name: user.name
+      name: user.name,
+      profilePhoto: user.profilePhoto,
+      premiumMember: user.premiumMember
     });
   } catch (error: any) {
     console.error('💥 [LOGIN DEBUG] CRITICAL ERROR:', error);
