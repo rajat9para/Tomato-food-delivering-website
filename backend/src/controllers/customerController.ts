@@ -85,6 +85,7 @@ export const getFeaturedDishes = async (req: AuthRequest, res: Response) => {
 
     res.json(dishes);
   } catch (error) {
+    console.error('getFeaturedDishes error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -100,6 +101,7 @@ export const getBestDishes = async (req: AuthRequest, res: Response) => {
 
     res.json(dishes);
   } catch (error) {
+    console.error('getBestDishes error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -125,6 +127,7 @@ export const getGreatDeals = async (req: AuthRequest, res: Response) => {
 
     res.json(dishes);
   } catch (error) {
+    console.error('getGreatDeals error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -135,6 +138,7 @@ export const getRestaurantMenu = async (req: AuthRequest, res: Response) => {
     const items = await FoodItem.find({ restaurantId: id, availability: true });
     res.json(items);
   } catch (error) {
+    console.error('getRestaurantMenu error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

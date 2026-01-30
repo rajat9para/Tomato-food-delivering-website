@@ -177,97 +177,57 @@ export const getMyRevenue = async (req: AuthRequest, res: Response) => {
     if (!restaurant) return res.status(404).json({ message: 'Restaurant not found' });
 
     const now = new Date();
-
-    // Calculate today's revenue
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayRevenue = await Order.aggregate([
-      {
-        $match: {
-          restaurantId: restaurant._id,
-          orderStatus: { $ne: 'cancelled' },
-          createdAt: { $gte: todayStart }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$baseAmount' } } }
-    ]);
-
-    // Calculate this week's revenue
     const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const weeklyRevenue = await Order.aggregate([
-      {
-        $match: {
-          restaurantId: restaurant._id,
-          orderStatus: { $ne: 'cancelled' },
-          createdAt: { $gte: weekStart }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$baseAmount' } } }
-    ]);
-
-    // Calculate this month's revenue
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthlyRevenue = await Order.aggregate([
-      {
-        $match: {
-          restaurantId: restaurant._id,
-          orderStatus: { $ne: 'cancelled' },
-          createdAt: { $gte: monthStart }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$baseAmount' } } }
-    ]);
-
-    // Get total revenue (all time)
-    const totalRevenue = await Order.aggregate([
-      { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' } } },
-      { $group: { _id: null, total: { $sum: '$baseAmount' } } }
-    ]);
-
-    // Calculate this year's revenue (for yearly period)
     const yearStart = new Date(now.getFullYear(), 0, 1);
-    const yearlyRevenue = await Order.aggregate([
-      {
-        $match: {
-          restaurantId: restaurant._id,
-          orderStatus: { $ne: 'cancelled' },
-          createdAt: { $gte: yearStart }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+
+    // Parallelize all aggregation queries for performance
+    const [
+      todayRevenueRes,
+      weeklyRevenueRes,
+      monthlyRevenueRes,
+      totalRevenueRes,
+      yearlyRevenueRes,
+      todayOrders,
+      weeklyOrders,
+      monthlyOrders,
+      totalOrders
+    ] = await Promise.all([
+      // Revenue Aggregations
+      Order.aggregate([
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: todayStart } } },
+        { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+      ]),
+      Order.aggregate([
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: weekStart } } },
+        { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+      ]),
+      Order.aggregate([
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: monthStart } } },
+        { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+      ]),
+      Order.aggregate([
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' } } },
+        { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+      ]),
+      Order.aggregate([
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: yearStart } } },
+        { $group: { _id: null, total: { $sum: '$baseAmount' } } }
+      ]),
+      // Order Counts
+      Order.countDocuments({ restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: todayStart } }),
+      Order.countDocuments({ restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: weekStart } }),
+      Order.countDocuments({ restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: monthStart } }),
+      Order.countDocuments({ restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' } })
     ]);
 
-    // Count orders for each period
-    const todayOrders = await Order.countDocuments({
-      restaurantId: restaurant._id,
-      orderStatus: { $ne: 'cancelled' },
-      createdAt: { $gte: todayStart }
-    });
+    const avgOrderValue = totalOrders > 0 ? (totalRevenueRes[0]?.total || 0) / totalOrders : 0;
 
-    const weeklyOrders = await Order.countDocuments({
-      restaurantId: restaurant._id,
-      orderStatus: { $ne: 'cancelled' },
-      createdAt: { $gte: weekStart }
-    });
-
-    const monthlyOrders = await Order.countDocuments({
-      restaurantId: restaurant._id,
-      orderStatus: { $ne: 'cancelled' },
-      createdAt: { $gte: monthStart }
-    });
-
-    const totalOrders = await Order.countDocuments({
-      restaurantId: restaurant._id,
-      orderStatus: { $ne: 'cancelled' }
-    });
-
-    const avgOrderValue = totalOrders > 0 ? (totalRevenue[0]?.total || 0) / totalOrders : 0;
-
-    // Generate chart data based on period (for backward compatibility)
+    // Generate chart data based on period
     let chartData: any[] = [];
     let chartLabels: string[] = [];
     let periodLabel: string;
-
-    // Calculate date ranges based on period for chart
     let startDate: Date;
     let endDate: Date = now;
 
@@ -285,7 +245,7 @@ export const getMyRevenue = async (req: AuthRequest, res: Response) => {
         periodLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' });
         break;
       case 'yearly':
-        startDate = new Date(now.getFullYear(), 0, 1);
+        startDate = yearStart;
         periodLabel = now.getFullYear().toString();
         break;
       default:
@@ -293,131 +253,64 @@ export const getMyRevenue = async (req: AuthRequest, res: Response) => {
         periodLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' });
     }
 
+    // Chart Data Aggregation (separate awaited call as it depends on switch)
     if (period === 'today') {
-      // Hourly data for today
       const hours = Array.from({ length: 24 }, (_, i) => i);
       const hourlyData = await Order.aggregate([
-        {
-          $match: {
-            restaurantId: restaurant._id,
-            orderStatus: { $ne: 'cancelled' },
-            createdAt: { $gte: startDate, $lte: endDate }
-          }
-        },
-        {
-          $group: {
-            _id: { $hour: '$createdAt' },
-            revenue: { $sum: '$baseAmount' }
-          }
-        }
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: startDate, $lte: endDate } } },
+        { $group: { _id: { $hour: '$createdAt' }, revenue: { $sum: '$baseAmount' } } }
       ]);
-
       const hourlyMap = new Map(hourlyData.map(item => [item._id, item.revenue]));
-      chartData = hours.map(hour => ({
-        label: `${hour}:00`,
-        value: hourlyMap.get(hour) || 0
-      }));
+      chartData = hours.map(hour => ({ label: `${hour}:00`, value: hourlyMap.get(hour) || 0 }));
       chartLabels = hours.map(hour => `${hour}:00`);
 
     } else if (period === 'weekly') {
-      // Daily data for this week
       const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const dailyData = await Order.aggregate([
-        {
-          $match: {
-            restaurantId: restaurant._id,
-            orderStatus: { $ne: 'cancelled' },
-            createdAt: { $gte: startDate, $lte: endDate }
-          }
-        },
-        {
-          $group: {
-            _id: { $dayOfWeek: '$createdAt' },
-            revenue: { $sum: '$baseAmount' }
-          }
-        }
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: startDate, $lte: endDate } } },
+        { $group: { _id: { $dayOfWeek: '$createdAt' }, revenue: { $sum: '$baseAmount' } } }
       ]);
-
-      const dailyMap = new Map(dailyData.map(item => [item._id - 1, item.revenue])); // MongoDB Sunday=1, JS Sunday=0
-      chartData = days.map((day, index) => ({
-        label: day,
-        value: dailyMap.get(index) || 0
-      }));
+      const dailyMap = new Map(dailyData.map(item => [item._id - 1, item.revenue]));
+      chartData = days.map((day, index) => ({ label: day, value: dailyMap.get(index) || 0 }));
       chartLabels = days;
 
     } else if (period === 'monthly') {
-      // Weekly data for this month
       const weeksData = await Order.aggregate([
-        {
-          $match: {
-            restaurantId: restaurant._id,
-            orderStatus: { $ne: 'cancelled' },
-            createdAt: { $gte: startDate, $lte: endDate }
-          }
-        },
-        {
-          $group: {
-            _id: { $week: '$createdAt' },
-            revenue: { $sum: '$baseAmount' }
-          }
-        },
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: startDate, $lte: endDate } } },
+        { $group: { _id: { $week: '$createdAt' }, revenue: { $sum: '$baseAmount' } } },
         { $sort: { '_id': 1 } }
       ]);
-
       const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
-      const weeksMap = new Map(weeksData.map((item, index) => [index, item.revenue]));
-      chartData = weeks.map((week, index) => ({
-        label: week,
-        value: weeksMap.get(index) || 0
-      }));
-      chartLabels = weeks;
+      const weeksMap = new Map(weeksData.map((item, index) => [index, item.revenue])); // Rough mapping, simplified
+      // Note: $week returns week number of year (0-53). Mapping directly to 0-4 index is tricky without offset.
+      // For simplicity/robustness in this view, we'll just push what we found or map standard 4 weeks
+      chartData = weeksData.map((d, i) => ({ label: `Week ${i + 1}`, value: d.revenue }));
+      chartLabels = chartData.map(d => d.label);
 
     } else if (period === 'yearly') {
-      // Monthly data for this year
       const monthsData = await Order.aggregate([
-        {
-          $match: {
-            restaurantId: restaurant._id,
-            orderStatus: { $ne: 'cancelled' },
-            createdAt: { $gte: startDate, $lte: endDate }
-          }
-        },
-        {
-          $group: {
-            _id: { $month: '$createdAt' },
-            revenue: { $sum: '$baseAmount' }
-          }
-        },
+        { $match: { restaurantId: restaurant._id, orderStatus: { $ne: 'cancelled' }, createdAt: { $gte: startDate, $lte: endDate } } },
+        { $group: { _id: { $month: '$createdAt' }, revenue: { $sum: '$baseAmount' } } },
         { $sort: { '_id': 1 } }
       ]);
-
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const monthsMap = new Map(monthsData.map(item => [item._id - 1, item.revenue]));
-      chartData = monthNames.map((month, index) => ({
-        label: month,
-        value: monthsMap.get(index) || 0
-      }));
+      chartData = monthNames.map((month, index) => ({ label: month, value: monthsMap.get(index) || 0 }));
       chartLabels = monthNames;
     }
 
     res.json({
-      // All-time metrics
-      revenue: totalRevenue[0]?.total || 0,
+      revenue: totalRevenueRes[0]?.total || 0,
       totalOrders,
       avgOrderValue: Math.round(avgOrderValue),
-
-      // Period-specific metrics
-      todayRevenue: todayRevenue[0]?.total || 0,
-      weeklyRevenue: weeklyRevenue[0]?.total || 0,
-      monthlyRevenue: monthlyRevenue[0]?.total || 0,
-      yearlyRevenue: yearlyRevenue[0]?.total || 0,
-
+      todayRevenue: todayRevenueRes[0]?.total || 0,
+      weeklyRevenue: weeklyRevenueRes[0]?.total || 0,
+      monthlyRevenue: monthlyRevenueRes[0]?.total || 0,
+      yearlyRevenue: yearlyRevenueRes[0]?.total || 0,
       todayOrders,
       weeklyOrders,
       monthlyOrders,
-
-      // Chart data (period-based)
-      periodRevenue: monthlyRevenue[0]?.total || 0, // For backward compatibility
+      periodRevenue: monthlyRevenueRes[0]?.total || 0,
       periodLabel,
       chartData,
       chartLabels
@@ -433,14 +326,15 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
     const restaurant = await Restaurant.findOne({ ownerId: req.user!.id });
 
     if (restaurant) {
-      await FoodItem.deleteMany({ restaurantId: restaurant._id });
-      await Order.deleteMany({ restaurantId: restaurant._id });
-      await Transaction.deleteMany({ restaurantId: restaurant._id });
-      await Restaurant.findByIdAndDelete(restaurant._id);
+      await Promise.all([
+        FoodItem.deleteMany({ restaurantId: restaurant._id }),
+        Order.deleteMany({ restaurantId: restaurant._id }),
+        Transaction.deleteMany({ restaurantId: restaurant._id }),
+        Restaurant.findByIdAndDelete(restaurant._id)
+      ]);
     }
 
     await User.findByIdAndDelete(req.user!.id);
-
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {
     console.error('Delete account error:', error);
@@ -459,7 +353,6 @@ export const updateRestaurantImage = async (req: AuthRequest, res: Response) => 
 
     restaurant.imageUrl = imageUrl;
     await restaurant.save();
-
     res.json(restaurant);
   } catch (error) {
     console.error('Update restaurant image error:', error);
@@ -470,7 +363,6 @@ export const updateRestaurantImage = async (req: AuthRequest, res: Response) => 
 export const updateRestaurantDetails = async (req: AuthRequest, res: Response) => {
   try {
     const { name, address, phone, openingTime, closingTime, description } = req.body;
-
     const restaurant = await Restaurant.findOne({ ownerId: req.user!.id });
     if (!restaurant) return res.status(404).json({ message: 'Restaurant not found' });
 
@@ -482,9 +374,7 @@ export const updateRestaurantDetails = async (req: AuthRequest, res: Response) =
     if (description !== undefined) restaurant.description = description;
 
     await restaurant.save();
-    const updated = await Restaurant.findById(restaurant._id);
-
-    res.json(updated);
+    res.json(restaurant);
   } catch (error) {
     console.error('Update restaurant details error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -498,9 +388,9 @@ export const toggleActiveStatus = async (req: AuthRequest, res: Response) => {
 
     restaurant.activeStatus = !restaurant.activeStatus;
     await restaurant.save();
-
     res.json({ activeStatus: restaurant.activeStatus });
   } catch (error) {
+    console.error('Toggle status error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

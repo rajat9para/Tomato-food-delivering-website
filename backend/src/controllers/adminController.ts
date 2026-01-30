@@ -221,6 +221,7 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
 
     res.json({ transactions, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
+    console.error('getTransactions error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -236,6 +237,7 @@ export const getRevenueByRestaurant = async (req: AuthRequest, res: Response) =>
     ]);
     res.json(revenue);
   } catch (error) {
+    console.error('getRevenueByRestaurant error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -247,6 +249,7 @@ export const getInbox = async (req: AuthRequest, res: Response) => {
       .sort({ createdAt: -1 });
     res.json(messages);
   } catch (error) {
+    console.error('getInbox error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -257,6 +260,7 @@ export const markMessageRead = async (req: AuthRequest, res: Response) => {
     await Contact.findByIdAndUpdate(id, { status: 'read' });
     res.json({ message: 'Message marked as read' });
   } catch (error) {
+    console.error('markMessageRead error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -473,6 +477,7 @@ export const getAdminRevenue = async (req: AuthRequest, res: Response) => {
       chartData
     });
   } catch (error) {
+    console.error('getAdminRevenue error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

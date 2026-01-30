@@ -57,10 +57,12 @@ const OwnerDashboard = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // High-performance background sync (silent)
-      loadData(true, true);
-      checkNewOrders();
-    }, 3000);
+      // Optimized Polling: Only if visible, every 30s
+      if (document.visibilityState === 'visible') {
+        loadData(true, true);
+        checkNewOrders();
+      }
+    }, 30000); // Increased from 3s to 30s
     return () => clearInterval(interval);
   }, [activeTab, timePeriod]);
 
@@ -403,20 +405,26 @@ const OwnerDashboard = () => {
               <button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
-                className={`w-full p-4 text-left rounded-xl font-bold text-lg transition relative ${activeTab === tab.name
-                  ? 'bg-primary text-white shadow-xl'
-                  : 'text-gray-700 hover:bg-primary/10 hover:text-primary border-2 border-transparent hover:border-primary/30'
+                className={`w-full p-4 text-left rounded-xl font-bold text-lg transition-all relative flex items-center gap-4 group overflow-hidden ${activeTab === tab.name
+                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200 translate-x-1'
+                  : 'text-gray-500 hover:bg-red-50 hover:text-red-600'
                   }`}
               >
-                <span className="mr-2">{tab.emoji}</span>
-                {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
+                {/* Active Indicator Line */}
+                {activeTab === tab.name && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20"></div>
+                )}
+
+                <span className={`text-2xl transition-transform group-hover:scale-110 ${activeTab === tab.name ? 'scale-110' : ''}`}>{tab.emoji}</span>
+                <span className="tracking-wide">{tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}</span>
+
                 {tab.name === 'orders' && newOrdersCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-pulse shadow-lg">
+                  <span className="ml-auto bg-white text-red-600 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm loading-pulse">
                     {newOrdersCount}
                   </span>
                 )}
                 {tab.name === 'messages' && unreadMessagesCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-pulse shadow-lg">
+                  <span className="ml-auto bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm">
                     {unreadMessagesCount}
                   </span>
                 )}
@@ -774,51 +782,64 @@ const OwnerDashboard = () => {
               </div>
 
               {/* Statistics Cards */}
+              {/* Statistics Cards - Royal Theme */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-10">
-                <div className="bg-white border-2 border-primary rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">💰</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">{timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)} Sales</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">💰</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">{timePeriod} Sales</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">
+                      ₹{timePeriod === 'today' ? todayRevenue.toLocaleString() :
+                        timePeriod === 'weekly' ? weeklyRevenue.toLocaleString() :
+                          timePeriod === 'monthly' ? monthlyRevenue.toLocaleString() :
+                            timePeriod === 'yearly' ? yearlyRevenue.toLocaleString() : revenue.toLocaleString()}
+                    </p>
+                    <p className="text-red-500 text-[10px] mt-1 font-bold">
+                      {timePeriod === 'today' ? todayOrders :
+                        timePeriod === 'weekly' ? weeklyOrders :
+                          timePeriod === 'monthly' ? monthlyOrders :
+                            timePeriod === 'yearly' ? totalOrders : totalOrders} orders
+                    </p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-primary">
-                    ₹{timePeriod === 'today' ? todayRevenue.toLocaleString() :
-                      timePeriod === 'weekly' ? weeklyRevenue.toLocaleString() :
-                        timePeriod === 'monthly' ? monthlyRevenue.toLocaleString() :
-                          timePeriod === 'yearly' ? yearlyRevenue.toLocaleString() : revenue.toLocaleString()}
-                  </p>
-                  <p className="text-gray-500 text-[10px] mt-1">
-                    {timePeriod === 'today' ? todayOrders :
-                      timePeriod === 'weekly' ? weeklyOrders :
-                        timePeriod === 'monthly' ? monthlyOrders :
-                          timePeriod === 'yearly' ? totalOrders : totalOrders} orders
-                  </p>
                 </div>
 
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">📊</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Total Revenue</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">📊</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Total Revenue</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">₹{revenue.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Lifetime Earnings</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-gray-900">₹{revenue.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">All time earnings</p>
                 </div>
 
-                <div className="bg-white border-2 border-purple-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">📦</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Total Orders</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">📦</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Total Orders</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">{totalOrders.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Completed Orders</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-purple-600">{totalOrders.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">All completed orders</p>
                 </div>
 
-                <div className="bg-white border-2 border-orange-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">🎯</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Avg Order Value</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Avg Order Value</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">₹{avgOrderValue.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Per Order</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-orange-600">₹{avgOrderValue.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">Per order</p>
                 </div>
               </div>
 
@@ -1130,8 +1151,8 @@ const OwnerDashboard = () => {
             </div>
           )}
         </main>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

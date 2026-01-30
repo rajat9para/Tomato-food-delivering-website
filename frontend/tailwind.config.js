@@ -16,7 +16,7 @@ export default {
         accent: '#ffa500',
         success: '#10B981',
         surface: '#FFFFFF',
-        background: '#fef8f7',
+        background: '#FDFBF7', // Royal Light Beige
         'text-primary': '#1c1c1c',
         'text-secondary': '#696969',
         border: '#e8e8e8',
