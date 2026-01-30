@@ -85,11 +85,7 @@ app.get('/health', (req, res) => {
   res.send('OK');
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/owner', ownerRoutes);
-app.use('/api/customer', customerRoutes);
+
 
 // 404 handler
 app.use((req, res) => {

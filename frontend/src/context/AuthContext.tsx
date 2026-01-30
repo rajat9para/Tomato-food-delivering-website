@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import api from '../utils/api';
 
 interface AuthContextType {
   token: string | null;
@@ -36,17 +37,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch('/api/auth/verify', {
-        headers: {
-          'Authorization': `Bearer ${storedToken}`
-        }
-      });
+      const response = await api.get('/auth/verify');
 
-      if (!response.ok) {
-        throw new Error('Session invalid');
-      }
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.user) {
         setUserId(data.user.id);
