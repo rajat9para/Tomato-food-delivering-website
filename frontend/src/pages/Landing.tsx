@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Store, Shield, Star, CheckCircle, Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import api from '../utils/api';
@@ -13,15 +13,9 @@ const Landing = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [stackIndex, setStackIndex] = useState(0);
 
-  // Auto-rotate stacked images every 5 seconds
-  useEffect(() => {
-    const stackTimer = setInterval(() => {
-      setStackIndex((prev) => (prev + 1));
-    }, 5000);
-    return () => clearInterval(stackTimer);
-  }, []);
+
+
 
   const foodImages = [
     '/foodimages/f1.jpg',
@@ -38,12 +32,15 @@ const Landing = () => {
     '/foodimages/f12.jpg',
   ];
 
+  // Hero slideshow timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % foodImages.length);
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+
 
   useEffect(() => {
     const searchItems = async () => {
@@ -304,13 +301,13 @@ const Landing = () => {
             <div className="flex-1 relative h-[600px] flex items-center justify-center">
               {/* Stacked Images */}
               <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform -rotate-12 translate-x-12 opacity-60 scale-90 border-4 border-white">
-                <img src={foodImages[5]} alt="" className="w-full h-full object-cover" />
+                <img src={foodImages[(currentSlide + 5) % foodImages.length]} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform rotate-12 -translate-x-12 opacity-80 scale-95 border-4 border-white">
-                <img src={foodImages[8]} alt="" className="w-full h-full object-cover" />
+                <img src={foodImages[(currentSlide + 8) % foodImages.length]} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="relative w-[85%] h-[75%] rounded-[3rem] overflow-hidden shadow-3xl transform hover:rotate-2 hover:scale-105 transition-all duration-500 border-8 border-white group z-10">
-                <img src={foodImages[2]} alt="" className="w-full h-full object-cover" />
+                <img src={foodImages[(currentSlide + 2) % foodImages.length]} alt="" className="w-full h-full object-cover" />
               </div>
 
               {/* Float Badge */}
