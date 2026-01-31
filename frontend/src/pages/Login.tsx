@@ -31,21 +31,27 @@ const Login = () => {
       else navigate('/customer/home');
     } catch (err: any) {
       console.error('❌ [LOGIN DEBUG] Error caught:', err);
-      if (err.code === 'ERR_NETWORK') {
-        const isDev = import.meta.env.DEV;
-        setError(isDev
-          ? 'Network error. Check if backend is running on port 5000.'
-          : 'Network error. Unable to connect to server. Please try again later.');
-      } else if (err.response) {
+
+      // Check if we have a response from the server (even if it's an error status)
+      if (err.response) {
         console.error('💩 [LOGIN DEBUG] Error response:', err.response.status, err.response.data);
-        if (err.response.status === 401) {
+        const msg = err.response.data?.message || err.response.data?.error;
+        if (msg) {
+          setError(msg);
+        } else if (err.response.status === 401) {
           setError('Invalid email or password');
+        } else if (err.response.status === 404) {
+          setError('User not found');
         } else {
-          const msg = err.response.data?.message || err.response.data?.error || 'Login failed';
-          setError(`${msg} (Status: ${err.response.status})`);
+          setError(`Login failed: ${err.message}`);
         }
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('❌ [LOGIN DEBUG] No response received:', err.request);
+        setError('Server not responding. Please check your internet connection or try again later.');
       } else {
-        setError(`Error: ${err.message || 'Unknown error'}`);
+        // Something happened in setting up the request that triggered an Error
+        setError(`Error: ${err.message}`);
       }
     } finally {
       setLoading(false);

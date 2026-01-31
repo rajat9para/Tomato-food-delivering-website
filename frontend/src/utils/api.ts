@@ -39,6 +39,7 @@ api.interceptors.response.use(
       statusText: error.response?.statusText,
       data: error.response?.data,
       message: error.message,
+      errorDetail: error.response?.data?.message || 'No Backend Message',
       config: {
         url: error.config?.url,
         method: error.config?.method,
