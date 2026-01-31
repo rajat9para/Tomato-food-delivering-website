@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Store, Shield, Star, CheckCircle, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import api from '../utils/api';
 import GlobalBackground from '../components/GlobalBackground';
-import FoodShowcase from '../components/FoodShowcase';
 import FloatingActionButton from '../components/FloatingActionButton';
 
 const Landing = () => {
@@ -13,6 +13,15 @@ const Landing = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [stackIndex, setStackIndex] = useState(0);
+
+  // Auto-rotate stacked images every 5 seconds
+  useEffect(() => {
+    const stackTimer = setInterval(() => {
+      setStackIndex((prev) => (prev + 1));
+    }, 5000);
+    return () => clearInterval(stackTimer);
+  }, []);
 
   const foodImages = [
     '/foodimages/f1.jpg',
@@ -269,26 +278,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Food Showcase Section */}
-      <section className="py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100/40 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-100/40 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-6xl md:text-8xl font-black text-gray-900 mb-6 tracking-tighter leading-none">
-              A Feast for<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500 italic">Your Eyes.</span>
-            </h2>
-            <p className="text-2xl text-gray-500 font-medium max-w-3xl mx-auto">
-              Explore our curated collection of mouthwatering delicacies from top restaurants.
-            </p>
-          </div>
-
-          <FoodShowcase />
-        </div>
-      </section>
 
       <section className="py-32 bg-white">
         <div className="container mx-auto px-6">
@@ -301,29 +291,37 @@ const Landing = () => {
                 Our network of thousands of restaurants and expert delivery partners ensure you never have to wait for your favorites.
               </p>
               <div className="grid grid-cols-2 gap-8">
-                <div className="p-8 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm">
+                <div className="p-8 rounded-[2rem] bg-white border-2 border-primary/10 shadow-xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300">
                   <div className="text-4xl font-black text-primary mb-1">30m</div>
                   <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Avg Delivery</div>
                 </div>
-                <div className="p-8 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm">
+                <div className="p-8 rounded-[2rem] bg-white border-2 border-primary/10 shadow-xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300">
                   <div className="text-4xl font-black text-primary mb-1">24/7</div>
                   <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Support</div>
                 </div>
               </div>
             </div>
-            <div className="flex-1 relative">
-              <div className="w-full h-[500px] rounded-[4rem] overflow-hidden shadow-3xl transform rotate-3 hover:rotate-0 transition-transform duration-700 border-8 border-white group">
-                <img src={foodImages[2]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]" />
+            <div className="flex-1 relative h-[600px] flex items-center justify-center">
+              {/* Stacked Images */}
+              <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform -rotate-12 translate-x-12 opacity-60 scale-90 border-4 border-white">
+                <img src={foodImages[5]} alt="" className="w-full h-full object-cover" />
               </div>
+              <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform rotate-12 -translate-x-12 opacity-80 scale-95 border-4 border-white">
+                <img src={foodImages[8]} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="relative w-[85%] h-[75%] rounded-[3rem] overflow-hidden shadow-3xl transform hover:rotate-2 hover:scale-105 transition-all duration-500 border-8 border-white group z-10">
+                <img src={foodImages[2]} alt="" className="w-full h-full object-cover" />
+              </div>
+
               {/* Float Badge */}
-              <div className="absolute -bottom-10 -left-10 glass-card p-8 rounded-[2.5rem] shadow-2xl animate-float border-white hidden lg:block">
+              <div className="absolute bottom-10 -left-6 glass-card p-6 rounded-[2rem] shadow-2xl animate-float border-white z-20 hidden lg:block">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
-                    <CheckCircle className="w-8 h-8 text-white" />
+                  <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-lg hover:rotate-180 transition-transform duration-700">
+                    <CheckCircle className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <div className="text-2xl font-black text-gray-900 leading-tight tracking-tighter">Reliable</div>
-                    <div className="text-sm font-bold text-gray-400 font-bold uppercase">Quality Assured</div>
+                    <div className="text-xl font-black text-gray-900 leading-tight">Reliable</div>
+                    <div className="text-xs font-bold text-gray-400 uppercase">Quality Assured</div>
                   </div>
                 </div>
               </div>
@@ -333,20 +331,20 @@ const Landing = () => {
       </section>
 
       <section className="py-24 px-6 mb-24">
-        <div className="max-w-7xl mx-auto rounded-[4rem] bg-gradient-to-br from-primary to-primary-dark relative overflow-hidden shadow-3xl p-16 md:p-32 text-center group">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 via-transparent to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+        <div className="max-w-7xl mx-auto rounded-[4rem] bg-black relative overflow-hidden shadow-3xl p-16 md:p-32 text-center group">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 via-transparent to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
 
           <div className="relative z-10 space-y-12">
             <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none">
-              The Finest Plate.<br /><span className="text-white/60 italic">Delivered.</span>
+              The Finest Plate.<br /><span className="text-primary italic">Delivered.</span>
             </h2>
-            <p className="text-2xl text-white/60 font-medium max-w-3xl mx-auto">
+            <p className="text-2xl text-gray-400 font-medium max-w-3xl mx-auto">
               Join millions of users who trust Tomato for their daily meals and restaurant management.
             </p>
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
               <button
                 onClick={() => navigate('/register/customer')}
-                className="px-16 py-6 bg-gray-950 text-white rounded-full font-black text-2xl hover:bg-white hover:text-gray-950 transition-all duration-300 shadow-2xl hover:shadow-white/40 transform hover:-translate-y-2 active:scale-95"
+                className="px-16 py-6 bg-white text-black rounded-full font-black text-2xl hover:bg-primary hover:text-white transition-all duration-300 shadow-2xl hover:shadow-primary/40 transform hover:-translate-y-2 active:scale-95"
               >
                 Start Ordering
               </button>

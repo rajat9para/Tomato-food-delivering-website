@@ -43,7 +43,10 @@ html {
 body {
   font-family: 'Lato', sans-serif;
   color: var(--text-primary);
-  background-color: var(--background);
+  color: var(--text-primary);
+  background-color: #FFF0F5;
+  /* Soft Pink Background (Lavender Blush) to reduce empty white feel */
+  background-image: linear-gradient(to bottom, #FFF0F5, #FFF5F7);
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   overscroll-behavior-y: contain;
@@ -508,13 +511,24 @@ th {
 
 /* Custom shake animation for errors */
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-5px);
   }
-  20%, 40%, 60%, 80% {
+
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(5px);
   }
 }
@@ -525,9 +539,12 @@ th {
 
 /* Pulse glow animation */
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(226, 55, 68, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(226, 55, 68, 0.6);
   }
@@ -542,9 +559,11 @@ th {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -556,7 +575,11 @@ th {
 }
 
 /* Smooth transitions for all interactive elements */
-button, a, input, textarea, select {
+button,
+a,
+input,
+textarea,
+select {
   transition: all 0.3s ease;
 }
 

@@ -9,33 +9,14 @@ interface FoodShowcaseProps {
 }
 
 const mainImages = [
-  '/foodimages/indian_cuisine.jpg',
-  '/foodimages/Chicken-Chow-Mein-1.jpg',
-  '/foodimages/white-sauce-pasta-2.jpg',
-  '/foodimages/india-food-paratha-1120x732.jpg',
-  '/foodimages/Desi-Chow-Mein-2.jpg',
-  '/foodimages/ananthan-chithiraikani-5I4faGfaUHg-unsplash.jpg',
-  '/foodimages/prchi-palwe-Tp1yIvG7aBw-unsplash.jpg',
-  '/foodimages/sharan-pagadala-x_kx9A58rvw-unsplash.jpg',
-  '/foodimages/kalyani-akella-69-Jb_PNqHI-unsplash.jpg',
-  '/foodimages/pushpak-dsilva-e75FKtu30fQ-unsplash.jpg',
-  '/foodimages/a-singh-W50inNOVUdU-unsplash.jpg',
-  '/foodimages/charlesdeluvio-PqsImnjuElM-unsplash.jpg'
-];
-
-const thumbnailImages = [
-  '/foodimages/f1.jpg',
-  '/foodimages/f2.jpg',
-  '/foodimages/f3.jpg',
-  '/foodimages/f4.jpg',
-  '/foodimages/f5.jpg',
-  '/foodimages/f6.jpg',
-  '/foodimages/f7.jpg',
-  '/foodimages/f8.jpg',
-  '/foodimages/f9.jpg',
-  '/foodimages/f10.jpg',
-  '/foodimages/f11.jpg',
-  '/foodimages/f12.jpg',
+  '/thumbnails/50050-five-minute-ice-cream-DDMFS-4x3-076-fbf49ca6248e4dceb3f43a4f02823dd9.jpg',
+  '/thumbnails/66FE2BE3-1758-4813-B086-1719799793ED.jpg',
+  '/thumbnails/Cuisine_(268)_44.jpg',
+  '/thumbnails/instant-jalebi-recipe-500x375.jpg',
+  '/thumbnails/khaman-dhokla-recipe.jpg',
+  '/thumbnails/maxresdefault.jpg',
+  '/thumbnails/rasmalai (1).avif',
+  '/thumbnails/rasmalai-2-e1505245876472-gpo.jpg',
 ];
 
 const FoodShowcase = ({ images = mainImages, autoplay = true, interval = 4000 }: FoodShowcaseProps) => {
@@ -64,11 +45,6 @@ const FoodShowcase = ({ images = mainImages, autoplay = true, interval = 4000 }:
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const goToIndex = (index: number) => {
-    setDirection(index > currentIndex ? 1 : -1);
-    setCurrentIndex(index);
-  };
-
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 1000 : -1000,
@@ -92,7 +68,7 @@ const FoodShowcase = ({ images = mainImages, autoplay = true, interval = 4000 }:
   return (
     <div className="relative w-full">
       {/* Main Carousel */}
-      <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-[3rem] overflow-hidden shadow-2xl group">
+      <div className="relative w-full h-[500px] md:h-[700px] lg:h-[850px] rounded-[3rem] overflow-hidden shadow-2xl group">
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none" />
 
@@ -158,55 +134,6 @@ const FoodShowcase = ({ images = mainImages, autoplay = true, interval = 4000 }:
         <div className="absolute bottom-6 left-6 z-20 px-5 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/40 text-white font-bold text-sm shadow-2xl">
           {currentIndex + 1} / {images.length}
         </div>
-
-        {/* Dots Indicator */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {images.map((_, index) => (
-            <motion.button
-              key={index}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => goToIndex(index)}
-              className={`transition-all ${index === currentIndex
-                ? 'w-8 h-2 bg-white'
-                : 'w-2 h-2 bg-white/50 hover:bg-white/70'
-                } rounded-full`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Thumbnail Strip */}
-      <div className="mt-6 flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
-        {thumbnailImages.map((image, index) => (
-          <motion.button
-            key={index}
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => goToIndex(index)}
-            className={`flex-shrink-0 relative group/thumb ${index === currentIndex ? 'ring-4 ring-primary' : 'ring-2 ring-white/20'
-              } rounded-2xl overflow-hidden transition-all shadow-lg`}
-          >
-            <img
-              src={image}
-              alt={`Thumbnail ${index + 1}`}
-              className="w-48 h-36 md:w-56 md:h-40 object-cover"
-            />
-            <div
-              className={`absolute inset-0 transition-opacity ${index === currentIndex
-                ? 'bg-primary/20'
-                : 'bg-black/30 group-hover/thumb:bg-black/10'
-                }`}
-            />
-            {index === currentIndex && (
-              <motion.div
-                layoutId="activeThumb"
-                className="absolute inset-0 border-4 border-primary rounded-2xl"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-            )}
-          </motion.button>
-        ))}
       </div>
     </div>
   );
