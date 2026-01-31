@@ -36,11 +36,11 @@ const CustomerGreatDeals = () => {
               <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary shadow-2xl shadow-primary/10">
                 <Zap size={40} />
               </div>
-              <h1 className="text-6xl md:text-8xl font-black text-gray-950 tracking-tighter leading-none">
+              <h1 className="text-5xl md:text-7xl font-bold text-[var(--text-primary)] tracking-tight leading-none">
                 Flash Deals
               </h1>
             </div>
-            <p className="text-2xl text-gray-500 font-medium leading-relaxed italic pr-10">
+            <p className="text-2xl text-[var(--text-secondary)] font-medium leading-relaxed italic pr-10">
               Unlock world-class discounts on your favorite cuisines. Authentic taste, premium savings.
             </p>
           </div>
@@ -48,8 +48,8 @@ const CustomerGreatDeals = () => {
           <div className="flex glass p-2 rounded-3xl border-white/60 shadow-xl">
             <button
               onClick={() => setSortBy('discount')}
-              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'discount'
-                ? 'bg-gray-950 text-white shadow-2xl'
+              className={`px-8 py-4 rounded-[1.2rem] font-bold text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'discount'
+                ? 'bg-[var(--primary-dark)] text-white shadow-xl'
                 : 'text-gray-400 hover:text-primary'
                 }`}
             >
@@ -57,8 +57,8 @@ const CustomerGreatDeals = () => {
             </button>
             <button
               onClick={() => setSortBy('price')}
-              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'price'
-                ? 'bg-gray-950 text-white shadow-2xl'
+              className={`px-8 py-4 rounded-[1.2rem] font-bold text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'price'
+                ? 'bg-[var(--primary-dark)] text-white shadow-xl'
                 : 'text-gray-400 hover:text-primary'
                 }`}
             >
@@ -66,8 +66,8 @@ const CustomerGreatDeals = () => {
             </button>
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'rating'
-                ? 'bg-gray-950 text-white shadow-2xl'
+              className={`px-8 py-4 rounded-[1.2rem] font-bold text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'rating'
+                ? 'bg-[var(--primary-dark)] text-white shadow-xl'
                 : 'text-gray-400 hover:text-primary'
                 }`}
             >
@@ -92,7 +92,7 @@ const CustomerGreatDeals = () => {
               {/* Modern Discount Badge */}
               {dish.discount > 0 && (
                 <div className="absolute top-8 left-8 z-20">
-                  <div className="bg-primary text-white px-6 py-2.5 rounded-2xl font-black text-lg shadow-2xl flex items-center gap-2 transform rotate-[-8deg] group-hover:rotate-0 transition-transform">
+                  <div className="bg-primary text-white px-6 py-2.5 rounded-2xl font-bold text-lg shadow-2xl flex items-center gap-2 transform rotate-[-8deg] group-hover:rotate-0 transition-transform">
                     <TrendingUp size={20} />
                     <span>{dish.discount}% OFF</span>
                   </div>
@@ -111,7 +111,7 @@ const CustomerGreatDeals = () => {
                 </div>
 
                 <div className="absolute bottom-10 left-10 right-10">
-                  <h3 className="text-4xl font-black text-white tracking-tighter leading-none mb-3 drop-shadow-2xl">{dish.name}</h3>
+                  <h3 className="text-4xl font-bold text-white tracking-tight leading-none mb-3 drop-shadow-2xl">{dish.name}</h3>
                   <div className="flex items-center gap-3">
                     <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
                       {dish.category || 'Specialty'}
@@ -125,21 +125,21 @@ const CustomerGreatDeals = () => {
               <div className="p-10 pt-8">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Pricing Strategy</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--primary)] tracking-widest">Details</span>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-4xl font-black text-gray-950 tracking-tighter">₹{(dish.price * (1 - dish.discount / 100)).toFixed(0)}</span>
+                      <span className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">₹{(dish.price * (1 - dish.discount / 100)).toFixed(0)}</span>
                       <span className="text-lg text-gray-300 font-bold line-through">₹{dish.price}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Status</span>
-                    <span className="font-black text-primary animate-pulse">Hot Deal</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--primary)] tracking-widest">Status</span>
+                    <span className="font-bold text-green-600 animate-pulse">Live</span>
                   </div>
                 </div>
-                <button className="w-full py-5 bg-gray-950 text-white rounded-[1.8rem] font-black text-lg group-hover:bg-primary transition-all duration-300 shadow-2xl flex items-center justify-center gap-3 group/btn relative overflow-hidden">
-                  <span className="relative z-10">Order This Plate</span>
+                <button className="w-full py-5 bg-[var(--primary)] text-white rounded-[1.8rem] font-bold text-lg hover:bg-[var(--primary-dark)] transition-all duration-300 shadow-xl flex items-center justify-center gap-3 group/btn relative overflow-hidden">
+                  <span className="relative z-10">Add to Cart</span>
                   <ChevronRight size={22} className="relative z-10 group-hover/btn:translate-x-2 transition-transform" />
-                  <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 </button>
               </div>
             </div>

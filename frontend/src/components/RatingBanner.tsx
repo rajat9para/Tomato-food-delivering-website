@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, X, Camera, Send, Check } from 'lucide-react';
+import { Star, X, Camera, Send } from 'lucide-react';
 import api from '../utils/api';
 
 interface RatingBannerProps {
@@ -105,8 +105,8 @@ const RatingBanner = ({ order, onClose, onSuccess }: RatingBannerProps) => {
                                 <Star
                                     size={56}
                                     className={`transition-all duration-300 ${star <= (hoverRating || ratingValue)
-                                            ? 'fill-yellow-400 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.4)]'
-                                            : 'text-gray-200'
+                                        ? 'fill-yellow-400 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.4)]'
+                                        : 'text-gray-200'
                                         }`}
                                     strokeWidth={2}
                                 />

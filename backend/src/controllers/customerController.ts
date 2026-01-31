@@ -575,18 +575,30 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     const { name, email, address, phone } = req.body;
     const file = req.file as Express.Multer.File;
 
+    console.log('🔄 Update Profile Request:', {
+      userId: req.user!._id,
+      body: req.body,
+      file: file ? file.filename : 'No file'
+    });
+
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (address !== undefined) updateData.address = address;
     if (phone !== undefined) updateData.phone = phone;
-    if (file) updateData.profilePhoto = `/uploads/${file.filename}`;
+
+    if (file) {
+      // Normalize path to forward slashes to ensure compatibility
+      updateData.profilePhoto = `/uploads/${file.filename}`;
+      console.log('📸 New profile photo path:', updateData.profilePhoto);
+    }
 
     const user = await User.findByIdAndUpdate(req.user!._id, updateData, { new: true }).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    console.log('✅ Profile updated successfully for:', user.email);
     res.json({ message: 'Profile updated successfully', user });
   } catch (error) {
     console.error('Update profile error:', error);

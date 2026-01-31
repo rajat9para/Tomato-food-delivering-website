@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Store, Shield, Star, Clock, CheckCircle, Search } from 'lucide-react';
+import { ShoppingCart, Store, Shield, Star, CheckCircle, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import api from '../utils/api';
 import GlobalBackground from '../components/GlobalBackground';
+import FoodShowcase from '../components/FoodShowcase';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const Landing = () => {
     '/foodimages/f9.jpg',
     '/foodimages/f10.jpg',
     '/foodimages/f11.jpg',
+    '/foodimages/f12.jpg',
   ];
 
   useEffect(() => {
@@ -71,14 +74,14 @@ const Landing = () => {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans selection:bg-primary/10 selection:text-primary">
+    <div className="min-h-screen bg-[var(--background)] font-sans selection:bg-primary/10 selection:text-primary">
       <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4">
         <div className="max-w-7xl mx-auto glass rounded-[2rem] px-8 py-3 flex justify-between items-center gap-6 shadow-2xl border-white/40">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
-              <img src="/tomato-logo.png" alt="T" className="w-7 h-7 brightness-0 invert" />
+              <img src="/tomato-logo.png" alt="T" className="w-7 h-7 object-contain drop-shadow-md" />
             </div>
-            <span className="text-2xl font-black text-primary tracking-tighter">tomato</span>
+            <span className="text-2xl font-bold text-primary tracking-tight">tomato</span>
           </div>
 
           <div className="flex-1 max-w-xl relative hidden md:block">
@@ -257,12 +260,33 @@ const Landing = () => {
                     </div>
                   ))}
                 </div>
-                <button className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-lg group-hover:bg-primary transform transition-all duration-300 shadow-xl flex items-center justify-center gap-2">
+                <button className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg group-hover:bg-primary-dark transform transition-all duration-300 shadow-xl flex items-center justify-center gap-2">
                   Launch {role.title} →
                 </button>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Food Showcase Section */}
+      <section className="py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100/40 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-100/40 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-6xl md:text-8xl font-black text-gray-900 mb-6 tracking-tighter leading-none">
+              A Feast for<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500 italic">Your Eyes.</span>
+            </h2>
+            <p className="text-2xl text-gray-500 font-medium max-w-3xl mx-auto">
+              Explore our curated collection of mouthwatering delicacies from top restaurants.
+            </p>
+          </div>
+
+          <FoodShowcase />
         </div>
       </section>
 
@@ -309,12 +333,12 @@ const Landing = () => {
       </section>
 
       <section className="py-24 px-6 mb-24">
-        <div className="max-w-7xl mx-auto rounded-[4rem] bg-gray-900 relative overflow-hidden shadow-3xl p-16 md:p-32 text-center group">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 via-transparent to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+        <div className="max-w-7xl mx-auto rounded-[4rem] bg-gradient-to-br from-primary to-primary-dark relative overflow-hidden shadow-3xl p-16 md:p-32 text-center group">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 via-transparent to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
 
           <div className="relative z-10 space-y-12">
             <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none">
-              The Finest Plate.<br /><span className="text-primary italic">Delivered.</span>
+              The Finest Plate.<br /><span className="text-white/60 italic">Delivered.</span>
             </h2>
             <p className="text-2xl text-white/60 font-medium max-w-3xl mx-auto">
               Join millions of users who trust Tomato for their daily meals and restaurant management.
@@ -322,13 +346,13 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
               <button
                 onClick={() => navigate('/register/customer')}
-                className="px-16 py-6 bg-primary text-white rounded-full font-black text-2xl hover:bg-white hover:text-primary transition-all duration-300 shadow-2xl hover:shadow-primary/40 transform hover:-translate-y-2 active:scale-95"
+                className="px-16 py-6 bg-gray-950 text-white rounded-full font-black text-2xl hover:bg-white hover:text-gray-950 transition-all duration-300 shadow-2xl hover:shadow-white/40 transform hover:-translate-y-2 active:scale-95"
               >
                 Start Ordering
               </button>
               <button
                 onClick={() => navigate('/register/owner')}
-                className="px-16 py-6 bg-white/10 backdrop-blur-md text-white rounded-full font-black text-2xl hover:bg-white hover:text-gray-900 transition-all duration-300 border-2 border-white/30 transform hover:-translate-y-2 active:scale-95"
+                className="px-16 py-6 bg-gray-950 text-white rounded-full font-black text-2xl hover:bg-white hover:text-gray-950 transition-all duration-300 border-2 border-gray-950 transform hover:-translate-y-2 active:scale-95"
               >
                 Become Partner
               </button>
@@ -337,6 +361,7 @@ const Landing = () => {
         </div>
       </section>
 
+      <FloatingActionButton />
       <Footer />
     </div>
   );

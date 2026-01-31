@@ -51,13 +51,13 @@ const DishCarousel = ({ images, alt }: DishCarouselProps) => {
           {/* Navigation Arrows */}
           <button
             onClick={handlePrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm hover:scale-110 z-10"
           >
             ←
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm hover:scale-110 z-10"
           >
             →
           </button>

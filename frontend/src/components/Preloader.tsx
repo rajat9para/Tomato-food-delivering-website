@@ -1,400 +1,311 @@
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChefHat, Sparkles, UtensilsCrossed } from 'lucide-react';
 
-interface PreloaderProps {
-    onComplete: () => void;
-}
-
-const Preloader = ({ onComplete }: PreloaderProps) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const leftCurtainRef = useRef<HTMLDivElement>(null);
-    const rightCurtainRef = useRef<HTMLDivElement>(null);
-    const logoRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-    const cursorRef = useRef<HTMLSpanElement>(null);
-    const particlesRef = useRef<HTMLDivElement>(null);
-    const progressRef = useRef<HTMLDivElement>(null);
-    const progressBarRef = useRef<HTMLDivElement>(null);
-    const glowRef = useRef<HTMLDivElement>(null);
-
-    const [displayText, setDisplayText] = useState('');
-    const fullText = "Your favorite meals are loading...";
+export default function Preloader({ onComplete }: { onComplete: () => void }) {
+    const [progress, setProgress] = useState(0);
+    const [phase, setPhase] = useState<'loading' | 'success' | 'exit'>('loading');
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Initial setup
-            gsap.set([leftCurtainRef.current, rightCurtainRef.current], {
-                transformOrigin: 'center center'
+        // Smooth progress animation
+        const progressInterval = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => setPhase('success'), 200);
+                    return 100;
+                }
+                // Accelerating progress for realistic feel
+                const increment = prev < 50 ? 2 : prev < 80 ? 3 : 5;
+                return Math.min(prev + increment, 100);
             });
+        }, 50);
 
-            // Initial states
-            gsap.set([logoRef.current, progressRef.current, textRef.current], { opacity: 0, scale: 0.8 });
+        return () => clearInterval(progressInterval);
+    }, []);
 
-            // Create particles
-            createParticles();
-
-            // Main animation timeline - Masterpiece Sequence
-            const tl = gsap.timeline();
-
-            // Phase 1: Background glow fade in
-            tl.fromTo(glowRef.current,
-                { opacity: 0, scale: 0.8 },
-                { opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }
-            )
-                // Phase 2: Typing Animation Starts First
-                .to(textRef.current, { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.7)' })
-                .add(() => {
-                    startTypingAnimation();
-                }, '-=0.4')
-
-                // Phase 3: Logo entrance with elastic effect (after typing started)
-                .fromTo(logoRef.current,
-                    { scale: 0, rotation: -180, opacity: 0 },
-                    { scale: 1, rotation: 0, opacity: 1, duration: 1.2, ease: 'elastic.out(1, 0.4)' },
-                    '-=1.5'
-                )
-                // Logo continuous subtle float
-                .to(logoRef.current, {
-                    y: -12,
-                    duration: 2,
-                    ease: 'sine.inOut',
-                    yoyo: true,
-                    repeat: -1
-                }, '<')
-
-                // Phase 4: Progress bar appearance
-                .fromTo(progressRef.current,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
-                    '-=1'
-                )
-                .fromTo(progressBarRef.current,
-                    { scaleX: 0 },
-                    { scaleX: 1, duration: 3.5, ease: 'power1.inOut' },
-                    '-=0.5'
-                )
-
-                // Phase 5: Exit Sequence
-                .to({}, { duration: 1 }) // Wait for completion
-                .to([logoRef.current, textRef.current, progressRef.current], {
-                    opacity: 0,
-                    scale: 1.1,
-                    filter: 'blur(10px)',
-                    duration: 0.8,
-                    stagger: 0.1,
-                    ease: 'power4.in'
-                })
-                // Curtain draw open effect - smoother easing
-                .to(leftCurtainRef.current, {
-                    x: '-100%',
-                    duration: 1.8,
-                    ease: 'expo.inOut'
-                }, '-=0.4')
-                .to(rightCurtainRef.current, {
-                    x: '100%',
-                    duration: 1.8,
-                    ease: 'expo.inOut'
-                }, '<')
-                // Fade out container
-                .to(containerRef.current, {
-                    opacity: 0,
-                    duration: 0.6,
-                    ease: 'power2.out',
-                    onComplete: () => {
-                        onComplete();
-                    }
-                });
-
-            // Animate particles continuously
-            animateParticles();
-
-            // Glow pulse animation
-            gsap.to(glowRef.current, {
-                scale: 1.2,
-                opacity: 0.5,
-                duration: 3,
-                ease: 'sine.inOut',
-                yoyo: true,
-                repeat: -1
-            });
-
-        }, containerRef);
-
-        return () => ctx.revert();
-    }, [onComplete]);
-
-    const createParticles = () => {
-        if (!particlesRef.current) return;
-
-        const particleCount = 40;
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'absolute rounded-full';
-
-            // Varied sizes for depth
-            const size = Math.random() * 6 + 2;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-
-            // Alternate between red shades and white
-            const colorChoice = i % 3;
-            if (colorChoice === 0) {
-                particle.classList.add('bg-red-400');
-            } else if (colorChoice === 1) {
-                particle.classList.add('bg-red-300');
-            } else {
-                particle.classList.add('bg-white');
-            }
-
-            // Random starting position
-            const startX = Math.random() * 100;
-            const startY = Math.random() * 100;
-
-            gsap.set(particle, {
-                left: `${startX}%`,
-                top: `${startY}%`,
-                opacity: Math.random() * 0.4 + 0.1,
-                scale: Math.random() * 0.6 + 0.4
-            });
-
-            particlesRef.current.appendChild(particle);
+    useEffect(() => {
+        if (phase === 'success') {
+            setTimeout(() => setPhase('exit'), 800);
         }
-    };
-
-    const animateParticles = () => {
-        if (!particlesRef.current) return;
-
-        const particles = particlesRef.current.children;
-
-        Array.from(particles).forEach((particle, i) => {
-            // More organic movement
-            gsap.to(particle, {
-                y: `random(-150, 150)`,
-                x: `random(-150, 150)`,
-                rotation: `random(0, 360)`,
-                scale: `random(0.5, 1.2)`,
-                duration: `random(4, 8)`,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-                delay: i * 0.05
-            });
-        });
-    };
-
-    const startTypingAnimation = () => {
-        let index = 0;
-        const typingInterval = setInterval(() => {
-            if (index <= fullText.length) {
-                setDisplayText(fullText.slice(0, index));
-                index++;
-            } else {
-                clearInterval(typingInterval);
-                // Smoother cursor blink
-                gsap.to(cursorRef.current, {
-                    opacity: 0,
-                    duration: 0.6,
-                    repeat: 4,
-                    yoyo: true,
-                    ease: 'steps(1)'
-                });
-            }
-        }, 90);
-    };
+        if (phase === 'exit') {
+            setTimeout(() => onComplete(), 600);
+        }
+    }, [phase, onComplete]);
 
     return (
-        <div
-            ref={containerRef}
-            className="fixed inset-0 z-[9999] overflow-hidden bg-black"
-        >
-            {/* Base Background */}
-            <div className="absolute inset-0 bg-red-900" />
-
-            {/* Animated glow background - more vibrant */}
-            <div
-                ref={glowRef}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full"
-                style={{
-                    background: 'radial-gradient(circle, rgba(239,68,68,0.4) 0%, rgba(185,28,28,0.2) 40%, transparent 70%)',
-                    filter: 'blur(80px)'
-                }}
-            />
-
-            {/* Left Red Curtain - Masterpiece Realism */}
-            <div
-                ref={leftCurtainRef}
-                className="absolute top-0 left-0 w-1/2 h-full z-20"
-                style={{
-                    background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 40%, #ef4444 60%, #b91c1c 100%)',
-                    boxShadow: 'inset -20px 0 50px rgba(0,0,0,0.5), 15px 0 30px rgba(0,0,0,0.3)'
-                }}
-            >
-                {/* Curtain folds with deep shadows */}
-                <div className="absolute inset-0 flex">
-                    {[...Array(12)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="flex-1 h-full"
-                            style={{
-                                background: `linear-gradient(90deg, 
-                  rgba(0,0,0,0.2) 0%, 
-                  rgba(255,255,255,0.05) 15%, 
-                  transparent 40%, 
-                  transparent 60%, 
-                  rgba(0,0,0,0.1) 85%, 
-                  rgba(0,0,0,0.3) 100%)`,
-                                borderRight: '1px solid rgba(0,0,0,0.15)'
-                            }}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Right Red Curtain - Masterpiece Realism */}
-            <div
-                ref={rightCurtainRef}
-                className="absolute top-0 right-0 w-1/2 h-full z-20"
-                style={{
-                    background: 'linear-gradient(225deg, #b91c1c 0%, #dc2626 40%, #ef4444 60%, #b91c1c 100%)',
-                    boxShadow: 'inset 20px 0 50px rgba(0,0,0,0.5), -15px 0 30px rgba(0,0,0,0.3)'
-                }}
-            >
-                {/* Curtain folds with deep shadows */}
-                <div className="absolute inset-0 flex">
-                    {[...Array(12)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="flex-1 h-full"
-                            style={{
-                                background: `linear-gradient(90deg, 
-                  rgba(0,0,0,0.3) 0%, 
-                  rgba(0,0,0,0.1) 15%, 
-                  transparent 40%, 
-                  transparent 60%, 
-                  rgba(255,255,255,0.05) 85%, 
-                  rgba(0,0,0,0.2) 100%)`,
-                                borderRight: '1px solid rgba(0,0,0,0.15)'
-                            }}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Center Content Container */}
-            <div className="absolute inset-0 flex items-center justify-center z-30">
-                {/* Particles container */}
-                <div ref={particlesRef} className="absolute inset-0 pointer-events-none" />
-
-                {/* Main content */}
-                <div className="relative z-10 flex flex-col items-center">
-                    {/* Masterpiece Tomato Orb Logo */}
-                    <div
-                        ref={logoRef}
-                        className="relative mb-8"
-                    >
-                        <div className="relative w-40 h-40">
-                            {/* Outer Atmosphere Glow */}
-                            <div className="absolute -inset-10 bg-red-500/20 rounded-full blur-3xl animate-pulse" />
-
-                            {/* Orbiting Rings */}
-                            <div className="absolute inset-0 rounded-full border-2 border-white/5 animate-spin" style={{ animationDuration: '8s' }} />
-                            <div className="absolute -inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '12s', animationDirection: 'reverse' }} />
-
-                            {/* Main Glossy Sphere */}
-                            <div className="relative w-full h-full rounded-full flex items-center justify-center overflow-hidden"
-                                style={{
-                                    background: 'radial-gradient(circle at 30% 30%, #ff8888 0%, #ef4444 40%, #991b1b 100%)',
-                                    boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 -10px 20px rgba(0,0,0,0.4), inset 0 10px 20px rgba(255,255,255,0.4)'
+        <AnimatePresence>
+            {phase !== 'exit' && (
+                <motion.div
+                    exit={{ opacity: 0, scale: 1.1 }}
+                    transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+                    className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
+                    style={{
+                        background: 'linear-gradient(135deg, #FDFBF7 0%, #FFF5F0 50%, #FFE8E5 100%)'
+                    }}
+                >
+                    {/* Animated Background Elements */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        {/* Floating food particles */}
+                        {[...Array(12)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute text-4xl opacity-10"
+                                initial={{
+                                    x: Math.random() * window.innerWidth,
+                                    y: window.innerHeight + 100,
+                                    rotate: Math.random() * 360
+                                }}
+                                animate={{
+                                    y: -100,
+                                    rotate: Math.random() * 360 + 360
+                                }}
+                                transition={{
+                                    duration: 8 + Math.random() * 4,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    delay: i * 0.5
                                 }}
                             >
-                                {/* Inner Gloss Highlights */}
-                                <div className="absolute top-[10%] left-[15%] w-[40%] h-[40%] bg-white/30 rounded-full blur-xl" />
-                                <div className="absolute top-[15%] left-[20%] w-6 h-6 bg-white/60 rounded-full" />
+                                {['🍕', '🍔', '🍜', '🍱', '🍛', '🥗'][i % 6]}
+                            </motion.div>
+                        ))}
 
-                                {/* Tomato Illustration - Enhanced */}
-                                <svg
-                                    viewBox="0 0 64 64"
-                                    className="w-24 h-24 text-white drop-shadow-2xl"
-                                    style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.4))' }}
-                                    fill="currentColor"
-                                >
-                                    <ellipse cx="32" cy="38" rx="23" ry="21" />
-                                    <ellipse cx="23" cy="31" rx="8" ry="6" fill="rgba(255,255,255,0.4)" />
-                                    <path d="M32 17 L27 10 L32 13 L37 10 L35 17 Z" fill="#166534" />
-                                    <path d="M32 17 Q24 14 20 19 Q27 17 32 19 Q37 17 44 19 Q40 14 32 17" fill="#22c55e" />
-                                </svg>
-
-                                {/* Sub-surface scattering effect */}
-                                <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-red-600/40 to-transparent" />
-                            </div>
-                        </div>
-
-                        {/* Brand Name - Masterpiece Typography */}
-                        <div className="mt-8 text-center">
-                            <h1 className="text-7xl font-black text-white tracking-tighter"
-                                style={{
-                                    textShadow: '0 10px 30px rgba(0,0,0,0.6), 0 0 50px rgba(239, 68, 68, 0.4)',
-                                    fontFamily: "'Outfit', 'Lato', sans-serif"
-                                }}
-                            >
-                                tomato
-                            </h1>
-                        </div>
+                        {/* Gradient orbs */}
+                        <motion.div
+                            className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px]"
+                            animate={{
+                                scale: [1, 1.2, 1],
+                                x: [0, 50, 0],
+                                y: [0, -50, 0]
+                            }}
+                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <motion.div
+                            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-400/10 rounded-full blur-[100px]"
+                            animate={{
+                                scale: [1, 1.3, 1],
+                                x: [0, -50, 0],
+                                y: [0, 50, 0]
+                            }}
+                            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        />
                     </div>
 
-                    {/* Enhanced Typing Box */}
-                    <div
-                        ref={textRef}
-                        className="relative"
-                    >
-                        <div className="backdrop-blur-xl rounded-2xl px-12 py-6 border border-white/10 shadow-3xl"
-                            style={{
-                                background: 'linear-gradient(135deg, rgba(31,0,0,0.4) 0%, rgba(20,0,0,0.6) 100%)',
+                    {/* Main Content */}
+                    <div className="relative z-10 flex flex-col items-center gap-8 px-4">
+                        {/* Logo with animation */}
+                        <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 20,
+                                delay: 0.1
                             }}
+                            className="relative"
                         >
-                            <p className="text-xl md:text-2xl font-semibold text-white/90 tracking-wide text-center">
-                                <span className="text-red-400 mr-2 opacity-50">"</span>
-                                {displayText}
-                                <span
-                                    ref={cursorRef}
-                                    className="inline-block w-1 h-6 bg-red-500 ml-1 align-middle"
-                                    style={{ boxShadow: '0 0 15px rgba(239,68,68,0.8)' }}
-                                />
-                                <span className="text-red-400 ml-2 opacity-50">"</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Precision Progress Bar */}
-                    <div
-                        ref={progressRef}
-                        className="mt-12 w-80"
-                    >
-                        <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5 p-[1px]">
-                            <div
-                                ref={progressBarRef}
-                                className="h-full origin-left rounded-full"
-                                style={{
-                                    background: 'linear-gradient(90deg, #dc2626 0%, #ef4444 50%, #fca5a5 100%)',
-                                    boxShadow: '0 0 20px rgba(239, 68, 68, 0.6)'
+                            {/* Pulsing glow effect */}
+                            <motion.div
+                                className="absolute inset-0 bg-primary/20 rounded-full blur-2xl"
+                                animate={{
+                                    scale: [1, 1.3, 1],
+                                    opacity: [0.3, 0.6, 0.3]
                                 }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             />
-                        </div>
-                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-bold mt-4 text-center">
-                            Establishing Gourmet Connection
-                        </p>
+
+                            {/* Logo container */}
+                            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-primary to-orange-500 p-1 shadow-2xl">
+                                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                                    <motion.div
+                                        animate={{ rotate: phase === 'loading' ? [0, 360] : 0 }}
+                                        transition={{ duration: 2, repeat: phase === 'loading' ? Infinity : 0, ease: "linear" }}
+                                    >
+                                        <ChefHat className="w-16 h-16 md:w-20 md:h-20 text-primary" strokeWidth={2.5} />
+                                    </motion.div>
+                                </div>
+                            </div>
+
+                            {/* Sparkles */}
+                            {phase === 'success' && (
+                                <>
+                                    {[...Array(6)].map((_, i) => (
+                                        <motion.div
+                                            key={i}
+                                            className="absolute"
+                                            initial={{ scale: 0, x: 0, y: 0 }}
+                                            animate={{
+                                                scale: [0, 1, 0],
+                                                x: Math.cos(i * 60 * Math.PI / 180) * 80,
+                                                y: Math.sin(i * 60 * Math.PI / 180) * 80
+                                            }}
+                                            transition={{ duration: 0.6, ease: "easeOut" }}
+                                            style={{
+                                                left: '50%',
+                                                top: '50%'
+                                            }}
+                                        >
+                                            <Sparkles className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                                        </motion.div>
+                                    ))}
+                                </>
+                            )}
+                        </motion.div>
+
+                        {/* Brand name */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.6 }}
+                            className="text-center"
+                        >
+                            <h1 className="text-5xl md:text-7xl font-black text-primary tracking-tight mb-2 flex items-center gap-3">
+                                tomato
+                                <motion.div
+                                    animate={{ rotate: [0, 10, -10, 0] }}
+                                    transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                                >
+                                    <UtensilsCrossed className="w-10 h-10 md:w-12 md:h-12" />
+                                </motion.div>
+                            </h1>
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="text-xl md:text-2xl text-gray-600 font-medium"
+                            >
+                                {phase === 'loading' && 'Preparing your feast...'}
+                                {phase === 'success' && 'Fixing Hunger! �️'}
+                            </motion.p>
+                        </motion.div>
+
+                        {/* Progress bar */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="w-64 md:w-80"
+                        >
+                            {/* Progress container */}
+                            <div className="relative h-3 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden shadow-inner border border-white/80">
+                                {/* Animated progress bar */}
+                                <motion.div
+                                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-orange-500 to-primary rounded-full shadow-lg"
+                                    initial={{ width: '0%' }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    style={{
+                                        backgroundSize: '200% 100%',
+                                    }}
+                                >
+                                    {/* Shimmer effect */}
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                        animate={{
+                                            x: ['-100%', '100%']
+                                        }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            ease: "linear"
+                                        }}
+                                    />
+                                </motion.div>
+
+                                {/* Success checkmark */}
+                                {phase === 'success' && (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg"
+                                    >
+                                        <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            {/* Progress percentage */}
+                            <motion.div
+                                className="text-center mt-3 text-sm font-bold text-gray-500 tracking-wider"
+                                key={progress}
+                            >
+                                {progress}%
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Fun loading messages */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="text-center max-w-md"
+                        >
+                            <AnimatePresence mode="wait">
+                                {progress < 30 && (
+                                    <motion.p
+                                        key="msg1"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="text-gray-500 font-medium italic text-sm"
+                                    >
+                                        Heating up the kitchen...
+                                    </motion.p>
+                                )}
+                                {progress >= 30 && progress < 60 && (
+                                    <motion.p
+                                        key="msg2"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="text-gray-500 font-medium italic text-sm"
+                                    >
+                                        Adding secret ingredients...
+                                    </motion.p>
+                                )}
+                                {progress >= 60 && progress < 90 && (
+                                    <motion.p
+                                        key="msg3"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="text-gray-500 font-medium italic text-sm"
+                                    >
+                                        Plating with perfection...
+                                    </motion.p>
+                                )}
+                                {progress >= 90 && phase === 'loading' && (
+                                    <motion.p
+                                        key="msg4"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="text-gray-500 font-medium italic text-sm"
+                                    >
+                                        Almost ready to serve...
+                                    </motion.p>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
                     </div>
-                </div>
-            </div>
 
-            {/* Corner Luxury Stamps */}
-            <div className="absolute top-12 left-12 w-16 h-16 border-l border-t border-white/10 rounded-tl-2xl opacity-40" />
-            <div className="absolute top-12 right-12 w-16 h-16 border-r border-t border-white/10 rounded-tr-2xl opacity-40" />
-            <div className="absolute bottom-12 left-12 w-16 h-16 border-l border-b border-white/10 rounded-bl-2xl opacity-40" />
-            <div className="absolute bottom-12 right-12 w-16 h-16 border-r border-b border-white/10 rounded-br-2xl opacity-40" />
-        </div>
+                    {/* Bottom brand mark */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                        className="absolute bottom-10 text-center"
+                    >
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">
+                            Crafted with ❤️ by Team DevX
+                        </p>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
-};
-
-export default Preloader;
-
+}

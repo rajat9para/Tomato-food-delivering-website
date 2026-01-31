@@ -11,8 +11,14 @@ if not exist "mongodb\logs" mkdir "mongodb\logs" 2>nul
 if not exist "mongodb\data" mkdir "mongodb\data" 2>nul
 start /B "MongoDB" ".\mongodb\mongodb-win32-x86_64-windows-7.0.4\bin\mongod.exe" --dbpath ".\mongodb\data" --logpath ".\mongodb\logs\mongod.log" >nul 2>&1
 
+echo [+] Checking Backend Dependencies...
+cd backend && call npm install && cd ..
+
 echo [+] Starting Backend...
 start /B "Backend" cmd /c "cd backend && npm run dev"
+
+echo [+] Checking Frontend Dependencies...
+cd frontend && call npm install && cd ..
 
 echo [+] Starting Frontend...
 cd frontend

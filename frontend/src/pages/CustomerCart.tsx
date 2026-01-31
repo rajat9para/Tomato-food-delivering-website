@@ -245,7 +245,7 @@ const CustomerCart = () => {
             <button
               onClick={handleCheckoutClick}
               disabled={checkoutLoading}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-4 rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-green-200 flex items-center justify-center gap-2"
             >
               {checkoutLoading ? (
                 <span className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></span>
@@ -268,10 +268,11 @@ const CustomerCart = () => {
 
             <div className="space-y-3">
               {/* UPI Button */}
+              {/* UPI Button - Green for Pay */}
               <button
                 onClick={() => handlePlaceOrder('UPI')}
                 disabled={checkoutLoading}
-                className="w-full bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg shadow-green-200/50 hover:shadow-xl hover:shadow-green-300/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {checkoutLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -285,16 +286,16 @@ const CustomerCart = () => {
               <button
                 onClick={() => handlePlaceOrder('Card')}
                 disabled={checkoutLoading}
-                className="w-full bg-white border-2 border-[#E23744] text-[#E23744] py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:bg-red-50 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="w-full bg-white border-2 border-[var(--primary)] text-[var(--primary)] py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:bg-red-50 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {checkoutLoading ? 'Processing...' : 'Credit / Debit Card'}
               </button>
 
-              {/* COD Button */}
+              {/* COD Button - Red/Primary instead of Black */}
               <button
                 onClick={() => handlePlaceOrder('COD')}
                 disabled={checkoutLoading}
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {checkoutLoading ? 'Processing...' : 'Cash on Delivery'}
               </button>

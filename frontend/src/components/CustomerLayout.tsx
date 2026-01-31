@@ -4,7 +4,7 @@ import CustomerSidebar from './CustomerSidebar';
 import GlobalBackground from './GlobalBackground';
 import api from '../utils/api';
 import RatingBanner from './RatingBanner';
-import { Star, X, Bell } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 
 const CustomerLayout = () => {
   const location = useLocation();

@@ -6,57 +6,57 @@ const HeroSlider = () => {
 
   const slides = [
     {
-      image: 'http://localhost:5000/foodimages/indian_cuisine.jpg',
+      image: '/foodimages/f1.jpg',
       title: 'Authentic Indian Cuisine',
       subtitle: 'Experience the rich flavors of India'
     },
     {
-      image: 'http://localhost:5000/foodimages/Chicken-Chow-Mein-1.jpg',
-      title: 'Delicious Chinese Food',
+      image: '/foodimages/f2.jpg',
+      title: 'Delicious Fresh Food',
       subtitle: 'Fresh and flavorful dishes'
     },
     {
-      image: 'http://localhost:5000/foodimages/white-sauce-pasta-2.jpg',
-      title: 'Italian Pasta Perfection',
+      image: '/foodimages/f3.jpg',
+      title: 'Chef Special',
       subtitle: 'Handcrafted with love'
     },
     {
-      image: 'http://localhost:5000/foodimages/india-food-paratha-1120x732.jpg',
-      title: 'Traditional Parathas',
+      image: '/foodimages/f4.jpg',
+      title: 'Premium Platters',
       subtitle: 'Crispy, buttery, and delicious'
     },
     {
-      image: 'http://localhost:5000/foodimages/Cabbage-Manchurian.jpg',
-      title: 'Crispy Cabbage Manchurian',
+      image: '/foodimages/f5.jpg',
+      title: 'Gourmet Selection',
       subtitle: 'Tangy and crunchy delight'
     },
     {
-      image: 'http://localhost:5000/foodimages/Chettinad-fish-fry-1B-500x500.jpg',
-      title: 'Chettinad Fish Fry',
-      subtitle: 'Spicy South Indian specialty'
+      image: '/foodimages/f6.jpg',
+      title: 'Fresh Delicacies',
+      subtitle: 'Spicy specialty dishes'
     },
     {
-      image: 'http://localhost:5000/foodimages/Desi-Chow-Mein-2.jpg',
-      title: 'Desi Chow Mein',
+      image: '/foodimages/f7.jpg',
+      title: 'Fusion Flavors',
       subtitle: 'Fusion of flavors'
     },
     {
-      image: 'http://localhost:5000/foodimages/images.jpeg',
+      image: '/foodimages/f8.jpg',
       title: 'Exotic Delicacies',
       subtitle: 'Discover new tastes'
     },
     {
-      image: 'http://localhost:5000/foodimages/images (1).jpeg',
+      image: '/foodimages/f9.jpg',
       title: 'Fresh and Healthy',
       subtitle: 'Nutritious meals for you'
     },
     {
-      image: 'http://localhost:5000/foodimages/images (2).jpeg',
+      image: '/foodimages/f10.jpg',
       title: 'Street Food Vibes',
       subtitle: 'Authentic street flavors'
     },
     {
-      image: 'http://localhost:5000/foodimages/54659021.avif',
+      image: '/foodimages/f11.jpg',
       title: 'Gourmet Experience',
       subtitle: 'Elevate your dining'
     }
@@ -82,9 +82,8 @@ const HeroSlider = () => {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-            index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-          }`}
+          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
         >
           <img
             src={slide.image}
@@ -103,13 +102,13 @@ const HeroSlider = () => {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-primary p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-primary p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
@@ -120,9 +119,8 @@ const HeroSlider = () => {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
+              }`}
           />
         ))}
       </div>

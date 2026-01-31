@@ -37,7 +37,7 @@ const CustomerSidebar = () => {
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-80 glass border-r border-white/40 shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display">
+    <div className="fixed left-0 top-0 h-screen w-80 glass border-r border-white/40 shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display bg-[#FDFBF7]">
       {/* Premium Logo Section */}
       <div className="p-10">
         <div
@@ -45,7 +45,7 @@ const CustomerSidebar = () => {
           onClick={() => navigate('/customer/home')}
         >
           <div className="w-12 h-12 bg-primary rounded-[1.2rem] flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-all duration-500 shadow-primary/20">
-            <img src="/tomato-logo.png" alt="T" className="w-8 h-8 brightness-0 invert" />
+            <img src="/tomato-logo.png" alt="T" className="w-8 h-8 object-contain drop-shadow-sm" />
           </div>
           <div>
             <h1 className="text-3xl font-black text-primary tracking-tighter leading-none">tomato</h1>
@@ -74,7 +74,7 @@ const CustomerSidebar = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Welcome back</p>
-              <h3 className="font-black text-gray-950 truncate text-xl tracking-tight pr-4">{name || 'Guest'}</h3>
+              <h3 className="font-black text-gray-800 truncate text-xl tracking-tight pr-4">{name || 'Guest'}</h3>
               {premiumMember && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <Zap size={12} className="text-yellow-500 fill-yellow-500" />
@@ -96,7 +96,7 @@ const CustomerSidebar = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`w-full group px-8 py-5 rounded-[1.8rem] flex items-center gap-5 transition-all duration-500 relative overflow-hidden ${isActive
-                ? 'bg-gray-950 text-white shadow-2xl shadow-black/20'
+                ? 'bg-[var(--primary)] text-white shadow-2xl shadow-primary/30'
                 : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                 }`}
             >

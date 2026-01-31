@@ -23,7 +23,15 @@ const CustomerBestRestaurants = () => {
     if (dishName && restaurants.length > 0) {
       filterRestaurantsByDish();
     } else {
-      setFilteredRestaurants(restaurants);
+      // Apply sorting based on sortBy state
+      const sorted = [...restaurants].sort((a, b) => {
+        if (sortBy === 'rating') {
+          return (b.rating || 0) - (a.rating || 0); // Highest rating first
+        } else {
+          return (a.averageCost || 300) - (b.averageCost || 300); // Lowest price first
+        }
+      });
+      setFilteredRestaurants(sorted);
     }
   }, [restaurants, dishName, sortBy]);
 
@@ -93,18 +101,18 @@ const CustomerBestRestaurants = () => {
           <div className="flex glass p-2 rounded-3xl border-white/60 shadow-xl">
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'rating'
-                ? 'bg-gray-950 text-white shadow-2xl'
-                : 'text-gray-400 hover:text-primary'
+              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-300 ${sortBy === 'rating'
+                ? 'bg-primary text-white shadow-lg'
+                : 'text-gray-500 hover:text-primary hover:bg-primary/10'
                 }`}
             >
               Top Rating
             </button>
             <button
               onClick={() => setSortBy('price')}
-              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-500 ${sortBy === 'price'
-                ? 'bg-gray-950 text-white shadow-2xl'
-                : 'text-gray-400 hover:text-primary'
+              className={`px-8 py-4 rounded-[1.2rem] font-black text-sm uppercase tracking-widest transition-all duration-300 ${sortBy === 'price'
+                ? 'bg-primary text-white shadow-lg'
+                : 'text-gray-500 hover:text-primary hover:bg-primary/10'
                 }`}
             >
               Budget First
@@ -167,18 +175,24 @@ const CustomerBestRestaurants = () => {
               <div className="p-10 pt-8">
                 <div className="flex items-center justify-between mb-8 opacity-60 group-hover:opacity-100 transition-opacity">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Pricing</span>
-                    <span className="font-black text-gray-950">₹300 for two</span>
+                    <span className="text-xs font-semibold uppercase text-gray-400 tracking-wider">Pricing</span>
+                    <span className="text-base font-bold text-gray-800">₹300 for two</span>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Availability</span>
-                    <span className="font-black text-green-500">Live Now</span>
+                    <span className="text-xs font-semibold uppercase text-gray-400 tracking-wider">Status</span>
+                    <span className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg">Live Now</span>
                   </div>
                 </div>
-                <button className="w-full py-5 bg-gray-950 text-white rounded-[1.8rem] font-black text-lg group-hover:bg-primary transition-all duration-300 shadow-2xl flex items-center justify-center gap-3 group/btn relative overflow-hidden">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/customer/home', { state: { selectedRestaurant: r } });
+                  }}
+                  className="w-full py-5 bg-primary text-white rounded-[1.8rem] font-bold text-lg hover:bg-primary-dark transition-all duration-300 shadow-xl flex items-center justify-center gap-3 group/btn relative overflow-hidden"
+                >
                   <span className="relative z-10">Experience Menu</span>
                   <ChevronRight size={22} className="relative z-10 group-hover/btn:translate-x-2 transition-transform" />
-                  <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 </button>
               </div>
             </div>

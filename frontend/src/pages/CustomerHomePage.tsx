@@ -385,22 +385,28 @@ const CustomerHomePage = () => {
                     <p className="text-white/80 font-bold text-sm line-clamp-1">{r.cuisineType?.join(', ') || 'Global, Modern'}</p>
                   </div>
                 </div>
-                <div className="p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Timing</span>
-                      <span className="text-sm font-black text-gray-900">{r.openingTime} - {r.closingTime}</span>
+                <div className="p-6 pt-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs font-semibold uppercase text-gray-400 tracking-wider">Hours</span>
+                      <span className="text-base font-bold text-gray-800">{r.openingTime} - {r.closingTime}</span>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Rating</span>
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5 text-primary rounded-lg text-sm font-black">
-                        <MessageCircle size={14} fill="currentColor" />
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-xs font-semibold uppercase text-gray-400 tracking-wider">Reviews</span>
+                      <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-600 rounded-xl text-sm font-bold">
+                        <MessageCircle size={14} />
                         <span>{r.totalReviews || 0}</span>
                       </div>
                     </div>
                   </div>
-                  <button className="w-full py-5 bg-gray-950 text-white rounded-[1.5rem] font-black text-lg group-hover:bg-primary transition-all duration-300 shadow-2xl flex items-center justify-center gap-3">
-                    Explore Menu <ChevronRight size={20} />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectRestaurant(r);
+                    }}
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-base hover:bg-primary-dark transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  >
+                    Explore Menu <ChevronRight size={18} />
                   </button>
                 </div>
               </div>
@@ -411,6 +417,7 @@ const CustomerHomePage = () => {
     );
   }
 
+
   // Selected Restaurant View
   return (
     <div className="pb-20 animate-fade-in font-display">
@@ -418,7 +425,7 @@ const CustomerHomePage = () => {
         onClick={() => setSelectedRestaurant(null)}
         className="mb-10 group px-6 py-3 bg-white border-2 border-gray-100 rounded-2xl text-gray-500 hover:text-primary hover:border-primary/20 transition-all duration-300 font-black flex items-center gap-3 shadow-sm"
       >
-        <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Discovery
+        <ChevronRight size={20} className="group-hover:-translate-x-1 transition-transform rotate-180" /> Back to Discovery
       </button>
 
       {/* Restaurant Hero Section */}
@@ -437,33 +444,33 @@ const CustomerHomePage = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-6xl md:text-8xl font-black text-gray-950 tracking-tighter leading-none mb-4">{selectedRestaurant.name}</h1>
+              <h1 className="text-5xl md:text-7xl font-bold text-[var(--text-primary)] tracking-tight leading-none mb-4">{selectedRestaurant.name}</h1>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-6">
-                <span className="px-5 py-2 glass-dark rounded-full text-white text-sm font-black shadow-lg">
+                <span className="px-5 py-2 glass-dark rounded-full text-white text-sm font-bold shadow-lg">
                   {selectedRestaurant.cuisineType?.join(', ') || 'Gourmet'}
                 </span>
-                <span className="px-5 py-2 glass rounded-full text-primary text-sm font-black border-primary/20 shadow-lg">
+                <span className="px-5 py-2 glass rounded-full text-primary text-sm font-bold border-primary/20 shadow-lg">
                   {selectedRestaurant.openingTime} - {selectedRestaurant.closingTime}
                 </span>
-                <div className="px-5 py-2 bg-green-500 rounded-full text-white text-sm font-black shadow-lg flex items-center gap-2">
+                <div className="px-5 py-2 bg-green-500 rounded-full text-white text-sm font-bold shadow-lg flex items-center gap-2">
                   <Star size={16} fill="currentColor" />
                   <span>{selectedRestaurant.rating?.toFixed(1) || '4.5'}</span>
                 </div>
               </div>
-              <p className="max-w-xl text-xl text-gray-500 font-medium leading-relaxed italic">
-                "{selectedRestaurant.description || 'Elevating your taste experience with authentic global flavors, prepared with passion and delivered fresh.'}"
+              <p className="max-w-xl text-xl text-[var(--text-secondary)] font-medium leading-relaxed italic">
+                "{selectedRestaurant.description || 'Authentic flavors, prepared with passion and delivered fresh.'}"
               </p>
             </div>
           </div>
 
           <div className="flex flex-col items-center lg:items-end gap-6">
             <div className="text-right">
-              <div className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Based on</div>
-              <div className="text-5xl font-black text-gray-900 leading-none">{selectedRestaurant.totalReviews || 12}</div>
-              <div className="text-sm font-black text-primary mt-1 underline cursor-pointer" onClick={() => setShowReviews(selectedRestaurant)}>Verified Reviews</div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Verified</div>
+              <div className="text-5xl font-bold text-[var(--text-primary)] leading-none">{selectedRestaurant.totalReviews || 12}</div>
+              <div className="text-sm font-bold text-primary mt-1 underline cursor-pointer" onClick={() => setShowReviews(selectedRestaurant)}>Reviews</div>
             </div>
-            <button className="px-8 py-4 bg-gray-950 text-white rounded-2xl font-black shadow-2xl hover:bg-primary transition-all duration-300 active:scale-95">
-              Contact Kitchen
+            <button className="px-8 py-4 bg-[var(--primary)] text-white rounded-2xl font-bold shadow-xl hover:bg-[var(--primary-dark)] transition-all duration-300 active:scale-95">
+              Contact Restaurant
             </button>
           </div>
         </div>
@@ -472,7 +479,7 @@ const CustomerHomePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="text-5xl font-black text-gray-900 tracking-tighter">Chef's Menu</h3>
+            <h3 className="text-5xl font-bold text-[var(--text-primary)] tracking-tight">Menu</h3>
             <div className="flex gap-3">
               <button className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-primary shadow-lg border-primary/10 transition-all hover:bg-primary hover:text-white"><Search size={20} /></button>
             </div>
@@ -485,8 +492,8 @@ const CustomerHomePage = () => {
                     <DishCarousel images={item.images || []} alt={item.name} />
                     <div className="absolute top-6 left-6">
                       {item.discount > 0 && (
-                        <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-lg animate-pulse">
-                          {item.discount}% SAVING
+                        <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg animate-pulse">
+                          {item.discount}% OFF
                         </div>
                       )}
                     </div>
@@ -498,37 +505,37 @@ const CustomerHomePage = () => {
                     <div>
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h4 className="text-3xl font-black text-gray-950 mb-1 tracking-tight group-hover:text-primary transition-colors">{item.name}</h4>
-                          <span className="text-xs font-black uppercase text-primary/60 tracking-widest">{item.category || 'Specialty'}</span>
+                          <h4 className="text-3xl font-bold text-[var(--text-primary)] mb-1 tracking-tight group-hover:text-primary transition-colors">{item.name}</h4>
+                          <span className="text-xs font-bold uppercase text-primary/60 tracking-widest">{item.category || 'Specialty'}</span>
                         </div>
                       </div>
-                      <p className="text-gray-500 text-lg font-medium leading-relaxed line-clamp-2 pr-10">{item.description}</p>
+                      <p className="text-[var(--text-secondary)] text-lg font-medium leading-relaxed line-clamp-2 pr-10">{item.description}</p>
                     </div>
 
                     <div className="flex items-end justify-between mt-10">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Culinarian Price</span>
+                        <span className="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-1">Price</span>
                         {item.discount > 0 ? (
                           <div className="flex items-baseline gap-3">
-                            <span className="text-4xl font-black text-gray-950 tracking-tighter">₹{(item.price * (1 - item.discount / 100)).toFixed(0)}</span>
+                            <span className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">₹{(item.price * (1 - item.discount / 100)).toFixed(0)}</span>
                             <span className="text-lg text-gray-300 font-bold line-through">₹{item.price}</span>
                           </div>
                         ) : (
-                          <span className="text-4xl font-black text-gray-950 tracking-tighter">₹{item.price}</span>
+                          <span className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">₹{item.price}</span>
                         )}
                       </div>
 
                       <button
                         onClick={() => addToCart(item, selectedRestaurant)}
                         disabled={!item.availability}
-                        className={`group/btn relative px-10 py-4 rounded-2xl font-black transition-all duration-300 overflow-hidden shadow-xl ${item.availability
-                          ? 'bg-primary text-white hover:shadow-primary/30 hover:-translate-y-1 active:scale-95'
+                        className={`group/btn relative px-10 py-4 rounded-2xl font-bold transition-all duration-300 overflow-hidden shadow-xl ${item.availability
+                          ? 'bg-[var(--primary)] text-white hover:shadow-primary/30 hover:-translate-y-1 active:scale-95'
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           }`}
                       >
                         <div className="relative z-10 flex items-center gap-3">
                           <ShoppingCart size={20} className="group-hover/btn:rotate-12 transition-transform" />
-                          <span>{item.availability ? 'Add to Plate' : 'Out of Stock'}</span>
+                          <span>{item.availability ? 'Add to Cart' : 'Out of Stock'}</span>
                         </div>
                         <div className="absolute inset-0 bg-white opacity-0 group-hover/btn:opacity-10 transition-opacity"></div>
                       </button>
@@ -546,13 +553,13 @@ const CustomerHomePage = () => {
             <div className="absolute top-[-30px] right-[-30px] w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
 
             <div className="flex items-center justify-between mb-10">
-              <h3 className="text-3xl font-black text-gray-900 tracking-tighter flex items-center gap-4">
+              <h3 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-4">
                 Cart
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
                   {cart.length}
                 </div>
               </h3>
-              {cart.length > 0 && <button onClick={clearCart} className="text-xs font-black text-gray-400 uppercase tracking-widest hover:text-primary transition-colors">Clear</button>}
+              {cart.length > 0 && <button onClick={clearCart} className="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-primary transition-colors">Clear</button>}
             </div>
 
             {cart.length === 0 ? (
@@ -560,7 +567,7 @@ const CustomerHomePage = () => {
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                   <ShoppingCart size={40} className="text-gray-200" />
                 </div>
-                <p className="text-gray-400 font-bold text-lg">Your gourmet palette is empty. Start adding delicious items.</p>
+                <p className="text-gray-400 font-bold text-lg">Your cart is empty.</p>
               </div>
             ) : (
               <div className="space-y-8">
@@ -569,7 +576,7 @@ const CustomerHomePage = () => {
                     <div key={restaurantId} className="group/res">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-1.5 h-6 bg-primary rounded-full"></div>
-                        <h4 className="font-black text-gray-950 uppercase tracking-tighter text-sm">
+                        <h4 className="font-bold text-[var(--text-primary)] uppercase tracking-tight text-sm">
                           {restaurantItems[0]?.restaurantName || 'Restaurant'}
                         </h4>
                       </div>
@@ -577,26 +584,26 @@ const CustomerHomePage = () => {
                         {restaurantItems.map((item: any) => (
                           <div key={item.foodId} className="relative group/item">
                             <div className="flex items-center justify-between mb-2">
-                              <p className="font-black text-gray-800 tracking-tight group-hover/item:text-primary transition-colors">{item.name}</p>
-                              <span className="font-black text-gray-900">₹{((item.price * (1 - item.discount / 100)) * item.quantity).toFixed(0)}</span>
+                              <p className="font-bold text-[var(--text-primary)] tracking-tight group-hover/item:text-primary transition-colors">{item.name}</p>
+                              <span className="font-bold text-[var(--text-primary)]">₹{((item.price * (1 - item.discount / 100)) * item.quantity).toFixed(0)}</span>
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center bg-gray-50 rounded-xl p-1 shadow-inner group-hover/item:bg-white border border-transparent group-hover/item:border-gray-100 transition-all">
                                 <button
                                   onClick={() => updateQuantity(item.foodId, -1)}
-                                  className="w-8 h-8 flex items-center justify-center font-black text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"
+                                  className="w-8 h-8 flex items-center justify-center font-bold text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"
                                 >
                                   -
                                 </button>
-                                <span className="w-10 text-center font-black text-gray-900 text-sm">{item.quantity}</span>
+                                <span className="w-10 text-center font-bold text-gray-900 text-sm">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.foodId, 1)}
-                                  className="w-8 h-8 flex items-center justify-center font-black text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"
+                                  className="w-8 h-8 flex items-center justify-center font-bold text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"
                                 >
                                   +
                                 </button>
                               </div>
-                              <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">₹{item.price}/ea</span>
+                              <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">₹{item.price}/ea</span>
                             </div>
                           </div>
                         ))}
@@ -607,21 +614,21 @@ const CustomerHomePage = () => {
 
                 <div className="pt-10 border-t-2 border-gray-100/50 space-y-6">
                   <div className="flex justify-between items-end">
-                    <span className="text-gray-400 font-black uppercase tracking-widest text-xs">Total Bill</span>
-                    <span className="text-5xl font-black text-primary tracking-tighter shadow-primary/10">₹{getTotal().toFixed(0)}</span>
+                    <span className="text-gray-400 font-bold uppercase tracking-widest text-xs">Total Bill</span>
+                    <span className="text-5xl font-bold text-primary tracking-tight shadow-primary/10">₹{getTotal().toFixed(0)}</span>
                   </div>
                   <button
                     onClick={handleCheckoutClick}
                     disabled={checkoutLoading}
-                    className="w-full relative group/checkout py-6 bg-gradient-to-r from-gray-900 to-black text-white rounded-[2rem] font-black text-xl transition-all duration-300 shadow-3xl hover:shadow-primary/30 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
+                    className="w-full relative group/checkout py-6 bg-[var(--primary)] text-white rounded-[2rem] font-bold text-xl transition-all duration-300 shadow-xl hover:shadow-primary/30 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
                   >
                     <div className="relative z-10 flex items-center gap-4">
-                      {checkoutLoading ? 'Preparing...' : 'Place My Order'}
+                      {checkoutLoading ? 'Processing...' : 'Checkout'}
                       <ChevronRight size={24} className="group-hover/checkout:translate-x-2 transition-transform" />
                     </div>
-                    <div className="absolute inset-0 bg-primary opacity-0 group-hover/checkout:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover/checkout:opacity-10 transition-opacity"></div>
                   </button>
-                  <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-tight">Safe and Secure Checkout Powered by Tomato</p>
+                  <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-tight">Secured by Tomato</p>
                 </div>
               </div>
             )}
@@ -654,7 +661,7 @@ const CustomerHomePage = () => {
               <button
                 onClick={() => checkout('UPI')}
                 disabled={checkoutLoading}
-                className="w-full group relative py-5 bg-primary text-white rounded-2xl font-black text-lg transition-all duration-300 shadow-xl shadow-red-200 hover:shadow-primary/40 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
+                className="w-full group relative py-5 bg-green-600 text-white rounded-2xl font-black text-lg transition-all duration-300 shadow-xl shadow-green-200 hover:shadow-green-500/30 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
               >
                 <div className="relative z-10">Pay with Instant UPI</div>
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
@@ -671,7 +678,7 @@ const CustomerHomePage = () => {
               <button
                 onClick={() => checkout('COD')}
                 disabled={checkoutLoading}
-                className="w-full py-5 bg-gray-950 text-white rounded-2xl font-black text-lg transition-all duration-300 hover:bg-gray-800 shadow-xl hover:-translate-y-1 active:scale-95"
+                className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg transition-all duration-300 hover:bg-primary-dark shadow-xl hover:-translate-y-1 active:scale-95"
               >
                 Cash on Delivery
               </button>
@@ -693,8 +700,8 @@ const CustomerHomePage = () => {
           <div className="glass-card p-0 rounded-[4rem] shadow-3xl max-w-3xl w-full border-white/60 max-h-[85vh] overflow-hidden flex flex-col scale-in animate-scale-in">
             <div className="p-12 pb-8 border-b border-gray-100/50 flex items-center justify-between">
               <div>
-                <h3 className="text-4xl font-black text-gray-950 tracking-tighter">Guest Reviews</h3>
-                <p className="text-gray-500 font-medium mt-1">Authentic stories from fellow foodies</p>
+                <h3 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">Reviews</h3>
+                <p className="text-[var(--text-secondary)] font-medium mt-1">What our customers say</p>
               </div>
               <button
                 onClick={() => setShowReviews(null)}
@@ -708,7 +715,7 @@ const CustomerHomePage = () => {
               {reviewsLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin shadow-xl mb-6"></div>
-                  <p className="text-gray-400 font-black uppercase tracking-widest text-sm animate-pulse">Reliving memories...</p>
+                  <p className="text-gray-400 font-bold uppercase tracking-widest text-sm animate-pulse">Loading reviews...</p>
                 </div>
               ) : reviews.length > 0 ? (
                 <div className="grid gap-12">
@@ -720,7 +727,7 @@ const CustomerHomePage = () => {
                             {review.customerPhoto ? (
                               <img src={review.customerPhoto} className="w-full h-full object-cover" alt="" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-primary text-white font-black text-2xl">
+                              <div className="w-full h-full flex items-center justify-center bg-primary text-white font-bold text-2xl">
                                 {review.customerName?.charAt(0)}
                               </div>
                             )}
@@ -729,16 +736,16 @@ const CustomerHomePage = () => {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <div>
-                              <h4 className="font-black text-gray-900 text-xl tracking-tight leading-none">{review.customerName}</h4>
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 block">{new Date(review.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                              <h4 className="font-bold text-[var(--text-primary)] text-xl tracking-tight leading-none">{review.customerName}</h4>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 block">{new Date(review.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 px-4 py-2 bg-yellow-400/10 text-yellow-600 rounded-2xl text-sm font-black shadow-inner">
+                            <div className="flex items-center gap-1.5 px-4 py-2 bg-yellow-400/10 text-yellow-600 rounded-2xl text-sm font-bold shadow-inner">
                               <Star size={16} fill="currentColor" />
                               <span>{review.rating}.0</span>
                             </div>
                           </div>
 
-                          <p className="text-gray-600 font-medium leading-relaxed italic text-lg pr-4 mt-6">"{review.review || 'No written words, just pure taste satisfaction.'}"</p>
+                          <p className="text-[var(--text-secondary)] font-medium leading-relaxed italic text-lg pr-4 mt-6">"{review.review || 'No written review.'}"</p>
 
                           {review.images && review.images.length > 0 && (
                             <div className="flex gap-4 mt-8 overflow-x-auto pb-2 no-scrollbar">
@@ -760,15 +767,15 @@ const CustomerHomePage = () => {
                   <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-md">
                     <MessageCircle size={48} className="text-gray-200" />
                   </div>
-                  <h4 className="text-3xl font-black text-gray-300 tracking-tighter mb-2">No reviews yet</h4>
-                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Be the legend who writes the first one</p>
+                  <h4 className="text-3xl font-bold text-gray-300 tracking-tight mb-2">No reviews yet</h4>
+                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Be the first to write one</p>
                 </div>
               )}
             </div>
 
             <div className="p-12 bg-gray-50/50 backdrop-blur-sm border-t border-gray-100">
-              <button className="w-full py-6 bg-gray-950 text-white rounded-[2rem] font-black text-xl hover:bg-primary transition-all duration-300 shadow-2xl">
-                Write Your Story
+              <button className="w-full py-6 bg-[var(--primary)] text-white rounded-[2rem] font-bold text-xl hover:bg-[var(--primary-dark)] transition-all duration-300 shadow-xl">
+                Write a Review
               </button>
             </div>
           </div>

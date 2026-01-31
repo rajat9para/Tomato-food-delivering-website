@@ -100,6 +100,13 @@ const CustomerProfile = () => {
     try {
       setSaving(true);
 
+      // Validation
+      if (!formData.name.trim() || !formData.email.trim()) {
+        showNotification('error', 'Name and Email are required');
+        setSaving(false);
+        return;
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('email', formData.email);
@@ -118,13 +125,17 @@ const CustomerProfile = () => {
 
       // FIX: Ensure photo preview persists - only update if new photo returned
       if (response.data.user?.profilePhoto) {
-        setPreviewPhoto(response.data.user.profilePhoto);
-        updateAuthProfile(response.data.user.profilePhoto, response.data.user.premiumMember);
+        const newPhotoUrl = response.data.user.profilePhoto;
+        setPreviewPhoto(newPhotoUrl);
+        updateAuthProfile(newPhotoUrl, response.data.user.premiumMember);
       }
       // Keep existing preview if no new photo was uploaded and none returned
 
       setProfilePhoto(null); // Clear staged file, but keep preview
       showNotification('success', 'Profile updated successfully!');
+
+      // Reload profile to ensure sync
+      loadProfile();
 
     } catch (error: any) {
       console.error('Frontend error:', error);
