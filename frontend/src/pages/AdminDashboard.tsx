@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import GlobalBackground from '../components/GlobalBackground';
 import { Search, LogOut, Mail, X } from 'lucide-react';
+import { AreaChart, BarChart, DonutChart } from '../components/charts';
 
 const AdminDashboard = () => {
   const { logout, name } = useAuth();
@@ -34,7 +35,9 @@ const AdminDashboard = () => {
     todayTotalSales: 0,
     weeklyTotalSales: 0,
     monthlyTotalSales: 0,
-    chartData: []
+    chartData: [],
+    topRestaurants: [],
+    categoryBreakdown: []
   });
   const [revenuePeriod, setRevenuePeriod] = useState<'monthly' | 'yearly'>('monthly');
 
@@ -308,129 +311,101 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Revenue Graph & Sales Overview */}
+              {/* Premium Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-                <div className="lg:col-span-2 bg-white border-2 border-gray-100 rounded-3xl p-8 shadow-sm">
-                  <div className="flex justify-between items-center mb-8">
-                    <div>
-                      <h3 className="text-2xl font-black text-gray-900">Revenue Trend</h3>
-                      <p className="text-gray-500 text-sm font-bold mt-1">Platform Earnings ({revenueData.periodLabel})</p>
+                {/* Main Area Chart */}
+                <div className="lg:col-span-2">
+                  <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 shadow-sm mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900">Revenue Trend</h3>
+                        <p className="text-gray-500 text-sm font-bold mt-1">Platform Earnings ({revenueData.periodLabel})</p>
+                      </div>
+                      <div className="flex bg-gray-100 p-1 rounded-xl">
+                        {['monthly', 'yearly'].map((p) => (
+                          <button
+                            key={p}
+                            onClick={() => setRevenuePeriod(p as any)}
+                            className={`px-4 py-2 rounded-lg text-xs font-black uppercase transition-all ${revenuePeriod === p ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
-                      {['monthly', 'yearly'].map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => setRevenuePeriod(p as any)}
-                          className={`px-4 py-2 rounded-lg text-xs font-black uppercase transition-all ${revenuePeriod === p ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500'}`}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
+                    <AreaChart
+                      data={revenueData.chartData}
+                      height={260}
+                      gradientFrom="#10b981"
+                      gradientTo="#10b98100"
+                      lineColor="#059669"
+                      showYAxis={true}
+                      formatValue={(v) => `₹${v.toLocaleString()}`}
+                    />
                   </div>
 
-                  {revenueData.chartData?.length > 0 ? (
-                    <div className="h-64 relative pl-12 pr-4">
-                      <svg className="w-full h-full" viewBox="0 0 800 240" preserveAspectRatio="none">
-                        {/* Grid lines */}
-                        {[0, 1, 2, 3].map((i) => (
-                          <line key={i} x1="0" y1={i * 80} x2="800" y2={i * 80} stroke="#f3f4f6" strokeWidth="2" />
-                        ))}
-
-                        {/* Line graph */}
-                        <polyline
-                          fill="none"
-                          stroke="#ef4444"
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={revenueData.chartData.map((item: any, index: number) => {
-                            const max = Math.max(...revenueData.chartData.map((d: any) => d.value), 10);
-                            const x = (index / (revenueData.chartData.length - 1)) * 800;
-                            const y = 240 - (item.value / max) * 200;
-                            return `${x},${y}`;
-                          }).join(' ')}
-                        />
-
-                        {/* Data points */}
-                        {revenueData.chartData.map((item: any, index: number) => {
-                          const max = Math.max(...revenueData.chartData.map((d: any) => d.value), 10);
-                          const x = (index / (revenueData.chartData.length - 1)) * 800;
-                          const y = 240 - (item.value / max) * 200;
-                          return (
-                            <g key={index} className="group cursor-pointer">
-                              <circle cx={x} cy={y} r="6" fill="#ef4444" className="transition-all duration-300 group-hover:r-8" />
-                              <circle cx={x} cy={y} r="12" fill="#ef4444" fillOpacity="0.1" className="animate-pulse" />
-                            </g>
-                          );
-                        })}
-                      </svg>
-
-                      {/* X Axis Labels */}
-                      <div className="flex justify-between mt-6">
-                        {revenueData.chartData.map((item: any, index: number) => (
-                          <span key={index} className="text-[10px] font-black text-gray-400 uppercase">{item.label}</span>
-                        ))}
-                      </div>
-
-                      {/* Y Axis Labels */}
-                      <div className="absolute left-0 top-0 h-full flex flex-col justify-between py-1">
-                        {[1, 2, 3, 4].map((i) => {
-                          const max = Math.max(...revenueData.chartData.map((d: any) => d.value), 10);
-                          return <span key={i} className="text-[10px] font-bold text-gray-400">₹{Math.round((max * (4 - i)) / 3)}</span>
-                        })}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-64 flex items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-bold">
-                      No data available for this period
-                    </div>
-                  )}
+                  {/* Top Restaurants Bar Chart */}
+                  <BarChart
+                    data={revenueData.topRestaurants}
+                    title="Top Restaurants"
+                    subtitle="By total sales revenue"
+                    height={240}
+                    barColor="#3b82f6"
+                    formatValue={(v) => `₹${v.toLocaleString()}`}
+                  />
                 </div>
 
-                <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 shadow-sm">
-                  <h3 className="text-2xl font-black text-gray-900 mb-6">Revenue Breakdown</h3>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Today's Platform Fee</span>
-                        <span className="text-sm font-black text-gray-900">₹{revenueData.todayPlatformRevenue?.toLocaleString() || 0}</span>
+                {/* Right Side Panel */}
+                <div className="space-y-6">
+                  {/* Category Breakdown Donut */}
+                  <DonutChart
+                    data={revenueData.categoryBreakdown}
+                    title="Order Categories"
+                    subtitle="Items sold by category"
+                    size={180}
+                    strokeWidth={28}
+                    showLegend={true}
+                    colors={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']}
+                  />
+
+                  {/* Revenue Breakdown Cards */}
+                  <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-black text-gray-900 mb-4">Revenue Breakdown</h3>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-emerald-700 uppercase">Today</span>
+                          <span className="text-sm font-black text-emerald-800">₹{revenueData.todayPlatformRevenue?.toLocaleString() || 0}</span>
+                        </div>
                       </div>
-                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.todayGstCollection?.toLocaleString() || 0}</div>
+                      <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-blue-700 uppercase">Weekly</span>
+                          <span className="text-sm font-black text-blue-800">₹{revenueData.weeklyPlatformRevenue?.toLocaleString() || 0}</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-violet-50 rounded-xl border border-violet-100">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-violet-700 uppercase">Monthly</span>
+                          <span className="text-sm font-black text-violet-800">₹{revenueData.monthlyPlatformRevenue?.toLocaleString() || 0}</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl text-white">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold uppercase opacity-90">All-Time</span>
+                          <span className="text-lg font-black">₹{revenueData.platformRevenue?.toLocaleString() || 0}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Weekly Platform Fee</span>
-                        <span className="text-sm font-black text-gray-900">₹{revenueData.weeklyPlatformRevenue?.toLocaleString() || 0}</span>
+                    <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100">
+                      <div className="p-3 bg-orange-50 rounded-xl border border-orange-100">
+                        <span className="block text-[10px] font-black text-orange-600 uppercase mb-1">Pending</span>
+                        <span className="text-xl font-black text-orange-700">{stats.pendingRestaurants || 0}</span>
                       </div>
-                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.weeklyGstCollection?.toLocaleString() || 0}</div>
-                    </div>
-
-                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-red-100 transition-colors">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Monthly Platform Fee</span>
-                        <span className="text-sm font-black text-gray-900">₹{revenueData.monthlyPlatformRevenue?.toLocaleString() || 0}</span>
-                      </div>
-                      <div className="text-[10px] text-gray-400 font-bold">GST: ₹{revenueData.monthlyGstCollection?.toLocaleString() || 0}</div>
-                    </div>
-
-                    <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-black text-red-600 uppercase tracking-widest">All-Time Revenue</span>
-                        <span className="text-sm font-black text-red-600">₹{revenueData.platformRevenue?.toLocaleString() || 0}</span>
-                      </div>
-                      <div className="text-[10px] text-red-400 font-bold">GST: ₹{revenueData.gstCollection?.toLocaleString() || 0}</div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 pt-4">
-                      <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                        <span className="block text-[10px] font-black text-orange-600 uppercase mb-1">Pending Requests</span>
-                        <span className="text-2xl font-black text-orange-700">{stats.pendingRestaurants || 0}</span>
-                      </div>
-                      <div className="p-4 bg-gray-900 rounded-2xl text-white">
+                      <div className="p-3 bg-gray-900 rounded-xl text-white">
                         <span className="block text-[10px] font-black text-gray-400 uppercase mb-1">Orders Today</span>
-                        <span className="text-2xl font-black text-white">{stats.ordersToday || 0}</span>
+                        <span className="text-xl font-black">{stats.ordersToday || 0}</span>
                       </div>
                     </div>
                   </div>

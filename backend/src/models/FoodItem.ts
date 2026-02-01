@@ -5,6 +5,7 @@ export interface IFoodItem extends Document {
   name: string;
   description: string;
   price: number;
+  priceUnit: 'per_item' | 'per_kg' | 'per_piece';
   discount: number;
   availability: boolean;
   images: string[];
@@ -16,6 +17,7 @@ const foodItemSchema = new Schema<IFoodItem>({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
+  priceUnit: { type: String, enum: ['per_item', 'per_kg', 'per_piece'], default: 'per_item' },
   discount: { type: Number, default: 0, min: 0, max: 100 },
   availability: { type: Boolean, default: true },
   images: [{ type: String }],

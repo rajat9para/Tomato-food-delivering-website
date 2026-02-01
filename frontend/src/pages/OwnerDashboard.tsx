@@ -6,6 +6,7 @@ import { Camera, X } from 'lucide-react';
 import GlobalBackground from '../components/GlobalBackground';
 import ImageCarousel from '../components/ImageCarousel';
 import { getImageUrl } from '../utils/formatters';
+import { AreaChart } from '../components/charts';
 
 const OwnerDashboard = () => {
   const { logout, name } = useAuth();
@@ -34,7 +35,7 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(false);
 
   const [editingFood, setEditingFood] = useState<any>(null);
-  const [newFood, setNewFood] = useState({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+  const [newFood, setNewFood] = useState({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [restaurantName, setRestaurantName] = useState('');
   const [restaurantImage, setRestaurantImage] = useState<File | null>(null);
@@ -182,7 +183,8 @@ const OwnerDashboard = () => {
       description: item.description,
       price: item.price.toString(),
       category: item.category || 'Main Course',
-      discount: (item.discount || 0).toString()
+      discount: (item.discount || 0).toString(),
+      priceUnit: item.priceUnit || 'per_item'
     });
     setSelectedImages([]);
     setShowAddFood(true);
@@ -191,7 +193,7 @@ const OwnerDashboard = () => {
   const cancelEdit = () => {
     setEditingFood(null);
     setShowAddFood(false);
-    setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+    setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
     setSelectedImages([]);
   };
 
@@ -233,6 +235,7 @@ const OwnerDashboard = () => {
         name: newFood.name,
         description: newFood.description,
         price: parseFloat(newFood.price),
+        priceUnit: newFood.priceUnit,
         category: newFood.category,
         discount: discount,
         images: imageArray
@@ -474,7 +477,7 @@ const OwnerDashboard = () => {
                     <button
                       onClick={() => {
                         setEditingFood(null);
-                        setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+                        setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
                         setSelectedImages([]);
                         setShowAddFood(true);
                       }}
@@ -565,6 +568,20 @@ const OwnerDashboard = () => {
                               onChange={(e) => setNewFood({ ...newFood, discount: e.target.value })}
                               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
                             />
+                          </div>
+
+                          {/* Price Unit */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Price Unit</label>
+                            <select
+                              value={newFood.priceUnit}
+                              onChange={(e) => setNewFood({ ...newFood, priceUnit: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            >
+                              <option value="per_item">Per Item</option>
+                              <option value="per_kg">Per KG</option>
+                              <option value="per_piece">Per Piece</option>
+                            </select>
                           </div>
                         </div>
 
@@ -848,82 +865,28 @@ const OwnerDashboard = () => {
                 </div>
               </div>
 
-              {/* Dynamic Revenue Graph */}
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-8 shadow-md">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 font-display">
-                  Revenue Trend - {revenueMonth || timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)}
-                </h3>
-                {monthlyData && monthlyData.length > 0 ? (
-                  <div className="relative h-80 pl-16">
-                    <svg className="w-full h-full" viewBox="0 0 800 300" preserveAspectRatio="none">
-                      {/* Grid lines */}
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <line
-                          key={i}
-                          x1="0"
-                          y1={i * 60 + 10}
-                          x2="800"
-                          y2={i * 60 + 10}
-                          stroke="#e5e7eb"
-                          strokeWidth="1"
-                        />
-                      ))}
-
-                      {/* Line graph */}
-                      <polyline
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="3"
-                        points={monthlyData
-                          .map((item, index) => {
-                            const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                            const x = (index / (monthlyData.length - 1)) * 800;
-                            const y = 270 - ((item.value || item.revenue || 0) / maxRevenue) * 240;
-                            return `${x},${y}`;
-                          })
-                          .join(' ')}
-                      />
-
-                      {/* Data points */}
-                      {monthlyData.map((item, index) => {
-                        const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                        const x = (index / (monthlyData.length - 1)) * 800;
-                        const y = 270 - ((item.value || item.revenue || 0) / maxRevenue) * 240;
-                        return (
-                          <circle
-                            key={index}
-                            cx={x}
-                            cy={y}
-                            r="5"
-                            fill="#3b82f6"
-                          />
-                        );
-                      })}
-                    </svg>
-
-                    {/* X-axis labels */}
-                    <div className="flex justify-between mt-4">
-                      {monthlyData.map((item, index) => (
-                        <span key={index} className="text-xs text-gray-600 font-medium">
-                          {item.label || item.month || index + 1}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Y-axis label */}
-                    <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-600 font-medium py-2">
-                      {[0, 1, 2, 3, 4].map((i) => {
-                        const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                        const value = Math.round((maxRevenue * (4 - i)) / 4);
-                        return <span key={i}>₹{value.toLocaleString()}</span>;
-                      })}
-                    </div>
+              {/* Premium Revenue Chart */}
+              <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900">Revenue Trend</h3>
+                    <p className="text-gray-500 text-sm font-medium mt-1">
+                      {revenueMonth || timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)} Performance
+                    </p>
                   </div>
-                ) : (
-                  <div className="h-80 flex items-center justify-center text-gray-500">
-                    <p>No revenue data available for this period</p>
-                  </div>
-                )}
+                </div>
+                <AreaChart
+                  data={(monthlyData || []).map((item: any) => ({
+                    label: item.label || item.month || '',
+                    value: item.value || item.revenue || 0
+                  }))}
+                  height={280}
+                  gradientFrom="#10b981"
+                  gradientTo="#10b98100"
+                  lineColor="#059669"
+                  showYAxis={true}
+                  formatValue={(v) => `₹${v.toLocaleString()}`}
+                />
               </div>
             </div>
           )}

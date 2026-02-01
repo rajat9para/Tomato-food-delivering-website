@@ -453,6 +453,27 @@ export const getAdminRevenue = async (req: AuthRequest, res: Response) => {
       chartData = monthsData.map(m => ({ label: monthNames[m._id - 1], value: m.revenue }));
     }
 
+    // Get top restaurants by revenue
+    const topRestaurantsData = await Order.aggregate([
+      { $match: { orderStatus: { $ne: 'cancelled' } } },
+      { $group: { _id: '$restaurantId', totalRevenue: { $sum: '$totalAmount' }, orderCount: { $sum: 1 } } },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'restaurants', localField: '_id', foreignField: '_id', as: 'restaurant' } },
+      { $unwind: '$restaurant' },
+      { $project: { label: '$restaurant.name', value: '$totalRevenue', orderCount: 1 } }
+    ]);
+
+    // Get order category breakdown
+    const categoryBreakdown = await Order.aggregate([
+      { $match: { orderStatus: { $ne: 'cancelled' } } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'fooditems', localField: 'items.foodId', foreignField: '_id', as: 'food' } },
+      { $unwind: '$food' },
+      { $group: { _id: '$food.category', count: { $sum: '$items.quantity' } } },
+      { $project: { label: '$_id', value: '$count' } }
+    ]);
+
     res.json({
       // All-time metrics
       platformRevenue: allTimeData.platformRevenue,
@@ -474,7 +495,14 @@ export const getAdminRevenue = async (req: AuthRequest, res: Response) => {
 
       // Chart data (period-based)
       periodLabel,
-      chartData
+      chartData,
+
+      // Additional analytics for premium charts
+      topRestaurants: topRestaurantsData,
+      categoryBreakdown: categoryBreakdown.map(c => ({
+        label: c.label || 'Other',
+        value: c.value
+      }))
     });
   } catch (error) {
     console.error('getAdminRevenue error:', error);
