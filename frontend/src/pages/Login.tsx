@@ -20,10 +20,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('🚀 [LOGIN DEBUG] Sending request to /auth/login for:', email);
       const response = await api.post('/auth/login', { email, password });
-      console.log('✅ [LOGIN DEBUG] Response received:', response.status, response.data);
-
       const { data } = response;
       login(data.token, data.role, data.userId, data.name);
 
@@ -32,11 +29,9 @@ const Login = () => {
       else if (data.role === 'rider') navigate('/rider/dashboard');
       else navigate('/customer/home');
     } catch (err: any) {
-      console.error('❌ [LOGIN DEBUG] Error caught:', err);
       if (err.code === 'ERR_NETWORK') {
         setError('Network error. Check if backend is running on port 5000.');
       } else if (err.response) {
-        console.error('💩 [LOGIN DEBUG] Error response:', err.response.status, err.response.data);
         if (err.response.status === 401) {
           setError('Invalid email or password');
         } else {

@@ -25,7 +25,7 @@ const CustomerLayout = () => {
   };
 
   // Routes where the notification should NOT appear
-  const excludedRoutes = ['/customer/cart', '/customer/orders'];
+  const excludedRoutes = ['/customer/cart', '/customer/orders', '/customer/profile'];
   const shouldShowNotification = !excludedRoutes.includes(location.pathname);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const CustomerLayout = () => {
       const { data } = await api.get('/customer/orders');
       if (Array.isArray(data)) {
         const unrated = data.find((order: any) => {
-          const isCompleted = order.orderStatus === 'completed';
+          const isCompleted = order.orderStatus === 'completed' || order.orderStatus === 'delivered';
           const isUnrated = !order.rating || order.rating === 0;
           const isDismissed = localStorage.getItem(`dismissed_rating_${order._id}`);
           return isCompleted && isUnrated && !isDismissed;
@@ -55,6 +55,8 @@ const CustomerLayout = () => {
         if (unrated) {
           setReminderOrder(unrated);
           setShowRatingReminder(true);
+        } else {
+          setShowRatingReminder(false);
         }
       }
     } catch (error) {

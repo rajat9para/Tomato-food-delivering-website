@@ -22,7 +22,7 @@ const Footer = () => {
   }, [showTeam]);
 
   const teamMembers = [
-    { name: 'Rajat Singh Rawat', leetcode: '#', linkedin: '#', github: '#', instagram: '#' },
+    { name: 'Rajat Singh Rawat', leetcode: 'https://leetcode.com/u/demonQueen/', linkedin: 'https://in.linkedin.com/in/rajat-singh-rawat-9675306079123454321', github: 'https://github.com/rajat9para', instagram: '#' },
     { name: 'Rikshit Negi', leetcode: '#', linkedin: '#', github: '#', instagram: '#' },
     { name: 'Sneha Kandwal', leetcode: '#', linkedin: '#', github: '#', instagram: '#' },
     { name: 'Priyanshu Jugran', leetcode: '#', linkedin: '#', github: '#', instagram: '#' },
