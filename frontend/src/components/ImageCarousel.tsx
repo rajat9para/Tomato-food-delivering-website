@@ -37,10 +37,10 @@ const ImageCarousel = ({ images, alt }: ImageCarouselProps) => {
 
   // Fallback images from foodimages folder if no images provided
   const fallbackImages = [
-    '/foodimages/ananthan-chithiraikani-5I4faGfaUHg-unsplash.jpg',
-    '/foodimages/charlesdeluvio-PqsImnjuElM-unsplash.jpg',
-    '/foodimages/gayatri-malhotra-mlwXrYYAOms-unsplash.jpg',
-    '/foodimages/jaydeep-gajera-7yb08BMYhmQ-unsplash.jpg',
+    '/foodimages/f1.jpg',
+    '/foodimages/f2.jpg',
+    '/foodimages/f3.jpg',
+    '/foodimages/f4.jpg',
   ];
 
   const displayImages = images && images.length > 0 ? images : fallbackImages;

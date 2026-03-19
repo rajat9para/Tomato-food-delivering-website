@@ -15,6 +15,8 @@ router.patch('/food/:id', ownerController.updateFoodItem);
 router.delete('/food/:id', ownerController.deleteFoodItem);
 router.get('/orders', ownerController.getMyOrders);
 router.patch('/orders/:id', ownerController.updateOrderStatus);
+router.get('/available-riders', ownerController.getAvailableRiders);
+router.post('/orders/:id/assign-rider', ownerController.assignRiderToOrder);
 router.get('/revenue', ownerController.getMyRevenue);
 router.delete('/account', ownerController.deleteAccount);
 router.patch('/restaurant/image', ownerController.updateRestaurantImage);

@@ -19,6 +19,11 @@ api.interceptors.request.use((config) => {
     delete config.headers['Content-Type'];
   }
 
+  // Add /api prefix to all API calls
+  if (config.url && !config.url.startsWith('/api') && !config.url.startsWith('/uploads')) {
+    config.url = `/api${config.url}`;
+  }
+
   console.log(`🌐 [API REQUEST] ${config.method?.toUpperCase()} ${config.url}`, {
     headers: config.headers,
     data: config.data instanceof FormData ? 'FormData' : config.data,

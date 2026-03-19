@@ -6,57 +6,57 @@ const HeroSlider = () => {
 
   const slides = [
     {
-      image: 'http://localhost:5000/foodimages/indian_cuisine.jpg',
+      image: '/foodimages/f1.jpg',
       title: 'Authentic Indian Cuisine',
       subtitle: 'Experience the rich flavors of India'
     },
     {
-      image: 'http://localhost:5000/foodimages/Chicken-Chow-Mein-1.jpg',
+      image: '/foodimages/f2.jpg',
       title: 'Delicious Chinese Food',
       subtitle: 'Fresh and flavorful dishes'
     },
     {
-      image: 'http://localhost:5000/foodimages/white-sauce-pasta-2.jpg',
+      image: '/foodimages/f3.jpg',
       title: 'Italian Pasta Perfection',
       subtitle: 'Handcrafted with love'
     },
     {
-      image: 'http://localhost:5000/foodimages/india-food-paratha-1120x732.jpg',
+      image: '/foodimages/f4.jpg',
       title: 'Traditional Parathas',
       subtitle: 'Crispy, buttery, and delicious'
     },
     {
-      image: 'http://localhost:5000/foodimages/Cabbage-Manchurian.jpg',
+      image: '/foodimages/f5.jpg',
       title: 'Crispy Cabbage Manchurian',
       subtitle: 'Tangy and crunchy delight'
     },
     {
-      image: 'http://localhost:5000/foodimages/Chettinad-fish-fry-1B-500x500.jpg',
+      image: '/foodimages/f6.jpg',
       title: 'Chettinad Fish Fry',
       subtitle: 'Spicy South Indian specialty'
     },
     {
-      image: 'http://localhost:5000/foodimages/Desi-Chow-Mein-2.jpg',
+      image: '/foodimages/f7.jpg',
       title: 'Desi Chow Mein',
       subtitle: 'Fusion of flavors'
     },
     {
-      image: 'http://localhost:5000/foodimages/images.jpeg',
+      image: '/foodimages/f8.jpg',
       title: 'Exotic Delicacies',
       subtitle: 'Discover new tastes'
     },
     {
-      image: 'http://localhost:5000/foodimages/images (1).jpeg',
+      image: '/foodimages/f9.jpg',
       title: 'Fresh and Healthy',
       subtitle: 'Nutritious meals for you'
     },
     {
-      image: 'http://localhost:5000/foodimages/images (2).jpeg',
+      image: '/foodimages/f10.jpg',
       title: 'Street Food Vibes',
       subtitle: 'Authentic street flavors'
     },
     {
-      image: 'http://localhost:5000/foodimages/54659021.avif',
+      image: '/foodimages/f11.jpg',
       title: 'Gourmet Experience',
       subtitle: 'Elevate your dining'
     }

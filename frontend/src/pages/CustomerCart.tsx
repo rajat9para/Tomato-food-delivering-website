@@ -87,24 +87,24 @@ const CustomerCart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8 min-h-[60vh] flex flex-col items-center justify-center">
-        <div className="w-64 h-64 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-float">
+      <div className="max-w-7xl mx-auto px-4 py-8 min-h-[60vh] flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+        <div className="w-64 h-64 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mb-8 animate-float">
           <img
             src="https://b.zmtcdn.com/data/webuikit/9f928a05a329b3659e01.png" // Zomato-like empty cart illustration placeholder
             alt="Empty Cart"
             className="w-48 opacity-50"
-            onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gray-100'); }}
+            onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br from-pink-100 to-purple-100'); }}
           />
           {/* Fallback icon if image fails */}
-          <ShoppingCart size={64} className="text-gray-300 absolute" />
+          <ShoppingCart size={64} className="text-pink-300 absolute" />
         </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h3>
-        <p className="text-gray-500 mb-8 max-w-md text-center">Looks like you haven't added anything to your cart yet.</p>
+        <h3 className="text-4xl font-display font-bold text-gray-900 mb-4 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Your cart is empty</h3>
+        <p className="text-gray-600 text-lg mb-10 max-w-md text-center">Looks like you haven't added anything to your cart yet.</p>
         <button
           onClick={() => navigate('/customer/home')}
-          className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-bold text-lg transition-transform hover:scale-105 shadow-lg"
+          className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-pink-500/30 hover:-translate-y-2 transform hover:scale-105 active:scale-95"
         >
-          See Restaurants Near You
+          Browse Restaurants
         </button>
       </div>
     );
@@ -124,67 +124,67 @@ const CustomerCart = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Items */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {Object.entries(itemsByRestaurant).map(([restaurantId, items]) => (
-            <div key={restaurantId} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                  <Store size={24} className="text-primary" />
+            <div key={restaurantId} className="bg-white rounded-2xl shadow-xl border border-pink-100 overflow-hidden card-hover">
+              <div className="p-6 border-b border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 flex items-center gap-4">
+                <div className="bg-white p-3 rounded-xl border border-pink-200 shadow-lg">
+                  <Store size={28} className="text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800">{items[0]?.restaurantName || 'Restaurant'}</h3>
-                  <p className="text-xs text-gray-500">Items from this restaurant</p>
+                  <h3 className="text-2xl font-display font-bold text-gray-900">{items[0]?.restaurantName || 'Restaurant'}</h3>
+                  <p className="text-gray-600 text-base mt-1">Items from this restaurant</p>
                 </div>
               </div>
 
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-6">
                 {items.map((item: any) => (
-                  <div key={item.foodId} className="flex gap-4 group">
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                  <div key={item.foodId} className="flex gap-6 group">
+                    <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-pink-100 to-purple-100 relative shadow-lg">
                       {item.images && item.images.length > 0 ? (
                         <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold bg-gray-200">
+                        <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl bg-gradient-to-br from-primary to-primary-dark shadow-lg">
                           {item.name.charAt(0)}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex-1 py-1">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold text-gray-800 text-lg leading-tight">{item.name}</h4>
+                    <div className="flex-1 py-2">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="font-display font-bold text-xl text-gray-900 leading-tight">{item.name}</h4>
                         <div className="text-right">
-                          <span className="block font-bold text-gray-900">
+                          <span className="block font-display font-bold text-2xl text-primary">
                             ₹{(item.price * (1 - item.discount / 100)).toFixed(0)}
                           </span>
                           {item.discount > 0 && (
-                            <span className="text-xs text-gray-400 line-through">₹{item.price}</span>
+                            <span className="text-sm text-gray-400 line-through">₹{item.price}</span>
                           )}
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 bg-red-50 rounded-lg p-1 border border-primary/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 border border-pink-200">
                           <button
                             onClick={() => updateQuantity(item.foodId, -1)}
-                            className="w-7 h-7 bg-white text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition shadow-sm"
+                            className="w-10 h-10 bg-white text-primary rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 shadow-sm"
                           >
-                            <Minus size={14} strokeWidth={3} />
+                            <Minus size={20} strokeWidth={3} />
                           </button>
-                          <span className="font-bold text-gray-800 min-w-[1.5rem] text-center">{item.quantity}</span>
+                          <span className="font-display font-bold text-xl text-gray-900 min-w-[2rem] text-center">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.foodId, 1)}
-                            className="w-7 h-7 bg-white text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition shadow-sm"
+                            className="w-10 h-10 bg-white text-primary rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 shadow-sm"
                           >
-                            <Plus size={14} strokeWidth={3} />
+                            <Plus size={20} strokeWidth={3} />
                           </button>
                         </div>
                         <button
                           onClick={() => removeFromCart(item.foodId)}
-                          className="text-gray-400 hover:text-red-500 transition p-2"
-                          title="Remove item"
+                          className="text-red-500 hover:text-red-700 transition-all duration-300 flex items-center gap-2 font-bold text-lg group"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={20} className="group-hover:rotate-90 transition-transform" />
+                          <span>Remove</span>
                         </button>
                       </div>
                     </div>
@@ -197,47 +197,53 @@ const CustomerCart = () => {
 
         {/* Right Column: Bill Details (Sticky) */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sticky top-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Bill Details</h3>
+          <div className="bg-white rounded-2xl shadow-xl border border-pink-100 p-8 sticky top-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white shadow-lg">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-display font-bold text-gray-900">Order Summary</h3>
+            </div>
 
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-600">
-                <span>Item Total</span>
-                <span>₹{getTotal().toFixed(0)}</span>
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between items-center py-3 border-b border-pink-100">
+                <span className="text-gray-600 font-semibold text-lg">Item Total</span>
+                <span className="font-display font-bold text-xl">₹{getTotal().toFixed(0)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Delivery Fee</span>
-                <span className="text-green-600">Free</span>
+              <div className="flex justify-between items-center py-3 border-b border-pink-100">
+                <span className="text-gray-600 font-semibold text-lg">Delivery Fee</span>
+                <span className="text-green-600 font-semibold text-lg">Free</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Platform Fee</span>
-                <span>₹{Math.round(getTotal() * 0.01)}</span>
+              <div className="flex justify-between items-center py-3 border-b border-pink-100">
+                <span className="text-gray-600 font-semibold text-lg">Platform Fee</span>
+                <span className="font-display font-bold text-xl">₹{Math.round(getTotal() * 0.01)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>GST and Restaurant Charges</span>
-                <span>₹{Math.round(getTotal() * 0.05)}</span>
+              <div className="flex justify-between items-center py-3 border-b border-pink-100">
+                <span className="text-gray-600 font-semibold text-lg">GST & Charges</span>
+                <span className="font-display font-bold text-xl">₹{Math.round(getTotal() * 0.05)}</span>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-4 mb-8">
+            <div className="border-t-2 border-pink-200 pt-6 mb-8">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-gray-900">To Pay</span>
-                <span className="text-2xl font-bold text-primary">₹{(getTotal() * 1.06).toFixed(0)}</span>
+                <span className="text-xl font-display font-bold text-gray-900">Total Amount</span>
+                <span className="text-3xl font-display font-bold text-primary">₹{(getTotal() * 1.06).toFixed(0)}</span>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-semibold text-gray-800">Delivering to:</h4>
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 mb-8 border border-pink-200">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-display font-bold text-lg text-gray-900">Delivering to:</h4>
                 <button
                   onClick={() => navigate('/customer/profile')}
-                  className="text-primary text-sm font-bold hover:underline"
+                  className="text-primary font-bold text-base hover:text-primary-dark transition-colors"
                 >
-                  Change
+                  Change Address
                 </button>
               </div>
-              {/* Placeholder for address view - simplified as we fetch it on checkout click */}
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-gray-600 text-base">
                 Home Address (Default)
               </p>
             </div>
@@ -245,13 +251,16 @@ const CustomerCart = () => {
             <button
               onClick={handleCheckoutClick}
               disabled={checkoutLoading}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-4 rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-5 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-pink-500/30 hover:-translate-y-2 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
             >
               {checkoutLoading ? (
-                <span className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></span>
+                <>
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="font-bold">Processing...</span>
+                </>
               ) : (
                 <>
-                  <span>Proceed to Pay</span>
+                  <span className="font-bold text-xl">Proceed to Checkout</span>
                 </>
               )}
             </button>

@@ -29,6 +29,7 @@ const Login = () => {
 
       if (data.role === 'admin') navigate('/admin/dashboard');
       else if (data.role === 'owner') navigate('/owner/dashboard');
+      else if (data.role === 'rider') navigate('/rider/dashboard');
       else navigate('/customer/home');
     } catch (err: any) {
       console.error('❌ [LOGIN DEBUG] Error caught:', err);
@@ -54,31 +55,31 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center">
       <GlobalBackground />
 
-      {/* Left Side Red Tags */}
-      <div className="fixed left-0 top-0 h-full w-24 bg-gradient-to-r from-red-600 to-red-500 flex flex-col items-center justify-center gap-8 z-0 shadow-2xl">
+      {/* Left Side Pink Tags */}
+      <div className="fixed left-0 top-0 h-full w-24 bg-gradient-to-r from-pink-600 to-pink-500 flex flex-col items-center justify-center gap-8 z-0 shadow-2xl">
         <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-4xl font-black tracking-wider">TOMATO</div>
+          <div className="text-4xl font-display font-black tracking-wider">TOMATO</div>
           <div className="text-xs font-bold mt-2 tracking-widest">FOOD ORDER</div>
         </div>
         <div className="w-16 h-1 bg-white/30 rounded-full"></div>
         <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-2xl font-bold">FAST</div>
+          <div className="text-2xl font-display font-bold">FAST</div>
           <div className="text-xs font-semibold">DELIVERY</div>
         </div>
       </div>
 
       <div className="relative z-10 bg-white p-10 rounded-2xl shadow-2xl w-[450px] border border-gray-100 ml-24">
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-md">
-            <span className="text-2xl font-bold text-white">T</span>
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20">
+            <span className="text-2xl font-display font-bold text-white">T</span>
           </div>
-          <h1 className="text-3xl font-bold text-primary">TOMATO</h1>
+          <h1 className="text-3xl font-display font-bold text-primary">TOMATO</h1>
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-3 text-center">Welcome Back</h2>
+        <h2 className="text-3xl font-display font-bold text-gray-900 mb-3 text-center">Welcome Back</h2>
         <p className="text-gray-600 text-center mb-8">Login to your account</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 text-sm">
+          <div className="bg-pink-50 border border-pink-200 text-pink-700 p-4 rounded-lg mb-6 text-sm">
             {error}
           </div>
         )}
@@ -92,7 +93,7 @@ const Login = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12"
+                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12 input-premium"
                 required
               />
               <button
@@ -112,7 +113,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12"
+                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12 input-premium"
                 required
               />
               <button
@@ -127,7 +128,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-lg font-bold text-lg transition shadow-lg hover:shadow-xl disabled:opacity-50"
+            className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-lg font-bold text-lg transition-all duration-300 shadow-lg shadow-pink-500/20 hover:-translate-y-1 disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
@@ -136,11 +137,14 @@ const Login = () => {
         <div className="mt-8 text-center border-t border-gray-200 pt-6">
           <p className="text-gray-600 mb-4">Don't have an account?</p>
           <div className="flex gap-3">
-            <Link to="/register/customer" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition text-center">
+            <Link to="/register/customer" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
               Customer
             </Link>
-            <Link to="/register/owner" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition text-center">
+            <Link to="/register/owner" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
               Owner
+            </Link>
+            <Link to="/register/rider" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
+              Rider
             </Link>
           </div>
         </div>

@@ -5,7 +5,7 @@ import GlobalBackground from '../components/GlobalBackground';
 import { Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
-  const { type } = useParams<{ type: 'customer' | 'owner' }>();
+  const { type } = useParams<{ type: 'customer' | 'owner' | 'rider' }>();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,7 +78,7 @@ const Register = () => {
           Create Account
         </h2>
         <p className="text-gray-600 text-center mb-8">
-          Register as {type === 'customer' ? 'a Customer' : 'a Restaurant Owner'}
+          Register as {type === 'customer' ? 'a Customer' : type === 'rider' ? 'a Delivery Rider' : 'a Restaurant Owner'}
         </p>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 text-sm whitespace-pre-line">

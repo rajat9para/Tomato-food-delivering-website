@@ -39,12 +39,9 @@ const CustomerHomePage = () => {
     loadRestaurants();
     loadFeaturedDishes();
 
-
     // Check if navigating from Best Restaurants with a selected restaurant
     if (location.state?.selectedRestaurant) {
       selectRestaurant(location.state.selectedRestaurant);
-      // Clear the state to prevent re-selection on refresh
-      window.history.replaceState({}, document.title);
     }
   }, []);
 

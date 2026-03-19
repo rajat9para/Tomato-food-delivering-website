@@ -1,0 +1,43 @@
+{
+  "database": {
+    "name": "tomatoDB",
+    "collections": {
+      "foods": {
+        "enabled": true,
+        "search_fields": ["name", "description", "category"],
+        "display_fields": ["name", "price", "category"],
+        "description": "Food items and menu"
+      },
+      "restaurants": {
+        "enabled": true,
+        "search_fields": ["name", "cuisine", "location", "description"],
+        "display_fields": ["name", "cuisine", "location", "rating"],
+        "description": "Restaurant information"
+      },
+      "locations": {
+        "enabled": true,
+        "search_fields": ["area", "city", "landmark", "address"],
+        "display_fields": ["area", "city", "distance"],
+        "description": "Restaurant locations and delivery areas"
+      },
+      "orders": {
+        "enabled": false,
+        "search_fields": ["order_id", "status"],
+        "display_fields": ["order_id", "status", "total"],
+        "description": "Order history"
+      }
+    }
+  },
+  "rag": {
+    "model": "all-MiniLM-L6-v2",
+    "top_k_results": 5,
+    "similarity_threshold": 0.2,
+    "auto_index_on_startup": true
+  },
+  "voice": {
+    "enabled": true,
+    "feminine_voice": true,
+    "rate": 0.95,
+    "pitch": 1.1
+  }
+}

@@ -8,13 +8,14 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
+import RiderDashboard from './pages/RiderDashboard';
 import CustomerHomePage from './pages/CustomerHomePage';
 import CustomerBestRestaurants from './pages/CustomerBestRestaurants';
 import CustomerGreatDeals from './pages/CustomerGreatDeals';
 import CustomerOrdersPage from './pages/CustomerOrdersPage';
 import CustomerProfile from './pages/CustomerProfile';
 import CustomerCart from './pages/CustomerCart';
-
+import { Toaster } from 'react-hot-toast';
 
 import IntroScreen from './components/IntroScreen';
 import { useState } from 'react';
@@ -43,6 +44,12 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
+          <Route path="/rider/dashboard" element={
+            <ProtectedRoute allowedRoles={['rider']}>
+              <RiderDashboard />
+            </ProtectedRoute>
+          } />
+
           <Route path="/customer" element={
             <ProtectedRoute allowedRoles={['customer']}>
               <CustomerLayout />
@@ -60,6 +67,32 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
+      
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #EC4899, #DB2777)',
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px rgba(236, 72, 153, 0.3)',
+            border: '1px solid rgba(236, 72, 153, 0.3)',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [text, setText] = useState('');
-    const fullText = "Welcome to TOMATO";
+    const fullText = "Fixing Hunger";
 
     useEffect(() => {
         let index = 0;
@@ -36,7 +36,7 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
                     <h1 className="text-5xl md:text-6xl font-bold text-primary tracking-tighter">
                         {text}<span className="animate-pulse">|</span>
                     </h1>
-                    <p className="text-gray-400 font-semibold tracking-widest uppercase text-sm">Delicious Food Delivered</p>
+                    <p className="text-gray-400 font-semibold tracking-widest uppercase text-sm">Food Delivery Service</p>
                 </div>
             </div>
         </div>

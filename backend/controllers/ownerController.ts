@@ -170,6 +170,49 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getAvailableRiders = async (req: AuthRequest, res: Response) => {
+  try {
+    const riders = await User.find({ role: 'rider', isAvailable: true, status: 'active' })
+      .select('name phone vehicleType isAvailable');
+    res.json(riders);
+  } catch (error) {
+    console.error('Get available riders error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const assignRiderToOrder = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { riderId } = req.body;
+
+    const restaurant = await Restaurant.findOne({ ownerId: req.user!.id });
+    if (!restaurant) return res.status(404).json({ message: 'Restaurant not found' });
+
+    // Verify rider exists and is available
+    const rider = await User.findOne({ _id: riderId, role: 'rider', isAvailable: true, status: 'active' });
+    if (!rider) return res.status(400).json({ message: 'Rider not available' });
+
+    // Atomically assign rider
+    const order = await Order.findOneAndUpdate(
+      { _id: id, restaurantId: restaurant._id, orderStatus: 'ready', riderId: { $exists: false } },
+      { riderId, riderAssignedAt: new Date() },
+      { new: true }
+    );
+
+    if (!order) return res.status(404).json({ message: 'Order not found or already assigned' });
+
+    // Mark rider as busy
+    await User.findByIdAndUpdate(riderId, { isAvailable: false });
+
+    res.json({ message: 'Rider assigned successfully', order });
+  } catch (error) {
+    console.error('Assign rider error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 export const getMyRevenue = async (req: AuthRequest, res: Response) => {
   try {
     const { period = 'monthly' } = req.query;

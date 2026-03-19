@@ -5,6 +5,7 @@ import api from '../utils/api';
 import RatingBanner from './RatingBanner';
 import { Star } from 'lucide-react';
 import GlassCard from './ui/GlassCard';
+import ChatbotWidget from './ChatbotWidget';
 
 const CustomerLayout = () => {
   const location = useLocation();
@@ -121,6 +122,7 @@ const CustomerLayout = () => {
           </div>
         </div>
       </div>
+      <ChatbotWidget />
     </div>
   );
 };

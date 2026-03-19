@@ -25,9 +25,9 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Cannot register as admin' });
     }
 
-    if (!['customer', 'owner'].includes(role)) {
+    if (!['customer', 'owner', 'rider'].includes(role)) {
       console.log('❌ Invalid role:', role);
-      return res.status(400).json({ message: 'Invalid role. Must be customer or owner' });
+      return res.status(400).json({ message: 'Invalid role. Must be customer, owner, or rider' });
     }
 
     const exists = await User.findOne({ email: email.toLowerCase() });
@@ -38,13 +38,21 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const userData: any = {
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       role,
       status: 'active'
-    });
+    };
+
+    // Add rider-specific defaults
+    if (role === 'rider') {
+      userData.vehicleType = req.body.vehicleType || 'bike';
+      userData.isAvailable = true;
+    }
+
+    const user = await User.create(userData);
 
     console.log('✅ User registered successfully:', user._id);
 

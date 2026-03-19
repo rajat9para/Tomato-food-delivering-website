@@ -4,7 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'owner' | 'customer';
+  role: 'admin' | 'owner' | 'customer' | 'rider';
   status: 'active' | 'blocked';
   address?: string;
   phone?: string;
@@ -12,6 +12,8 @@ export interface IUser extends Document {
   walletBalance?: number;
   premiumMember?: boolean;
   premiumExpiry?: Date;
+  vehicleType?: 'bike' | 'scooter' | 'car' | 'bicycle';
+  isAvailable?: boolean;
   createdAt: Date;
 }
 
@@ -19,7 +21,7 @@ const userSchema = new Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'owner', 'customer'], required: true },
+  role: { type: String, enum: ['admin', 'owner', 'customer', 'rider'], required: true },
   status: { type: String, enum: ['active', 'blocked'], default: 'active' },
   address: { type: String },
   phone: { type: String },
@@ -27,6 +29,8 @@ const userSchema = new Schema<IUser>({
   walletBalance: { type: Number, default: 0 },
   premiumMember: { type: Boolean, default: false },
   premiumExpiry: { type: Date },
+  vehicleType: { type: String, enum: ['bike', 'scooter', 'car', 'bicycle'] },
+  isAvailable: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 

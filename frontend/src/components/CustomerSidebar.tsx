@@ -38,13 +38,13 @@ const CustomerSidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[280px] bg-dark-card/90 backdrop-blur-xl border-r border-white/5 shadow-glass z-40 transition-all duration-300">
+    <aside className="fixed left-0 top-0 h-full w-[280px] bg-white/95 backdrop-blur-xl border-r border-pink-100 shadow-lg z-40 transition-all duration-300">
       {/* Logo Section */}
       <div className="p-8 pb-4 flex items-center justify-center">
         <div className="flex items-center gap-3 relative group cursor-pointer" onClick={() => navigate('/customer/home')}>
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
           <img src="/tomato-logo.png" alt="TOMATO" className="w-10 h-10 object-contain relative z-10 drop-shadow-lg" />
-          <h1 className="text-3xl font-display font-bold text-white tracking-tight relative z-10 group-hover:text-primary transition-colors">
+          <h1 className="text-3xl font-display font-bold text-primary tracking-tight relative z-10 group-hover:text-primary transition-colors">
             TOMATO
           </h1>
         </div>
@@ -53,7 +53,7 @@ const CustomerSidebar = () => {
       {/* User Info Card */}
       <div className="px-4 py-6">
         <div
-          className="glass-card p-4 flex items-center gap-4 cursor-pointer hover:bg-white/10"
+          className="glass-card p-4 flex items-center gap-4 cursor-pointer hover:bg-pink-50 transition-all duration-300"
           onClick={() => navigate('/customer/profile')}
         >
           <div className="relative">
@@ -61,7 +61,7 @@ const CustomerSidebar = () => {
               {profilePhoto ? (
                 <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-primary flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-lg">
                   {name?.charAt(0).toUpperCase() || 'U'}
                 </div>
               )}
@@ -74,8 +74,8 @@ const CustomerSidebar = () => {
           </div>
 
           <div className="overflow-hidden">
-            <p className="text-xs text-gray-400">Welcome,</p>
-            <p className="text-white font-semibold truncate text-sm">{name}</p>
+            <p className="text-xs text-gray-500 font-medium">Welcome,</p>
+            <p className="text-gray-800 font-semibold truncate text-sm">{name}</p>
           </div>
         </div>
       </div>
@@ -90,8 +90,8 @@ const CustomerSidebar = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActive
-                  ? 'bg-primary text-white shadow-neon'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-neon'
+                  : 'text-gray-600 hover:text-primary hover:bg-pink-50'
                 }`}
             >
               {isActive && (
@@ -102,7 +102,7 @@ const CustomerSidebar = () => {
 
               {/* Notification Badge */}
               {item.badge !== null && item.badge > 0 && (
-                <span className="absolute right-4 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow-lg animate-pulse">
+                <span className="absolute right-4 bg-gradient-to-r from-primary to-primary-dark text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow-lg animate-pulse">
                   {item.badge > 9 ? '9+' : item.badge}
                 </span>
               )}
@@ -115,10 +115,10 @@ const CustomerSidebar = () => {
       <div className="absolute bottom-6 left-0 right-0 px-4">
         <button
           onClick={() => { logout(); navigate('/login'); }}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all duration-300 group"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-xl transition-all duration-300 group shadow-sm hover:shadow-lg hover:-translate-y-1"
         >
           <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Logout</span>
+          <span className="font-semibold">Logout</span>
         </button>
       </div>
     </aside>

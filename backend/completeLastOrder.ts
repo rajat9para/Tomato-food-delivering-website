@@ -3,8 +3,11 @@ import { MONGODB_URI } from './config';
 import Order from './models/Order';
 
 const completeLast = async () => {
-    try {
-        await mongoose.connect(MONGODB_URI);
+  try {
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+    await mongoose.connect(MONGODB_URI as string);
         const order = await Order.findOne().sort({ createdAt: -1 });
         if (order) {
             order.orderStatus = 'completed';
