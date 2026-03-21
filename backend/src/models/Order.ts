@@ -8,6 +8,7 @@ export interface IOrder extends Document {
   baseAmount: number;
   gstAmount: number;
   platformFeeAmount: number;
+  deliveryFeeAmount: number;
   totalAmount: number;
   orderStatus: 'pending' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'completed' | 'cancelled';
   rating: number;
@@ -36,6 +37,7 @@ const orderSchema = new Schema<IOrder>({
   baseAmount: { type: Number, required: true },
   gstAmount: { type: Number, required: true },
   platformFeeAmount: { type: Number, required: true },
+  deliveryFeeAmount: { type: Number, default: 30 },
   totalAmount: { type: Number, required: true },
   orderStatus: { type: String, enum: ['pending', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed', 'cancelled'], default: 'pending' },
   rating: { type: Number, default: 0 },

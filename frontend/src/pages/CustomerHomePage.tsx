@@ -6,6 +6,7 @@ import DishCarousel from '../components/DishCarousel';
 import SkeletonCard from '../components/SkeletonCard';
 import { Star, ShoppingCart, Search, MessageCircle, X, ChevronRight, Shield } from 'lucide-react';
 import { getImageUrl } from '../utils/formatters';
+import ChatbotWidget from '../components/ChatbotWidget';
 
 const CustomerHomePage = () => {
   const navigate = useNavigate();
@@ -202,25 +203,30 @@ const CustomerHomePage = () => {
   if (!selectedRestaurant) {
     return (
       <div className="pb-20 animate-fade-in font-display">
-        {/* Search Bar - Modern Floating Style */}
+        {/* Search Bar + Chatbot Icon - Modern Floating Style */}
         <div className="mb-12 sticky top-4 z-[90]">
-          <div className="max-w-3xl mx-auto relative group">
-            <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-[2rem] opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative glass rounded-[2.5rem] px-8 py-4 shadow-2xl border-white/60 group-focus-within:border-primary/30 transition-all duration-300">
-              <input
-                type="text"
-                placeholder="Craving something specific? Search here..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => searchQuery && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full bg-transparent border-none focus:outline-none text-xl font-medium text-gray-900 placeholder:text-gray-400"
-              />
-              <Search className="absolute right-8 top-1/2 -translate-y-1/2 text-primary drop-shadow-md" size={28} />
+          <div className="max-w-3xl mx-auto relative group flex items-center gap-3">
+            <div className="flex-1 relative">
+              <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-[2rem] opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative glass rounded-[2.5rem] px-8 py-4 shadow-2xl border-white/60 group-focus-within:border-primary/30 transition-all duration-300">
+                <input
+                  type="text"
+                  placeholder="Craving something specific? Search here..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery && setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="w-full bg-transparent border-none focus:outline-none text-xl font-medium text-gray-900 placeholder:text-gray-400"
+                />
+                <Search className="absolute right-8 top-1/2 -translate-y-1/2 text-primary drop-shadow-md" size={28} />
+              </div>
             </div>
 
+            {/* Chatbot Toggle Button — Right of Search Bar */}
+            <ChatbotWidget />
+
             {showSuggestions && searchSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-4 glass-card rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] max-h-80 overflow-y-auto z-[100] border-white/80 animate-scale-in">
+              <div className="absolute top-full left-0 right-16 mt-4 glass-card rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] max-h-80 overflow-y-auto z-[100] border-white/80 animate-scale-in">
                 {searchSuggestions.map((restaurant: any) => (
                   <div
                     key={restaurant._id}

@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import GlobalBackground from '../components/GlobalBackground';
 import {
   Bike, Package, MapPin, Clock, CheckCircle, Navigation,
   Phone, LogOut, Star, Zap,
-  AlertCircle, RefreshCw, TrendingUp, DollarSign
+  AlertCircle, RefreshCw, TrendingUp, DollarSign, Map
 } from 'lucide-react';
 
 interface Order {
@@ -14,6 +15,7 @@ interface Order {
   customerId: { _id: string; name: string; phone?: string; address?: string };
   items: { foodId: { name: string }; quantity: number; price: number }[];
   totalAmount: number;
+  deliveryFeeAmount?: number;
   orderStatus: string;
   deliveryAddress: { name: string; phone: string; address: string };
   riderAssignedAt?: string;
@@ -28,22 +30,6 @@ interface RiderStats {
   totalEarnings: number;
   todayEarnings: number;
 }
-
-const statusColors: Record<string, string> = {
-  ready: '#F59E0B',
-  out_for_delivery: '#3B82F6',
-  delivered: '#10B981',
-  completed: '#8B5CF6',
-  cancelled: '#EF4444'
-};
-
-const statusLabels: Record<string, string> = {
-  ready: 'Ready for Pickup',
-  out_for_delivery: 'Out for Delivery',
-  delivered: 'Delivered',
-  completed: 'Completed',
-  cancelled: 'Cancelled'
-};
 
 export default function RiderDashboard() {
   const { name, logout } = useAuth();
@@ -79,7 +65,6 @@ export default function RiderDashboard() {
       setStats(statsRes.data);
       setIsAvailable(profileRes.data.isAvailable ?? true);
 
-      // Auto-switch to active tab if there's an active delivery
       if (activeRes.data) setTab('active');
     } catch (error) {
       console.error('Fetch error:', error);
@@ -125,7 +110,7 @@ export default function RiderDashboard() {
     try {
       setActionLoading(true);
       await api.post(`/rider/complete-delivery/${orderId}`);
-      showNotification('success', 'Delivery completed! Great job! 🎉');
+      showNotification('success', 'Delivery completed! ₹30 earned! 🎉');
       await fetchData();
       setTab('queue');
     } catch (err: any) {
@@ -158,139 +143,125 @@ export default function RiderDashboard() {
     return new Date(dateStr).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  const getMapUrl = (_address: string) => {
+    return `https://www.openstreetmap.org/export/embed.html?bbox=72.5,18.5,73.5,19.5&layer=mapnik&marker=19.0760,72.8777`;
+  };
+
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0a0a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '48px', height: '48px', border: '4px solid rgba(236,72,153,0.3)', borderTop: '4px solid #EC4899', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Loading dashboard...</p>
+      <div className="relative min-h-screen">
+        <GlobalBackground />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-red-200 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-500 text-sm">Loading dashboard...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0a0a1a 0%, #1a0a2e 100%)', color: '#fff', fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen">
+      <GlobalBackground />
+
       {/* Notification */}
       {notification && (
-        <div style={{
-          position: 'fixed', top: '16px', right: '16px', zIndex: 100,
-          padding: '12px 20px', borderRadius: '12px',
-          background: notification.type === 'success' ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #DC2626)',
-          color: '#fff', fontWeight: 600, fontSize: '14px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          animation: 'slideIn 0.3s ease-out'
-        }}>
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl font-semibold text-sm shadow-xl flex items-center gap-2 animate-slide-in-up ${
+          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
           {notification.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
           {notification.message}
         </div>
       )}
 
-      {/* Header */}
-      <header style={{
-        background: 'rgba(15,15,35,0.95)', backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '44px', height: '44px', borderRadius: '14px',
-              background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <Bike size={24} color="#fff" />
+      {/* Header — Tomato Red/White */}
+      <nav className="bg-white shadow-lg border-b-2 border-primary sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-2 md:gap-3">
+              <img src="/tomato-logo.png" alt="TOMATO" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
+              <h1 className="text-xl md:text-2xl font-bold text-primary italic">TOMATO</h1>
             </div>
-            <div>
-              <h1 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Hey, {name || 'Rider'} 👋</h1>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Rider Dashboard</p>
+            <div className="hidden md:flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-red-700 rounded-full flex items-center justify-center text-white border-2 border-primary">
+                <Bike size={20} />
+              </div>
+              <span className="text-gray-700 text-base">Welcome, <span className="font-bold text-gray-900">{name || 'Rider'}</span></span>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="flex items-center gap-3 md:gap-4">
             {/* Availability Toggle */}
-            <button
-              onClick={toggleAvailability}
-              style={{
-                padding: '8px 20px', borderRadius: '24px', border: 'none',
-                background: isAvailable ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255,255,255,0.1)',
-                color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '6px',
-                transition: 'all 0.3s'
-              }}
-            >
-              <div style={{
-                width: '8px', height: '8px', borderRadius: '50%',
-                background: isAvailable ? '#fff' : 'rgba(255,255,255,0.3)',
-                boxShadow: isAvailable ? '0 0 8px rgba(255,255,255,0.5)' : 'none'
-              }} />
-              {isAvailable ? 'Online' : 'Offline'}
-            </button>
-            <button onClick={handleLogout} style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '10px', padding: '8px 16px', color: 'rgba(255,255,255,0.7)',
-              fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-            }}>
+            <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-200 shadow-sm">
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</span>
+                <span className={`text-[10px] font-bold ${isAvailable ? 'text-green-600' : 'text-red-500'} uppercase`}>
+                  {isAvailable ? 'Online' : 'Offline'}
+                </span>
+              </div>
+              <button
+                onClick={toggleAvailability}
+                className={`w-12 h-6 rounded-full transition-all duration-500 relative shadow-inner ${isAvailable ? 'bg-green-500 shadow-green-200' : 'bg-gray-300'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-500 shadow-md ${isAvailable ? 'left-7 ring-2 ring-green-100' : 'left-1'}`}></div>
+              </button>
+            </div>
+            <button onClick={handleLogout} className="bg-primary hover:bg-red-700 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-lg font-bold text-sm transition shadow-md flex items-center gap-2">
               <LogOut size={16} /> Logout
             </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-        {/* Stats Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 relative z-10">
+        {/* Stats Cards — White with Red Accents */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
-            { icon: <Package size={20} />, label: 'Today Deliveries', value: stats.todayDeliveries, color: '#3B82F6' },
-            { icon: <DollarSign size={20} />, label: 'Today Earnings', value: `₹${stats.todayEarnings.toFixed(0)}`, color: '#10B981' },
-            { icon: <TrendingUp size={20} />, label: 'Total Deliveries', value: stats.totalDeliveries, color: '#8B5CF6' },
-            { icon: <Zap size={20} />, label: 'Total Earnings', value: `₹${stats.totalEarnings.toFixed(0)}`, color: '#F59E0B' }
+            { icon: <Package size={22} />, label: 'Today Deliveries', value: stats.todayDeliveries, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { icon: <DollarSign size={22} />, label: 'Today Earnings', value: `₹${stats.todayEarnings}`, color: 'text-green-600', bg: 'bg-green-50' },
+            { icon: <TrendingUp size={22} />, label: 'Total Deliveries', value: stats.totalDeliveries, color: 'text-primary', bg: 'bg-red-50' },
+            { icon: <Zap size={22} />, label: 'Total Earnings', value: `₹${stats.totalEarnings}`, color: 'text-amber-600', bg: 'bg-amber-50' }
           ].map((stat, i) => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.04)', borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.06)', padding: '20px',
-              display: 'flex', alignItems: 'center', gap: '16px'
-            }}>
-              <div style={{
-                width: '44px', height: '44px', borderRadius: '12px',
-                background: `${stat.color}20`, color: stat.color,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
+            <div key={i} className="bg-white rounded-2xl border-2 border-gray-100 p-5 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+              <div className={`w-11 h-11 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-3`}>
                 {stat.icon}
               </div>
-              <div>
-                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>{stat.label}</p>
-                <p style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>{stat.value}</p>
-              </div>
+              <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
+              <p className="text-2xl font-black text-gray-900 mt-1">{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', background: 'rgba(255,255,255,0.04)', borderRadius: '14px', padding: '4px' }}>
+        {/* ₹30 per delivery info banner */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">₹30</div>
+          <div>
+            <p className="text-green-800 font-bold text-sm">Earn ₹30 per delivery!</p>
+            <p className="text-green-600 text-xs">Complete deliveries and earnings are credited to your wallet instantly.</p>
+          </div>
+        </div>
+
+        {/* Tabs — Clean Tomato Style */}
+        <div className="flex gap-2 mb-6 bg-white rounded-xl p-1.5 shadow-md border border-gray-100">
           {[
             { key: 'queue' as const, label: 'Waiting Queue', count: availableOrders.length, icon: <Clock size={16} /> },
             { key: 'active' as const, label: 'Active Delivery', count: activeDelivery ? 1 : 0, icon: <Navigation size={16} /> },
-            { key: 'history' as const, label: 'History', count: deliveryHistory.length, icon: <Star size={16} /> }
+            { key: 'history' as const, label: 'History', count: deliveryHistory.filter(o => ['delivered', 'completed'].includes(o.orderStatus)).length, icon: <Star size={16} /> }
           ].map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              style={{
-                flex: 1, padding: '12px 16px', borderRadius: '10px', border: 'none',
-                background: tab === t.key ? 'linear-gradient(135deg, #EC4899, #8B5CF6)' : 'transparent',
-                color: tab === t.key ? '#fff' : 'rgba(255,255,255,0.5)',
-                fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                transition: 'all 0.3s'
-              }}
+              className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                tab === t.key
+                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200'
+                  : 'text-gray-500 hover:bg-red-50 hover:text-red-600'
+              }`}
             >
               {t.icon} {t.label}
               {t.count > 0 && (
-                <span style={{
-                  background: tab === t.key ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
-                  padding: '2px 8px', borderRadius: '10px', fontSize: '11px'
-                }}>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  tab === t.key ? 'bg-white/25' : 'bg-gray-100'
+                }`}>
                   {t.count}
                 </span>
               )}
@@ -298,13 +269,9 @@ export default function RiderDashboard() {
           ))}
         </div>
 
-        {/* Refresh button */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <button onClick={fetchData} style={{
-            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '8px', padding: '6px 14px', color: 'rgba(255,255,255,0.6)',
-            fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-          }}>
+        {/* Refresh */}
+        <div className="flex justify-end mb-4">
+          <button onClick={fetchData} className="bg-white border-2 border-gray-200 rounded-lg px-4 py-2 text-gray-600 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 shadow-sm">
             <RefreshCw size={14} /> Refresh
           </button>
         </div>
@@ -313,75 +280,73 @@ export default function RiderDashboard() {
         {tab === 'queue' && (
           <div>
             {availableOrders.length === 0 ? (
-              <div style={{
-                textAlign: 'center', padding: '60px 20px',
-                background: 'rgba(255,255,255,0.03)', borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.06)'
-              }}>
-                <Clock size={48} color="rgba(255,255,255,0.2)" style={{ margin: '0 auto 16px' }} />
-                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>No orders in queue</h3>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
+              <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-16 text-center">
+                <Clock size={48} className="mx-auto mb-4 text-gray-300" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No orders in queue</h3>
+                <p className="text-gray-500 text-sm">
                   {isAvailable ? 'Waiting for restaurants to prepare orders...' : 'Go online to see available orders'}
                 </p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="space-y-4">
                 {availableOrders.map(order => (
-                  <div key={order._id} style={{
-                    background: 'rgba(255,255,255,0.04)', borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.08)', padding: '20px',
-                    transition: 'border-color 0.3s'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                  <div key={order._id} className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-5 hover:shadow-xl transition-all hover:-translate-y-0.5">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">
                           🍽️ {order.restaurantId?.name || 'Restaurant'}
                         </h3>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+                        <p className="text-xs text-gray-500">
                           Order #{order._id.slice(-6).toUpperCase()} • {formatTime(order.createdAt)}
                         </p>
+                        {order.restaurantId?.address && (
+                          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                            <MapPin size={12} /> {order.restaurantId.address}
+                          </p>
+                        )}
                       </div>
-                      <span style={{
-                        padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700,
-                        background: '#F59E0B20', color: '#F59E0B'
-                      }}>
+                      <span className="px-3 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700">
                         Ready for Pickup
                       </span>
                     </div>
 
                     {/* Items */}
-                    <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }}>
+                    <div className="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
                       {order.items.map((item, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px' }}>
-                          <span style={{ color: 'rgba(255,255,255,0.7)' }}>{item.quantity}x {item.foodId?.name || 'Item'}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.5)' }}>₹{item.price}</span>
+                        <div key={i} className="flex justify-between py-1 text-sm">
+                          <span className="text-gray-700">{item.quantity}x {item.foodId?.name || 'Item'}</span>
+                          <span className="text-gray-500">₹{item.price}</span>
                         </div>
                       ))}
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontWeight: 700, fontSize: '14px' }}>Total</span>
-                        <span style={{ fontWeight: 700, fontSize: '14px', color: '#10B981' }}>₹{order.totalAmount}</span>
+                      <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between">
+                        <span className="font-bold text-sm">Total</span>
+                        <span className="font-bold text-sm text-primary">₹{order.totalAmount}</span>
                       </div>
                     </div>
 
                     {/* Delivery Address */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '16px', fontSize: '13px' }}>
-                      <MapPin size={16} color="#EC4899" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <div className="flex items-start gap-2 mb-4 text-sm">
+                      <MapPin size={16} className="text-primary mt-0.5 flex-shrink-0" />
                       <div>
-                        <p style={{ fontWeight: 600, marginBottom: '2px' }}>{order.deliveryAddress.name}</p>
-                        <p style={{ color: 'rgba(255,255,255,0.5)' }}>{order.deliveryAddress.address}</p>
+                        <p className="font-semibold text-gray-800">{order.deliveryAddress.name}</p>
+                        <p className="text-gray-500 text-xs">{order.deliveryAddress.address}</p>
                       </div>
+                    </div>
+
+                    {/* Delivery Fee Banner */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-4 text-center">
+                      <span className="text-green-700 text-xs font-bold">💰 You'll earn ₹{order.deliveryFeeAmount || 30} for this delivery</span>
                     </div>
 
                     <button
                       onClick={() => handleAcceptOrder(order._id)}
                       disabled={actionLoading || !isAvailable}
-                      style={{
-                        width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
-                        background: isAvailable ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255,255,255,0.1)',
-                        color: '#fff', fontSize: '15px', fontWeight: 800, cursor: isAvailable ? 'pointer' : 'default',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                        transition: 'all 0.3s', opacity: actionLoading ? 0.7 : 1
-                      }}
+                      className={`w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg ${
+                        isAvailable
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-green-200 hover:-translate-y-0.5'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                      style={{ opacity: actionLoading ? 0.7 : 1 }}
                     >
                       <Package size={18} /> Accept Order
                     </button>
@@ -396,152 +361,140 @@ export default function RiderDashboard() {
         {tab === 'active' && (
           <div>
             {!activeDelivery ? (
-              <div style={{
-                textAlign: 'center', padding: '60px 20px',
-                background: 'rgba(255,255,255,0.03)', borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.06)'
-              }}>
-                <Navigation size={48} color="rgba(255,255,255,0.2)" style={{ margin: '0 auto 16px' }} />
-                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>No active delivery</h3>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Accept an order from the queue to start delivering</p>
+              <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-16 text-center">
+                <Navigation size={48} className="mx-auto mb-4 text-gray-300" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No active delivery</h3>
+                <p className="text-gray-500 text-sm">Accept an order from the queue to start delivering</p>
               </div>
             ) : (
-              <div style={{
-                background: 'rgba(255,255,255,0.04)', borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden'
-              }}>
+              <div className="space-y-4">
                 {/* Status Banner */}
-                <div style={{
-                  background: activeDelivery.orderStatus === 'out_for_delivery'
-                    ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)'
-                    : 'linear-gradient(135deg, #F59E0B, #D97706)',
-                  padding: '20px 24px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {activeDelivery.orderStatus === 'out_for_delivery' ? <Navigation size={24} /> : <Package size={24} />}
-                    <div>
-                      <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
-                        {activeDelivery.orderStatus === 'out_for_delivery' ? 'On the way to customer' : 'Pickup from restaurant'}
-                      </h3>
-                      <p style={{ fontSize: '12px', opacity: 0.8, margin: 0 }}>
-                        Order #{activeDelivery._id.slice(-6).toUpperCase()}
-                      </p>
+                <div className={`rounded-2xl overflow-hidden shadow-lg ${
+                  activeDelivery.orderStatus === 'out_for_delivery'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                    : 'bg-gradient-to-r from-amber-500 to-orange-600'
+                }`}>
+                  <div className="p-5 flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      {activeDelivery.orderStatus === 'out_for_delivery' ? <Navigation size={24} /> : <Package size={24} />}
+                      <div>
+                        <h3 className="text-lg font-bold">
+                          {activeDelivery.orderStatus === 'out_for_delivery' ? '🚀 On the Way to Customer' : '📦 Pickup from Restaurant'}
+                        </h3>
+                        <p className="text-sm opacity-80">Order #{activeDelivery._id.slice(-6).toUpperCase()}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black">₹{activeDelivery.totalAmount}</p>
+                      <p className="text-xs opacity-80">Earn ₹{activeDelivery.deliveryFeeAmount || 30}</p>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ padding: '24px' }}>
-                  {/* Route Steps */}
-                  <div style={{ marginBottom: '24px' }}>
-                    {/* Restaurant */}
-                    <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div style={{
-                          width: '36px', height: '36px', borderRadius: '50%',
-                          background: activeDelivery.orderStatus === 'ready' ? '#F59E0B' : '#10B981',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                          {activeDelivery.orderStatus === 'ready' ? <Package size={16} /> : <CheckCircle size={16} />}
-                        </div>
-                        <div style={{ width: '2px', flex: 1, background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                {/* Route Details */}
+                <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-5">
+                  {/* Restaurant Pickup */}
+                  <div className="flex gap-4 mb-6">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        activeDelivery.orderStatus === 'ready' ? 'bg-amber-500' : 'bg-green-500'
+                      } text-white`}>
+                        {activeDelivery.orderStatus === 'ready' ? <Package size={18} /> : <CheckCircle size={18} />}
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>PICKUP</p>
-                        <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>
-                          🍽️ {activeDelivery.restaurantId?.name}
-                        </h4>
-                        {activeDelivery.restaurantId?.address && (
-                          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{activeDelivery.restaurantId.address}</p>
-                        )}
-                        {activeDelivery.restaurantId?.phone && (
-                          <a href={`tel:${activeDelivery.restaurantId.phone}`} style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '6px',
-                            color: '#3B82F6', fontSize: '13px', textDecoration: 'none', marginTop: '8px'
-                          }}>
-                            <Phone size={14} /> {activeDelivery.restaurantId.phone}
-                          </a>
-                        )}
-                      </div>
+                      <div className="w-0.5 flex-1 bg-gray-200 my-2" />
                     </div>
-
-                    {/* Customer */}
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div style={{
-                          width: '36px', height: '36px', borderRadius: '50%',
-                          background: activeDelivery.orderStatus === 'out_for_delivery' ? '#3B82F6' : 'rgba(255,255,255,0.1)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                          <MapPin size={16} />
-                        </div>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>DELIVERY</p>
-                        <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>
-                          📍 {activeDelivery.deliveryAddress.name}
-                        </h4>
-                        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{activeDelivery.deliveryAddress.address}</p>
-                        <a href={`tel:${activeDelivery.deliveryAddress.phone}`} style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '6px',
-                          color: '#3B82F6', fontSize: '13px', textDecoration: 'none', marginTop: '8px'
-                        }}>
-                          <Phone size={14} /> {activeDelivery.deliveryAddress.phone}
+                    <div className="flex-1 pb-4">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">PICKUP</p>
+                      <h4 className="text-base font-bold text-gray-900 mb-1">🍽️ {activeDelivery.restaurantId?.name}</h4>
+                      {activeDelivery.restaurantId?.address && (
+                        <p className="text-sm text-gray-500 mb-2">{activeDelivery.restaurantId.address}</p>
+                      )}
+                      {activeDelivery.restaurantId?.phone && (
+                        <a href={`tel:${activeDelivery.restaurantId.phone}`} className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:underline">
+                          <Phone size={14} /> {activeDelivery.restaurantId.phone}
                         </a>
-                      </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Items Summary */}
-                  <div style={{ marginBottom: '24px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontWeight: 700 }}>ORDER ITEMS</p>
-                    {activeDelivery.items.map((item, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.7)' }}>{item.quantity}x {item.foodId?.name || 'Item'}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>₹{item.price}</span>
+                  {/* Customer Delivery */}
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        activeDelivery.orderStatus === 'out_for_delivery' ? 'bg-blue-500' : 'bg-gray-200'
+                      } text-white`}>
+                        <MapPin size={18} />
                       </div>
-                    ))}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 800 }}>Total</span>
-                      <span style={{ fontWeight: 800, color: '#10B981', fontSize: '16px' }}>₹{activeDelivery.totalAmount}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">DELIVERY</p>
+                      <h4 className="text-base font-bold text-gray-900 mb-1">📍 {activeDelivery.deliveryAddress.name}</h4>
+                      <p className="text-sm text-gray-500 mb-2">{activeDelivery.deliveryAddress.address}</p>
+                      <a href={`tel:${activeDelivery.deliveryAddress.phone}`} className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:underline">
+                        <Phone size={14} /> {activeDelivery.deliveryAddress.phone}
+                      </a>
                     </div>
                   </div>
+                </div>
 
-                  {/* Action Buttons */}
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    {activeDelivery.orderStatus === 'ready' && (
+                {/* Delivery Map */}
+                <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden">
+                  <div className="p-4 border-b border-gray-100 flex items-center gap-2">
+                    <Map size={18} className="text-primary" />
+                    <h4 className="font-bold text-gray-800 text-sm">Delivery Map</h4>
+                  </div>
+                  <div className="h-64 bg-gray-100 relative">
+                    <iframe
+                      title="Delivery Map"
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      scrolling="no"
+                      src={getMapUrl(activeDelivery.deliveryAddress.address)}
+                      style={{ border: 0 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-5">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">ORDER ITEMS</p>
+                  {activeDelivery.items.map((item, i) => (
+                    <div key={i} className="flex justify-between py-1.5 text-sm">
+                      <span className="text-gray-700">{item.quantity}x {item.foodId?.name || 'Item'}</span>
+                      <span className="text-gray-500">₹{item.price}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-200 mt-3 pt-3 flex justify-between">
+                    <span className="font-bold">Total</span>
+                    <span className="font-bold text-primary text-lg">₹{activeDelivery.totalAmount}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons — Side by Side */}
+                <div className="grid grid-cols-2 gap-4">
+                  {activeDelivery.orderStatus === 'ready' && (
+                    <>
                       <button
                         onClick={() => handleStartDelivery(activeDelivery._id)}
                         disabled={actionLoading}
-                        style={{
-                          flex: 1, padding: '16px', borderRadius: '14px', border: 'none',
-                          background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-                          color: '#fff', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                          boxShadow: '0 8px 32px rgba(59,130,246,0.3)',
-                          opacity: actionLoading ? 0.7 : 1, transition: 'all 0.3s'
-                        }}
+                        className="col-span-2 py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl hover:shadow-blue-200 hover:-translate-y-0.5 transition-all"
+                        style={{ opacity: actionLoading ? 0.7 : 1 }}
                       >
-                        🚀 Start Journey
+                        🚀 Start Riding
                       </button>
-                    )}
-                    {activeDelivery.orderStatus === 'out_for_delivery' && (
-                      <button
-                        onClick={() => handleCompleteDelivery(activeDelivery._id)}
-                        disabled={actionLoading}
-                        style={{
-                          flex: 1, padding: '16px', borderRadius: '14px', border: 'none',
-                          background: 'linear-gradient(135deg, #10B981, #059669)',
-                          color: '#fff', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                          boxShadow: '0 8px 32px rgba(16,185,129,0.3)',
-                          opacity: actionLoading ? 0.7 : 1, transition: 'all 0.3s'
-                        }}
-                      >
-                        ✅ Complete Order
-                      </button>
-                    )}
-                  </div>
+                    </>
+                  )}
+                  {activeDelivery.orderStatus === 'out_for_delivery' && (
+                    <button
+                      onClick={() => handleCompleteDelivery(activeDelivery._id)}
+                      disabled={actionLoading}
+                      className="col-span-2 py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl hover:shadow-green-200 hover:-translate-y-0.5 transition-all"
+                      style={{ opacity: actionLoading ? 0.7 : 1 }}
+                    >
+                      ✅ Complete Ride — Earn ₹{activeDelivery.deliveryFeeAmount || 30}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -552,49 +505,31 @@ export default function RiderDashboard() {
         {tab === 'history' && (
           <div>
             {deliveryHistory.filter(o => ['delivered', 'completed'].includes(o.orderStatus)).length === 0 ? (
-              <div style={{
-                textAlign: 'center', padding: '60px 20px',
-                background: 'rgba(255,255,255,0.03)', borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.06)'
-              }}>
-                <Star size={48} color="rgba(255,255,255,0.2)" style={{ margin: '0 auto 16px' }} />
-                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>No delivery history yet</h3>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Complete your first delivery to see it here</p>
+              <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-16 text-center">
+                <Star size={48} className="mx-auto mb-4 text-gray-300" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No delivery history yet</h3>
+                <p className="text-gray-500 text-sm">Complete your first delivery to see it here</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="space-y-3">
                 {deliveryHistory.filter(o => ['delivered', 'completed'].includes(o.orderStatus)).map(order => (
-                  <div key={order._id} style={{
-                    background: 'rgba(255,255,255,0.04)', borderRadius: '14px',
-                    border: '1px solid rgba(255,255,255,0.06)', padding: '16px',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <div style={{
-                        width: '40px', height: '40px', borderRadius: '10px',
-                        background: (statusColors[order.orderStatus] || '#8B5CF6') + '20',
-                        color: statusColors[order.orderStatus] || '#8B5CF6',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                      }}>
+                  <div key={order._id} className="bg-white rounded-xl border-2 border-gray-100 shadow-md p-4 flex justify-between items-center hover:shadow-lg transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
                         <CheckCircle size={20} />
                       </div>
                       <div>
-                        <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>
+                        <p className="font-bold text-sm text-gray-800">
                           {order.restaurantId?.name} → {order.deliveryAddress.name}
                         </p>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+                        <p className="text-xs text-gray-400">
                           {formatDate(order.deliveredAt || order.createdAt)} • #{order._id.slice(-6).toUpperCase()}
                         </p>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontWeight: 800, color: '#10B981', fontSize: '15px' }}>₹{order.totalAmount}</p>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 700,
-                        color: statusColors[order.orderStatus] || '#8B5CF6'
-                      }}>
-                        {statusLabels[order.orderStatus] || order.orderStatus}
-                      </span>
+                    <div className="text-right">
+                      <p className="font-black text-green-600 text-base">+₹{order.deliveryFeeAmount || 30}</p>
+                      <span className="text-xs font-bold text-green-500">Delivered</span>
                     </div>
                   </div>
                 ))}
@@ -603,13 +538,6 @@ export default function RiderDashboard() {
           </div>
         )}
       </div>
-
-      {/* Global styles */}
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        * { box-sizing: border-box; margin: 0; }
-      `}</style>
     </div>
   );
 }

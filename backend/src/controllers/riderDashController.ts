@@ -145,10 +145,14 @@ export const completeDelivery = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Order not found or not in correct state' });
     }
 
-    // Mark rider as available again
-    await User.findByIdAndUpdate(riderId, { isAvailable: true });
+    // Credit delivery fee to rider's wallet
+    const deliveryFee = order.deliveryFeeAmount || 30;
+    await User.findByIdAndUpdate(riderId, {
+      isAvailable: true,
+      $inc: { walletBalance: deliveryFee }
+    });
 
-    res.json({ message: 'Delivery completed! Great job! 🎉', order });
+    res.json({ message: 'Delivery completed! Great job! 🎉', order, earnings: deliveryFee });
   } catch (error) {
     console.error('Complete delivery error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -223,7 +227,7 @@ export const getRiderProfile = async (req: AuthRequest, res: Response) => {
       {
         $group: {
           _id: null,
-          total: { $sum: '$platformFeeAmount' }
+          total: { $sum: { $ifNull: ['$deliveryFeeAmount', 30] } }
         }
       }
     ]);
@@ -290,11 +294,11 @@ export const getRiderStats = async (req: AuthRequest, res: Response) => {
       Order.countDocuments({ riderId, orderStatus: { $in: ['delivered', 'completed'] }, deliveredAt: { $gte: today } }),
       Order.aggregate([
         { $match: { riderId, orderStatus: { $in: ['delivered', 'completed'] } } },
-        { $group: { _id: null, total: { $sum: '$platformFeeAmount' } } }
+        { $group: { _id: null, total: { $sum: { $ifNull: ['$deliveryFeeAmount', 30] } } } }
       ]),
       Order.aggregate([
         { $match: { riderId, orderStatus: { $in: ['delivered', 'completed'] }, deliveredAt: { $gte: today } } },
-        { $group: { _id: null, total: { $sum: '$platformFeeAmount' } } }
+        { $group: { _id: null, total: { $sum: { $ifNull: ['$deliveryFeeAmount', 30] } } } }
       ])
     ]);
 

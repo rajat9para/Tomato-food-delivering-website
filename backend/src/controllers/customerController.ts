@@ -218,9 +218,10 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
     const baseAmount = totalAmount;
     const gstAmount = Math.round(baseAmount * 0.01); // 1% GST
     const platformFeeAmount = Math.round(baseAmount * 0.01); // 1% Platform fee
-    const finalTotalAmount = baseAmount + gstAmount + platformFeeAmount;
+    const deliveryFeeAmount = 30; // ₹30 delivery fee for rider
+    const finalTotalAmount = baseAmount + gstAmount + platformFeeAmount + deliveryFeeAmount;
 
-    console.log('💰 Payment breakdown:', { baseAmount, gstAmount, platformFeeAmount, finalTotalAmount });
+    console.log('💰 Payment breakdown:', { baseAmount, gstAmount, platformFeeAmount, deliveryFeeAmount, finalTotalAmount });
 
     const transactionId = `TXN${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
 
@@ -231,6 +232,7 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
       baseAmount,
       gstAmount,
       platformFeeAmount,
+      deliveryFeeAmount,
       totalAmount: finalTotalAmount,
       deliveryAddress,
       orderStatus: 'pending'

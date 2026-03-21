@@ -75,7 +75,7 @@ export default function ChatbotWidget() {
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button — Red/White Tomato Theme */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -84,34 +84,34 @@ export default function ChatbotWidget() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            width: '60px',
-            height: '60px',
+            width: '62px',
+            height: '62px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
-            border: 'none',
+            background: 'linear-gradient(135deg, #E23744, #d62b38)',
+            border: '3px solid #fff',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(236, 72, 153, 0.4)',
+            boxShadow: '0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15)',
             zIndex: 9999,
             transition: 'all 0.3s ease',
             animation: 'chatPulse 2s ease-in-out infinite'
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 12px 40px rgba(236, 72, 153, 0.5)';
+            e.currentTarget.style.transform = 'scale(1.12)';
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(226, 55, 68, 0.55), 0 0 0 6px rgba(226, 55, 68, 0.2)';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 32px rgba(236, 72, 153, 0.4)';
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15)';
           }}
         >
           <MessageCircle size={28} color="#fff" />
         </button>
       )}
 
-      {/* Chat Panel */}
+      {/* Chat Panel — Clean Red/White Theme */}
       {isOpen && (
         <div
           style={{
@@ -127,14 +127,14 @@ export default function ChatbotWidget() {
             zIndex: 9999,
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(226,55,68,0.15)',
+            border: '1px solid #eee',
             animation: 'chatSlideUp 0.3s ease-out'
           }}
         >
-          {/* Header */}
+          {/* Header — Tomato Red */}
           <div style={{
-            background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+            background: 'linear-gradient(135deg, #E23744, #d62b38)',
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -154,8 +154,8 @@ export default function ChatbotWidget() {
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: '16px' }}>
                   Tomato AI
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>
-                  🟢 Online • Powered by AI
+                <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '12px' }}>
+                  🟢 Online • Ask me anything
                 </div>
               </div>
             </div>
@@ -163,24 +163,24 @@ export default function ChatbotWidget() {
               onClick={() => setIsOpen(false)}
               id="chatbot-close"
               style={{
-                background: 'rgba(255,255,255,0.15)', border: 'none',
+                background: 'rgba(255,255,255,0.2)', border: 'none',
                 borderRadius: '50%', width: '32px', height: '32px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'background 0.2s'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.35)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
             >
               <X size={18} color="#fff" />
             </button>
           </div>
 
-          {/* Messages */}
+          {/* Messages — Clean White Background */}
           <div style={{
             flex: 1,
             overflowY: 'auto',
             padding: '16px',
-            background: '#0f0f1a',
+            background: '#f9fafb',
             display: 'flex',
             flexDirection: 'column',
             gap: '12px'
@@ -198,7 +198,7 @@ export default function ChatbotWidget() {
                 {msg.role === 'assistant' && (
                   <div style={{
                     width: '28px', height: '28px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+                    background: 'linear-gradient(135deg, #E23744, #d62b38)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0
                   }}>
@@ -212,20 +212,21 @@ export default function ChatbotWidget() {
                     ? '16px 16px 4px 16px'
                     : '16px 16px 16px 4px',
                   background: msg.role === 'user'
-                    ? 'linear-gradient(135deg, #EC4899, #8B5CF6)'
-                    : 'rgba(255,255,255,0.08)',
-                  color: '#fff',
+                    ? 'linear-gradient(135deg, #E23744, #d62b38)'
+                    : '#fff',
+                  color: msg.role === 'user' ? '#fff' : '#1f2937',
                   fontSize: '14px',
                   lineHeight: '1.5',
                   wordBreak: 'break-word',
                   border: msg.role === 'assistant'
-                    ? '1px solid rgba(255,255,255,0.06)'
-                    : 'none'
+                    ? '1px solid #e5e7eb'
+                    : 'none',
+                  boxShadow: msg.role === 'assistant' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none'
                 }}>
                   <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
                   <div style={{
                     fontSize: '10px',
-                    color: 'rgba(255,255,255,0.5)',
+                    color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : '#9ca3af',
                     marginTop: '4px',
                     textAlign: msg.role === 'user' ? 'right' : 'left'
                   }}>
@@ -235,11 +236,11 @@ export default function ChatbotWidget() {
                 {msg.role === 'user' && (
                   <div style={{
                     width: '28px', height: '28px', borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
+                    background: '#f3f4f6',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0
+                    flexShrink: 0, border: '1px solid #e5e7eb'
                   }}>
-                    <User size={14} color="#fff" />
+                    <User size={14} color="#6b7280" />
                   </div>
                 )}
               </div>
@@ -251,7 +252,7 @@ export default function ChatbotWidget() {
               }}>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+                  background: 'linear-gradient(135deg, #E23744, #d62b38)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0
                 }}>
@@ -259,10 +260,11 @@ export default function ChatbotWidget() {
                 </div>
                 <div style={{
                   padding: '10px 14px', borderRadius: '16px 16px 16px 4px',
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: '#fff',
+                  border: '1px solid #e5e7eb',
                   display: 'flex', alignItems: 'center', gap: '6px',
-                  color: 'rgba(255,255,255,0.6)', fontSize: '13px'
+                  color: '#9ca3af', fontSize: '13px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
                 }}>
                   <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
                   Thinking...
@@ -273,11 +275,11 @@ export default function ChatbotWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
+          {/* Input — White with Red Accents */}
           <div style={{
             padding: '12px 16px',
-            background: '#13132a',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: '#fff',
+            borderTop: '1px solid #e5e7eb',
             display: 'flex',
             gap: '8px',
             flexShrink: 0
@@ -295,15 +297,15 @@ export default function ChatbotWidget() {
                 flex: 1,
                 padding: '10px 16px',
                 borderRadius: '12px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                border: '1px solid #e5e7eb',
+                background: '#f9fafb',
+                color: '#1f2937',
                 fontSize: '14px',
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={e => e.currentTarget.style.borderColor = 'rgba(236, 72, 153, 0.5)'}
-              onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+              onFocus={e => e.currentTarget.style.borderColor = '#E23744'}
+              onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
             />
             <button
               onClick={sendMessage}
@@ -312,15 +314,15 @@ export default function ChatbotWidget() {
               style={{
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: input.trim() && !isLoading
-                  ? 'linear-gradient(135deg, #EC4899, #8B5CF6)'
-                  : 'rgba(255,255,255,0.05)',
+                  ? 'linear-gradient(135deg, #E23744, #d62b38)'
+                  : '#f3f4f6',
                 border: 'none', cursor: input.trim() && !isLoading ? 'pointer' : 'default',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.2s',
                 flexShrink: 0
               }}
             >
-              <Send size={18} color={input.trim() && !isLoading ? '#fff' : 'rgba(255,255,255,0.3)'} />
+              <Send size={18} color={input.trim() && !isLoading ? '#fff' : '#d1d5db'} />
             </button>
           </div>
         </div>
@@ -329,8 +331,8 @@ export default function ChatbotWidget() {
       {/* Global styles for animations */}
       <style>{`
         @keyframes chatPulse {
-          0%, 100% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.4); }
-          50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.6), 0 0 0 8px rgba(236, 72, 153, 0.1); }
+          0%, 100% { box-shadow: 0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15); }
+          50% { box-shadow: 0 8px 32px rgba(226, 55, 68, 0.6), 0 0 0 8px rgba(226, 55, 68, 0.1); }
         }
         @keyframes chatSlideUp {
           from { opacity: 0; transform: translateY(20px) scale(0.95); }

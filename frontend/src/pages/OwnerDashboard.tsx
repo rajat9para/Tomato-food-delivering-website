@@ -757,18 +757,40 @@ const OwnerDashboard = () => {
 
                       {order.orderStatus === 'pending' && (
                         <button onClick={() => updateOrderStatus(order._id, 'preparing')} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition shadow-sm">
-                          Start Preparing
+                          🍳 Start Preparing
                         </button>
                       )}
                       {order.orderStatus === 'preparing' && (
                         <button onClick={() => updateOrderStatus(order._id, 'ready')} className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition shadow-sm">
-                          Mark Ready
+                          ✅ Mark Ready
                         </button>
                       )}
-                      {order.orderStatus === 'ready' && (
-                        <button onClick={() => updateOrderStatus(order._id, 'completed')} className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition shadow-sm">
-                          Complete Order
-                        </button>
+                      {order.orderStatus === 'ready' && !order.riderId && (
+                        <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-3 text-center">
+                          <p className="text-amber-700 text-sm font-bold mb-1">🚴 Waiting for Rider to Accept</p>
+                          <p className="text-amber-600 text-xs">Order is in the rider queue. A rider will pick it up shortly.</p>
+                        </div>
+                      )}
+                      {order.orderStatus === 'ready' && order.riderId && (
+                        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 text-center">
+                          <p className="text-blue-700 text-sm font-bold">🏍️ Rider Assigned — Pickup Pending</p>
+                        </div>
+                      )}
+                      {order.orderStatus === 'out_for_delivery' && (
+                        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-3 text-center">
+                          <p className="text-indigo-700 text-sm font-bold">🚀 Out for Delivery</p>
+                          <p className="text-indigo-500 text-xs">Rider is on the way to the customer</p>
+                        </div>
+                      )}
+                      {order.orderStatus === 'delivered' && (
+                        <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3 text-center">
+                          <p className="text-green-700 text-sm font-bold">✅ Delivered Successfully</p>
+                        </div>
+                      )}
+                      {order.orderStatus === 'completed' && (
+                        <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3 text-center">
+                          <p className="text-green-700 text-sm font-bold">✅ Order Completed</p>
+                        </div>
                       )}
                     </div>
                   </div>
