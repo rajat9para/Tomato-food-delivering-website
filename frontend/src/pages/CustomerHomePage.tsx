@@ -655,13 +655,42 @@ const CustomerHomePage = () => {
               <X size={20} />
             </button>
 
-            <div className="text-center mb-12">
-              <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl">
                 <ShoppingCart size={40} className="text-primary" />
               </div>
-              <h3 className="text-4xl font-black text-gray-950 tracking-tighter mb-2">Checkout</h3>
-              <p className="text-gray-500 font-medium">Almost there! Select your payment method.</p>
+              <h3 className="text-3xl font-black text-gray-950 tracking-tighter mb-1">Order Summary</h3>
             </div>
+
+            {/* Bill Breakdown */}
+            <div className="bg-gray-50 rounded-2xl p-5 mb-6 space-y-3">
+              <div className="flex justify-between text-sm font-semibold text-gray-600">
+                <span>Items Subtotal</span>
+                <span>₹{getTotal().toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-semibold text-gray-600">
+                <span>GST (5%)</span>
+                <span>₹{(getTotal() * 0.05).toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-semibold text-gray-600">
+                <span>Platform Fee (2%)</span>
+                <span>₹{(getTotal() * 0.02).toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-bold text-[#E23744]">
+                <span>🚴 Delivery Fee</span>
+                <span>₹30</span>
+              </div>
+              <div className="border-t-2 border-gray-200 pt-3 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-black text-gray-900">Total</span>
+                  <span className="text-2xl font-black text-primary">
+                    ₹{(getTotal() + getTotal() * 0.05 + getTotal() * 0.02 + 30).toFixed(0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-center text-gray-400 font-medium text-xs mb-4">Select your payment method</p>
 
             <div className="space-y-4">
               <button

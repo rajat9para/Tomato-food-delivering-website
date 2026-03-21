@@ -37,7 +37,7 @@ const CustomerSidebar = () => {
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-80 glass border-r border-white/40 shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display bg-[#FDFBF7]">
+    <div className="fixed left-0 top-0 h-screen w-80 glass border-r-2 border-r-[#E23744] shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display bg-[#FDFBF7]">
       {/* Premium Logo Section */}
       <div className="p-10">
         <div

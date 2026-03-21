@@ -82,7 +82,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-[var(--background)] font-sans selection:bg-primary/10 selection:text-primary">
       <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4">
-        <div className="max-w-7xl mx-auto glass rounded-[2rem] px-8 py-3 flex justify-between items-center gap-6 shadow-2xl border-white/40">
+        <div className="max-w-7xl mx-auto glass rounded-[2rem] px-8 py-3 flex justify-between items-center gap-6 shadow-2xl border-2 border-[#E23744]/30 border-b-[#E23744]">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
               <img src="/tomato-logo.png" alt="T" className="w-7 h-7 object-contain drop-shadow-md" />
@@ -217,18 +217,13 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 max-w-[100%] mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[100%] mx-auto">
             {[
               {
                 title: 'Customer',
                 description: 'Order & enjoy the best food delivered to your doorstep',
                 icon: ShoppingCart,
                 gradient: 'from-[#E23744] via-[#d62b38] to-[#c4232f]',
-                lightBg: 'bg-red-50',
-                iconBg: 'bg-white/20',
-                borderColor: 'border-red-100',
-                hoverBorder: 'hover:border-[#E23744]',
-                shadow: 'hover:shadow-red-200/60',
                 features: ['Instant Delivery', 'Live Order Tracking', '24/7 Expert Support'],
                 path: '/register/customer',
                 emoji: '🛒'
@@ -238,11 +233,6 @@ const Landing = () => {
                 description: 'Grow your food business & reach thousands of customers',
                 icon: Store,
                 gradient: 'from-[#E23744] via-[#d62b38] to-[#c4232f]',
-                lightBg: 'bg-red-50',
-                iconBg: 'bg-white/20',
-                borderColor: 'border-red-100',
-                hoverBorder: 'hover:border-[#E23744]',
-                shadow: 'hover:shadow-red-200/60',
                 features: ['Sales Analytics', 'Full Menu Control', 'Instant Payouts'],
                 path: '/register/owner',
                 emoji: '🏪'
@@ -252,11 +242,6 @@ const Landing = () => {
                 description: 'Deliver food & earn flexibly on your own schedule',
                 icon: Bike,
                 gradient: 'from-[#E23744] via-[#d62b38] to-[#c4232f]',
-                lightBg: 'bg-red-50',
-                iconBg: 'bg-white/20',
-                borderColor: 'border-red-100',
-                hoverBorder: 'hover:border-[#E23744]',
-                shadow: 'hover:shadow-red-200/60',
                 features: ['Flexible Hours', 'Route Navigation', 'Earnings Dashboard'],
                 path: '/register/rider',
                 emoji: '🚴'
@@ -266,11 +251,6 @@ const Landing = () => {
                 description: 'Manage & oversee the entire Tomato platform',
                 icon: Shield,
                 gradient: 'from-[#E23744] via-[#d62b38] to-[#c4232f]',
-                lightBg: 'bg-red-50',
-                iconBg: 'bg-white/20',
-                borderColor: 'border-red-100',
-                hoverBorder: 'hover:border-[#E23744]',
-                shadow: 'hover:shadow-red-200/60',
                 features: ['Full Oversight', 'Security Tools', 'Reports & Analytics'],
                 path: '/login',
                 emoji: '🛡️'
@@ -278,16 +258,8 @@ const Landing = () => {
             ].map((role, index) => (
               <div
                 key={index}
-                className={`group relative bg-white border-2 ${role.borderColor} ${role.hoverBorder} ${role.shadow} transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl overflow-hidden flex flex-col
-                  ${index === 0 ? 'rounded-t-[2rem] sm:rounded-l-[2rem] sm:rounded-tr-none' : ''}
-                  ${index === 3 ? 'rounded-b-[2rem] sm:rounded-r-[2rem] sm:rounded-bl-none' : ''}
-                  lg:${index === 0 ? 'rounded-l-[2rem] rounded-r-none' : ''}
-                  lg:${index === 3 ? 'rounded-r-[2rem] rounded-l-none' : ''}
-                `}
+                className={`group relative bg-white border-2 border-[#E23744]/30 rounded-2xl hover:border-[#E23744] hover:shadow-[0_12px_40px_rgba(226,55,68,0.2)] transition-all duration-500 cursor-pointer transform hover:-translate-y-3 hover:scale-[1.03] overflow-hidden flex flex-col`}
                 onClick={() => navigate(role.path)}
-                style={{
-                  borderRadius: index === 0 ? undefined : index === 3 ? undefined : '0',
-                }}
               >
                 {/* Gradient Header with Icon */}
                 <div className={`relative bg-gradient-to-br ${role.gradient} px-6 py-8 text-center overflow-hidden`}>
@@ -296,7 +268,7 @@ const Landing = () => {
                   <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
                   
                   {/* Icon */}
-                  <div className={`relative z-10 w-20 h-20 mx-auto ${role.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-white/20`}>
+                  <div className="relative z-10 w-20 h-20 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-white/20">
                     <role.icon className="w-10 h-10 text-white" />
                   </div>
                   
@@ -318,7 +290,7 @@ const Landing = () => {
                   <div className="space-y-2.5 mb-6 flex-1">
                     {role.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2.5">
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-[#E23744] flex-shrink-0" />
                         <span className="text-sm font-semibold text-gray-700">{feature}</span>
                       </div>
                     ))}
