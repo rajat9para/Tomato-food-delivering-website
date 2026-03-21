@@ -62,3 +62,15 @@ export const formatPaymentStatus = (status: PaymentStatus): string => {
   };
   return statusMap[status];
 };
+
+import { SERVER_URL } from './api';
+
+export const getImageUrl = (path: string | null | undefined): string => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('data:')) return path;
+
+  // Ensure we don't end up with // or missing /
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${SERVER_URL}${cleanPath}`;
+};

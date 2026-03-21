@@ -1,33 +1,72 @@
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Store, Shield, Search, Star, Clock, CheckCircle, Bike } from 'lucide-react';
+import { ShoppingCart, Store, Shield, Star, CheckCircle, Search, Bike } from 'lucide-react';
+
 import { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import api from '../utils/api';
+import GlobalBackground from '../components/GlobalBackground';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+
+
+
+  const foodImages = [
+    '/foodimages/f1.jpg',
+    '/foodimages/f2.jpg',
+    '/foodimages/f3.jpg',
+    '/foodimages/f4.jpg',
+    '/foodimages/f5.jpg',
+    '/foodimages/f6.jpg',
+    '/foodimages/f7.jpg',
+    '/foodimages/f8.jpg',
+    '/foodimages/f9.jpg',
+    '/foodimages/f10.jpg',
+    '/foodimages/f11.jpg',
+    '/foodimages/f12.jpg',
+  ];
+
+  // Hero slideshow timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % foodImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+
 
   useEffect(() => {
     const searchItems = async () => {
       if (searchQuery.trim().length > 0) {
         try {
+          // Search restaurants
           const restaurantsRes = await api.get('/public/restaurants');
           const filteredRestaurants = restaurantsRes.data.filter((restaurant: any) =>
             restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
+
+          // Search dishes
           const dishesRes = await api.get('/public/dishes');
           const filteredDishes = dishesRes.data.filter((dish: any) =>
             dish.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
-          setSuggestions([
+
+          const suggestionsList = [
             ...filteredRestaurants.slice(0, 3).map((r: any) => ({ ...r, type: 'restaurant' })),
             ...filteredDishes.slice(0, 3).map((d: any) => ({ ...d, type: 'dish' }))
-          ]);
+          ];
+
+          setSuggestions(suggestionsList);
           setShowSuggestions(true);
         } catch (error) {
+          console.error('Search error:', error);
           setSuggestions([]);
         }
       } else {
@@ -35,100 +74,260 @@ const Landing = () => {
         setShowSuggestions(false);
       }
     };
+
     const debounce = setTimeout(searchItems, 300);
     return () => clearTimeout(debounce);
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/tomato-logo.png" alt="TOMATO" className="w-10 h-10 object-contain shadow-sm" />
-            <span className="text-3xl font-display font-bold text-primary tracking-tighter italic">TOMATO</span>
+    <div className="min-h-screen bg-[var(--background)] font-sans selection:bg-primary/10 selection:text-primary">
+      <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4">
+        <div className="max-w-7xl mx-auto glass rounded-[2rem] px-8 py-3 flex justify-between items-center gap-6 shadow-2xl border-white/40">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+              <img src="/tomato-logo.png" alt="T" className="w-7 h-7 object-contain drop-shadow-md" />
+            </div>
+            <span className="text-2xl font-bold text-primary tracking-tight">tomato</span>
           </div>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold shadow-lg shadow-pink-500/20 transition-all duration-300 hover:-translate-y-1"
-          >
-            Sign In
-          </button>
+
+          <div className="flex-1 max-w-xl relative hidden md:block">
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+              <input
+                type="text"
+                placeholder="Search for restaurants, cuisines or dishes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="w-full pl-14 pr-6 py-3.5 bg-white/50 backdrop-blur-md border-2 border-transparent rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 font-medium"
+              />
+            </div>
+
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-4 glass-card rounded-[2rem] shadow-2xl overflow-hidden z-50 animate-scale-in border-white/60">
+                {suggestions.map((item: any) => (
+                  <div
+                    key={item._id}
+                    onClick={() => navigate('/login')}
+                    className="px-6 py-4 hover:bg-primary/5 cursor-pointer transition-all flex items-center gap-4 group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-md group-hover:scale-110 transition-transform">
+                      {item.type === 'restaurant' ? (
+                        item.imageUrl ? <img src={item.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary text-white flex items-center justify-center font-bold text-lg">{item.name.charAt(0)}</div>
+                      ) : (
+                        item.images?.[0] ? <img src={item.images[0]} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-orange-500 text-white flex items-center justify-center text-xl">🍽️</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-900 group-hover:text-primary transition-colors">{item.name}</div>
+                      <div className="text-sm text-gray-500 font-medium capitalize">{item.type} • {item.cuisineType?.join(', ') || (item.price ? `₹${item.price}` : 'Food')}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-8 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-200 hover:-translate-y-1 transition-all duration-300 active:scale-95 shadow-lg whitespace-nowrap"
+            >
+              Sign In
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-pink-50/50 -z-10 rounded-l-[100px] hidden lg:block"></div>
-        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="animate-slide-up">
-            <h1 className="text-6xl lg:text-7xl font-display font-bold text-gray-900 leading-tight mb-6">
-              Premium Food<br />
-              <span className="text-gradient">Delivered Fast.</span>
-            </h1>
-            <p className="text-xl text-gray-500 mb-10 max-w-lg">
-              Experience the best dining in your city with TOMATO's elite collection of verified restaurants.
-            </p>
-
-            <div className="relative max-w-md mb-8">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search restaurants or dishes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white outline-none transition-all input-premium"
+      <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          {foodImages.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1500 ${index === currentSlide ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+                } transition-all duration-[2000ms] ease-out`}
+            >
+              <img
+                src={image}
+                alt=""
+                className="w-full h-full object-cover"
               />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
-                  {suggestions.map((item) => (
-                    <div key={item._id} onClick={() => navigate('/login')} className="px-5 py-3 hover:bg-pink-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0">
-                      <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-primary text-xs">🍽️</div>
-                      <div>
-                        <div className="font-bold text-gray-900 text-sm">{item.name}</div>
-                        <div className="text-xs text-gray-400 capitalize">{item.type}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-transparent"></div>
             </div>
+          ))}
+        </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => navigate('/register/customer')} className="btn-primary">Order Now</button>
-              <button onClick={() => navigate('/register/owner')} className="btn-secondary">Partner with Us</button>
-            </div>
+        <div className="relative z-10 text-center px-6 max-w-6xl mx-auto pt-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white text-sm font-bold mb-8 animate-slide-in-down">
+            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <span>Over 10,000+ happy foodies served</span>
           </div>
+          <h1 className="text-6xl md:text-9xl font-black text-white mb-8 leading-[0.9] tracking-tighter animate-fade-in drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+            Craving?<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-primary-dark uppercase">Tomato.</span>
+          </h1>
+          <p className="text-xl md:text-3xl text-white/90 mb-12 font-medium max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
+            Delicious food from your favorite restaurants,<br className="hidden md:block" />
+            delivered straight to your doorstep in minutes.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-in-up">
+            <button
+              onClick={() => navigate('/register/customer')}
+              className="group px-12 py-5 bg-primary text-white rounded-[2rem] font-black text-xl hover:bg-white hover:text-primary transition-all duration-300 shadow-2xl hover:shadow-white/20 transform hover:-translate-y-2 flex items-center gap-3"
+            >
+              Order Now
+              <div className="w-10 h-10 bg-white/20 group-hover:bg-primary/10 rounded-full flex items-center justify-center transition-colors">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
+            </button>
+            <button
+              onClick={() => navigate('/register/owner')}
+              className="px-12 py-5 bg-white/10 backdrop-blur-md text-white rounded-[2rem] font-bold text-xl hover:bg-white hover:text-gray-900 transition-all duration-300 border-2 border-white/30 shadow-2xl transform hover:-translate-y-2 flex items-center gap-3"
+            >
+              Partner With Us
+              <Store className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
-          <div className="relative animate-fade-in hidden lg:block">
-            <div className="absolute -inset-4 bg-pink-100 blur-3xl opacity-30 rounded-full"></div>
-            <img src="/foodimages/f1.jpg" alt="Delicious Food" className="relative w-full h-[500px] object-cover rounded-[3rem] shadow-2xl border-8 border-white" />
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-60">
+          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center p-1">
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div>
           </div>
+          <span className="text-white text-[10px] uppercase font-black tracking-[0.2em]">Scroll Down</span>
         </div>
       </section>
 
-      {/* Roles Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-display font-bold text-gray-900 mb-4">Start Your Journey</h2>
-            <p className="text-gray-500">Select how you want to use TOMATO</p>
+      <section className="py-32 relative overflow-hidden">
+        <GlobalBackground />
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8 text-center md:text-left">
+            <div className="max-w-2xl">
+              <h2 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 tracking-tighter leading-none">
+                Start your journey<br /><span className="text-primary italic">In Seconds.</span>
+              </h2>
+              <p className="text-xl text-gray-500 font-medium">
+                Choose your role and unlock the world of taste with Tomato.
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <img src="/tomato-logo.png" alt="" className="w-32 h-32 opacity-10 rotate-12" />
+            </div>
           </div>
-          <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 max-w-[100%] mx-auto">
             {[
-              { icon: ShoppingCart, title: 'Customer', desc: 'Order from elite restaurants', path: '/register/customer' },
-              { icon: Store, title: 'Restaurant', desc: 'Grow your business with us', path: '/register/owner' },
-              { icon: Bike, title: 'Rider', desc: 'Deliver & earn with us', path: '/register/rider' },
-              { icon: Shield, title: 'Admin', desc: 'Securely manage the platform', path: '/login' }
-            ].map((role) => (
-              <div key={role.title} onClick={() => navigate(role.path)} className="glass-card p-10 cursor-pointer group card-hover">
-                <div className="w-16 h-16 bg-pink-50 text-primary rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
-                  <role.icon size={32} />
+              {
+                title: 'Customer',
+                description: 'Order & enjoy the best food delivered to your doorstep',
+                icon: ShoppingCart,
+                gradient: 'from-red-500 via-red-600 to-rose-700',
+                lightBg: 'bg-red-50',
+                iconBg: 'bg-white/20',
+                borderColor: 'border-red-200',
+                hoverBorder: 'hover:border-red-400',
+                shadow: 'hover:shadow-red-300/40',
+                features: ['Instant Delivery', 'Live Order Tracking', '24/7 Expert Support'],
+                path: '/register/customer',
+                emoji: '🛒'
+              },
+              {
+                title: 'Restaurant',
+                description: 'Grow your food business & reach thousands of customers',
+                icon: Store,
+                gradient: 'from-orange-500 via-orange-600 to-amber-700',
+                lightBg: 'bg-orange-50',
+                iconBg: 'bg-white/20',
+                borderColor: 'border-orange-200',
+                hoverBorder: 'hover:border-orange-400',
+                shadow: 'hover:shadow-orange-300/40',
+                features: ['Sales Analytics', 'Full Menu Control', 'Instant Payouts'],
+                path: '/register/owner',
+                emoji: '🏪'
+              },
+              {
+                title: 'Rider',
+                description: 'Deliver food & earn flexibly on your own schedule',
+                icon: Bike,
+                gradient: 'from-emerald-500 via-green-600 to-teal-700',
+                lightBg: 'bg-green-50',
+                iconBg: 'bg-white/20',
+                borderColor: 'border-green-200',
+                hoverBorder: 'hover:border-green-400',
+                shadow: 'hover:shadow-green-300/40',
+                features: ['Flexible Hours', 'Route Navigation', 'Earnings Dashboard'],
+                path: '/register/rider',
+                emoji: '🚴'
+              },
+              {
+                title: 'Admin',
+                description: 'Manage & oversee the entire Tomato platform',
+                icon: Shield,
+                gradient: 'from-blue-600 via-indigo-600 to-violet-700',
+                lightBg: 'bg-blue-50',
+                iconBg: 'bg-white/20',
+                borderColor: 'border-blue-200',
+                hoverBorder: 'hover:border-blue-400',
+                shadow: 'hover:shadow-blue-300/40',
+                features: ['Full Oversight', 'Security Tools', 'Reports & Analytics'],
+                path: '/login',
+                emoji: '🛡️'
+              }
+            ].map((role, index) => (
+              <div
+                key={index}
+                className={`group relative bg-white border-2 ${role.borderColor} ${role.hoverBorder} ${role.shadow} transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl overflow-hidden flex flex-col
+                  ${index === 0 ? 'rounded-t-[2rem] sm:rounded-l-[2rem] sm:rounded-tr-none' : ''}
+                  ${index === 3 ? 'rounded-b-[2rem] sm:rounded-r-[2rem] sm:rounded-bl-none' : ''}
+                  lg:${index === 0 ? 'rounded-l-[2rem] rounded-r-none' : ''}
+                  lg:${index === 3 ? 'rounded-r-[2rem] rounded-l-none' : ''}
+                `}
+                onClick={() => navigate(role.path)}
+                style={{
+                  borderRadius: index === 0 ? undefined : index === 3 ? undefined : '0',
+                }}
+              >
+                {/* Gradient Header with Icon */}
+                <div className={`relative bg-gradient-to-br ${role.gradient} px-6 py-8 text-center overflow-hidden`}>
+                  {/* Background decorative elements */}
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+                  
+                  {/* Icon */}
+                  <div className={`relative z-10 w-20 h-20 mx-auto ${role.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-white/20`}>
+                    <role.icon className="w-10 h-10 text-white" />
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="relative z-10 text-2xl font-black text-white tracking-tight mb-1">
+                    {role.title}
+                  </h3>
+                  <span className="text-white/60 text-3xl">{role.emoji}</span>
                 </div>
-                <h3 className="text-2xl font-display font-bold mb-3">{role.title}</h3>
-                <p className="text-gray-500 mb-6">{role.desc}</p>
-                <div className="text-primary font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform">
-                  Launch →
+                
+                {/* Content Area */}
+                <div className="flex-1 flex flex-col p-6">
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm font-medium mb-5 leading-relaxed text-center">
+                    {role.description}
+                  </p>
+                  
+                  {/* Features */}
+                  <div className="space-y-2.5 mb-6 flex-1">
+                    {role.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2.5">
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm font-semibold text-gray-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <button className={`w-full py-3.5 bg-gradient-to-r ${role.gradient} text-white rounded-xl font-bold text-sm group-hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 hover:opacity-90 active:scale-95`}>
+                    Get Started →
+                  </button>
                 </div>
               </div>
             ))}
@@ -136,25 +335,88 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Why Us Section */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center max-w-5xl mx-auto">
-          {[
-            { icon: Star, title: 'Elite Quality', text: 'Hand-picked restaurants only' },
-            { icon: Clock, title: 'Fastest Delivery', text: 'Under 30 minutes guaranteed' },
-            { icon: CheckCircle, title: 'Total Security', text: 'Pay with complete peace of mind' }
-          ].map((item) => (
-            <div key={item.title}>
-              <div className="w-16 h-16 bg-gray-50 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <item.icon size={28} />
+
+
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center gap-20">
+            <div className="flex-1 space-y-8">
+              <h2 className="text-6xl font-black text-gray-900 tracking-tighter">
+                Real Time.<br /><span className="text-primary italic">Real Taste.</span>
+              </h2>
+              <p className="text-xl text-gray-500 font-medium leading-relaxed">
+                Our network of thousands of restaurants and expert delivery partners ensure you never have to wait for your favorites.
+              </p>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="p-8 rounded-[2rem] bg-white border-2 border-primary/10 shadow-xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300">
+                  <div className="text-4xl font-black text-primary mb-1">30m</div>
+                  <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Avg Delivery</div>
+                </div>
+                <div className="p-8 rounded-[2rem] bg-white border-2 border-primary/10 shadow-xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300">
+                  <div className="text-4xl font-black text-primary mb-1">24/7</div>
+                  <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Support</div>
+                </div>
               </div>
-              <h4 className="text-xl font-display font-bold mb-2">{item.title}</h4>
-              <p className="text-gray-400">{item.text}</p>
             </div>
-          ))}
+            <div className="flex-1 relative h-[600px] flex items-center justify-center">
+              {/* Stacked Images */}
+              <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform -rotate-12 translate-x-12 opacity-60 scale-90 border-4 border-white">
+                <img src={foodImages[(currentSlide + 5) % foodImages.length]} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute w-[80%] h-[70%] rounded-[3rem] overflow-hidden shadow-2xl transform rotate-12 -translate-x-12 opacity-80 scale-95 border-4 border-white">
+                <img src={foodImages[(currentSlide + 8) % foodImages.length]} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="relative w-[85%] h-[75%] rounded-[3rem] overflow-hidden shadow-3xl transform hover:rotate-2 hover:scale-105 transition-all duration-500 border-8 border-white group z-10">
+                <img src={foodImages[(currentSlide + 2) % foodImages.length]} alt="" className="w-full h-full object-cover" />
+              </div>
+
+              {/* Float Badge */}
+              <div className="absolute bottom-10 -left-6 glass-card p-6 rounded-[2rem] shadow-2xl animate-float border-white z-20 hidden lg:block">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-lg hover:rotate-180 transition-transform duration-700">
+                    <CheckCircle className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-black text-gray-900 leading-tight">Reliable</div>
+                    <div className="text-xs font-bold text-gray-400 uppercase">Quality Assured</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
+      <section className="py-24 px-6 mb-24">
+        <div className="max-w-7xl mx-auto rounded-[4rem] bg-black relative overflow-hidden shadow-3xl p-16 md:p-32 text-center group">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 via-transparent to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+
+          <div className="relative z-10 space-y-12">
+            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none">
+              The Finest Plate.<br /><span className="text-primary italic">Delivered.</span>
+            </h2>
+            <p className="text-2xl text-gray-400 font-medium max-w-3xl mx-auto">
+              Join millions of users who trust Tomato for their daily meals and restaurant management.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+              <button
+                onClick={() => navigate('/register/customer')}
+                className="px-16 py-6 bg-white text-black rounded-full font-black text-2xl hover:bg-primary hover:text-white transition-all duration-300 shadow-2xl hover:shadow-primary/40 transform hover:-translate-y-2 active:scale-95"
+              >
+                Start Ordering
+              </button>
+              <button
+                onClick={() => navigate('/register/owner')}
+                className="px-16 py-6 bg-gray-950 text-white rounded-full font-black text-2xl hover:bg-white hover:text-gray-950 transition-all duration-300 border-2 border-gray-950 transform hover:-translate-y-2 active:scale-95"
+              >
+                Become Partner
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <FloatingActionButton />
       <Footer />
     </div>
   );

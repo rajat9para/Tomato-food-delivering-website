@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import api from '../utils/api';
 
 interface AuthContextType {
   token: string | null;
@@ -8,7 +9,7 @@ interface AuthContextType {
   profilePhoto: string | null;
   premiumMember: boolean;
   loading: boolean;
-  login: (token: string, role: string, userId: string, name: string) => void;
+  login: (token: string, role: string, userId: string, name: string, profilePhoto?: string, premiumMember?: boolean) => void;
   logout: () => void;
   updateProfile: (profilePhoto?: string, premiumMember?: boolean) => void;
 }
@@ -36,17 +37,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch('/api/auth/verify', {
-        headers: {
-          'Authorization': `Bearer ${storedToken}`
-        }
-      });
+      const response = await api.get('/auth/verify');
 
-      if (!response.ok) {
-        throw new Error('Session invalid');
-      }
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.user) {
         setUserId(data.user.id);
@@ -69,15 +63,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = (token: string, role: string, userId: string, name: string) => {
+  const login = (token: string, role: string, userId: string, name: string, userProfilePhoto?: string, isPremium?: boolean) => {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
     localStorage.setItem('userId', userId);
     localStorage.setItem('name', name);
+    if (userProfilePhoto) localStorage.setItem('profilePhoto', userProfilePhoto);
+    if (isPremium !== undefined) localStorage.setItem('premiumMember', isPremium.toString());
+
     setToken(token);
     setRole(role);
     setUserId(userId);
     setName(name);
+    if (userProfilePhoto) setProfilePhoto(userProfilePhoto);
+    if (isPremium !== undefined) setPremiumMember(isPremium);
   };
 
   const logout = () => {

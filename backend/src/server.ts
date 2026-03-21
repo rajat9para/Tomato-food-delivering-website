@@ -6,6 +6,9 @@ import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
 import ownerRoutes from './routes/ownerRoutes';
 import customerRoutes from './routes/customerRoutes';
+import chatbotRoutes from './routes/chatbotRoutes';
+import riderRoutes from './routes/riderRoutes';
+import riderDashRoutes from './routes/riderDashRoutes';
 import path from 'path';
 import fs from 'fs';
 
@@ -38,7 +41,7 @@ app.use(
         callback(null, true);
       } else {
         console.log(`🚫 CORS Blocked Origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(null, true); // Allow all in development
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -99,13 +102,18 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/owner', ownerRoutes);
 app.use('/api/customer', customerRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/riders', riderRoutes);
+app.use('/api/rider', riderDashRoutes);
 
-// Basic health check for Render
-app.get('/health', (req, res) => {
-  res.send('OK');
+// Health check endpoints for Render
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running', timestamp: new Date() });
 });
 
-
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running', timestamp: new Date() });
+});
 
 // 404 handler
 app.use((req, res) => {
@@ -122,29 +130,20 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-const PORT = Number(process.env.PORT) || 5000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const PORT = API_PORT;
 
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI is not defined in environment variables');
-  process.exit(1);
-}
-
-import mongoose from 'mongoose';
-
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log('========================================');
-      console.log('✅ TOMATO Backend Server Started');
-      console.log('========================================');
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`🌐 API: ${BASE_URL}`);
-      console.log(`🗄️  Database: Connected`);
-      console.log('========================================');
-    });
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
+connectDB().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log('========================================');
+    console.log('✅ TOMATO Backend Server Started');
+    console.log('========================================');
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 API: ${BASE_URL}`);
+    console.log(`📁 Uploads: ${path.join(process.cwd(), 'public/uploads')}`);
+    console.log(`🗄️  Database: Connected`);
+    console.log('========================================');
   });
+}).catch((err) => {
+  console.error('❌ Failed to start server:', err);
+  process.exit(1);
+});

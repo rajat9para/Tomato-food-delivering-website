@@ -9,7 +9,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showEmail, setShowEmail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -20,26 +19,40 @@ const Login = () => {
     setLoading(true);
 
     try {
+      console.log('🚀 [LOGIN DEBUG] Sending request to /auth/login for:', email);
       const response = await api.post('/auth/login', { email, password });
+      console.log('✅ [LOGIN DEBUG] Response received:', response.status, response.data);
+
       const { data } = response;
-      login(data.token, data.role, data.userId, data.name);
+      login(data.token, data.role, data.userId, data.name, data.profilePhoto, data.premiumMember);
 
       if (data.role === 'admin') navigate('/admin/dashboard');
       else if (data.role === 'owner') navigate('/owner/dashboard');
       else if (data.role === 'rider') navigate('/rider/dashboard');
       else navigate('/customer/home');
     } catch (err: any) {
-      if (err.code === 'ERR_NETWORK') {
-        setError('Network error. Check if backend is running on port 5000.');
-      } else if (err.response) {
-        if (err.response.status === 401) {
+      console.error('❌ [LOGIN DEBUG] Error caught:', err);
+
+      // Check if we have a response from the server (even if it's an error status)
+      if (err.response) {
+        console.error('💩 [LOGIN DEBUG] Error response:', err.response.status, err.response.data);
+        const msg = err.response.data?.message || err.response.data?.error;
+        if (msg) {
+          setError(msg);
+        } else if (err.response.status === 401) {
           setError('Invalid email or password');
+        } else if (err.response.status === 404) {
+          setError('User not found');
         } else {
-          const msg = err.response.data?.message || err.response.data?.error || 'Login failed';
-          setError(`${msg} (Status: ${err.response.status})`);
+          setError(`Login failed: ${err.message}`);
         }
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('❌ [LOGIN DEBUG] No response received:', err.request);
+        setError('Server not responding. Please check your internet connection or try again later.');
       } else {
-        setError(`Error: ${err.message || 'Unknown error'}`);
+        // Something happened in setting up the request that triggered an Error
+        setError(`Error: ${err.message}`);
       }
     } finally {
       setLoading(false);
@@ -47,100 +60,107 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex">
       <GlobalBackground />
 
-      {/* Left Side Pink Tags */}
-      <div className="fixed left-0 top-0 h-full w-24 bg-gradient-to-r from-pink-600 to-pink-500 flex flex-col items-center justify-center gap-8 z-0 shadow-2xl">
-        <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-4xl font-display font-black tracking-wider">TOMATO</div>
-          <div className="text-xs font-bold mt-2 tracking-widest">FOOD ORDER</div>
-        </div>
-        <div className="w-16 h-1 bg-white/30 rounded-full"></div>
-        <div className="text-white text-center transform -rotate-90 whitespace-nowrap">
-          <div className="text-2xl font-display font-bold">FAST</div>
-          <div className="text-xs font-semibold">DELIVERY</div>
+      {/* Left Brand Strip */}
+      <div className="hidden lg:flex w-80 bg-gradient-to-b from-primary to-primary-dark flex-col items-center justify-center p-8 relative">
+        <div className="absolute inset-0 bg-[url('/tomato-logo.png')] bg-center bg-no-repeat opacity-10 bg-[length:200px]"></div>
+        <div className="relative z-10 text-center">
+          <img src="/tomato-logo.png" alt="Tomato" className="w-24 h-24 mx-auto mb-6 drop-shadow-2xl" />
+          <h1 className="text-5xl font-black text-white tracking-tighter mb-4">tomato</h1>
+          <p className="text-white/80 font-medium text-lg leading-relaxed">
+            Delicious food,<br />delivered fresh.
+          </p>
+          <div className="mt-12 flex flex-col gap-3 text-white/60 text-sm font-bold uppercase tracking-widest">
+            <span>🍕 Fast Delivery</span>
+            <span>⭐ Top Restaurants</span>
+            <span>💳 Secure Payments</span>
+          </div>
         </div>
       </div>
 
-      <div className="relative z-10 bg-white p-10 rounded-2xl shadow-2xl w-[450px] border border-gray-100 ml-24">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20">
-            <span className="text-2xl font-display font-bold text-white">T</span>
-          </div>
-          <h1 className="text-3xl font-display font-bold text-primary">TOMATO</h1>
-        </div>
-        <h2 className="text-3xl font-display font-bold text-gray-900 mb-3 text-center">Welcome Back</h2>
-        <p className="text-gray-600 text-center mb-8">Login to your account</p>
+      {/* Right Form Section */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="relative z-10 w-full max-w-[420px] animate-scale-in">
+          <div className="glass-card p-10 rounded-[2.5rem] border-white/40 shadow-2xl relative overflow-hidden">
 
-        {error && (
-          <div className="bg-pink-50 border border-pink-200 text-pink-700 p-4 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label className="block text-gray-800 font-bold mb-2">Email Address</label>
-            <div className="relative">
-              <input
-                type={showEmail ? 'text' : 'email'}
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12 input-premium"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowEmail(!showEmail)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showEmail ? '👁️' : '👁️‍🗨️'}
-              </button>
+            {/* Mobile Logo - visible on small screens */}
+            <div className="lg:hidden flex flex-col items-center mb-8">
+              <img src="/tomato-logo.png" alt="Tomato" className="w-16 h-16 mb-3" />
+              <h2 className="text-3xl font-black text-primary tracking-tighter">tomato</h2>
             </div>
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-800 font-bold mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition text-gray-900 placeholder:text-gray-400 pr-12 input-premium"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-lg font-bold text-lg transition-all duration-300 shadow-lg shadow-pink-500/20 hover:-translate-y-1 disabled:opacity-50"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
 
-        <div className="mt-8 text-center border-t border-gray-200 pt-6">
-          <p className="text-gray-600 mb-4">Don't have an account?</p>
-          <div className="flex gap-3">
-            <Link to="/register/customer" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
-              Customer
-            </Link>
-            <Link to="/register/owner" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
-              Owner
-            </Link>
-            <Link to="/register/rider" className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-center shadow-sm hover:shadow-lg hover:-translate-y-1">
-              Rider
-            </Link>
+            <div className="flex flex-col items-center mb-8">
+              <h1 className="text-3xl font-black text-gray-900 tracking-tighter mb-2">Welcome Back</h1>
+              <p className="text-gray-500 font-medium">Login to explore deliciousness</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-50/80 backdrop-blur-sm border border-red-100 text-red-600 p-4 rounded-xl mb-6 text-sm font-semibold flex items-center gap-3 animate-shake">
+                <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Email Address</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="off"
+                  className="w-full px-5 py-4 bg-white/70 border-2 border-primary/20 rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 font-medium"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="w-full px-5 py-4 bg-white/70 border-2 border-primary/20 rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 pr-12 font-medium"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary transition-colors"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 shadow-xl shadow-red-200/50 hover:shadow-2xl hover:shadow-red-300/50 hover:-translate-y-1 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 mt-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Logging in...
+                  </>
+                ) : 'Login'}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-gray-500 font-medium">
+                Don't have an account?{' '}
+                <Link to="/" className="text-primary font-bold hover:text-primary-dark transition-colors">
+                  Register here
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

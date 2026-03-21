@@ -5,6 +5,8 @@ import api from '../utils/api';
 import { Camera, X } from 'lucide-react';
 import GlobalBackground from '../components/GlobalBackground';
 import ImageCarousel from '../components/ImageCarousel';
+import { getImageUrl } from '../utils/formatters';
+import { AreaChart } from '../components/charts';
 
 const OwnerDashboard = () => {
   const { logout, name } = useAuth();
@@ -33,7 +35,7 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(false);
 
   const [editingFood, setEditingFood] = useState<any>(null);
-  const [newFood, setNewFood] = useState({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+  const [newFood, setNewFood] = useState({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [restaurantName, setRestaurantName] = useState('');
   const [restaurantImage, setRestaurantImage] = useState<File | null>(null);
@@ -57,10 +59,12 @@ const OwnerDashboard = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // High-performance background sync (silent)
-      loadData(true, true);
-      checkNewOrders();
-    }, 3000);
+      // Optimized Polling: Only if visible, every 30s
+      if (document.visibilityState === 'visible') {
+        loadData(true, true);
+        checkNewOrders();
+      }
+    }, 30000); // Increased from 3s to 30s
     return () => clearInterval(interval);
   }, [activeTab, timePeriod]);
 
@@ -179,7 +183,8 @@ const OwnerDashboard = () => {
       description: item.description,
       price: item.price.toString(),
       category: item.category || 'Main Course',
-      discount: (item.discount || 0).toString()
+      discount: (item.discount || 0).toString(),
+      priceUnit: item.priceUnit || 'per_item'
     });
     setSelectedImages([]);
     setShowAddFood(true);
@@ -188,7 +193,7 @@ const OwnerDashboard = () => {
   const cancelEdit = () => {
     setEditingFood(null);
     setShowAddFood(false);
-    setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+    setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
     setSelectedImages([]);
   };
 
@@ -230,6 +235,7 @@ const OwnerDashboard = () => {
         name: newFood.name,
         description: newFood.description,
         price: parseFloat(newFood.price),
+        priceUnit: newFood.priceUnit,
         category: newFood.category,
         discount: discount,
         images: imageArray
@@ -354,7 +360,7 @@ const OwnerDashboard = () => {
             </div>
             <div className="hidden md:flex items-center gap-3">
               {restaurant?.imageUrl ? (
-                <img src={restaurant.imageUrl} alt={restaurant.name} className="w-10 h-10 object-cover rounded-full border-2 border-primary" />
+                <img src={getImageUrl(restaurant.imageUrl)} alt={restaurant.name} className="w-10 h-10 object-cover rounded-full border-2 border-primary" />
               ) : restaurant ? (
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white text-lg font-bold border-2 border-primary">
                   {restaurant.name.charAt(0).toUpperCase()}
@@ -403,20 +409,26 @@ const OwnerDashboard = () => {
               <button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
-                className={`w-full p-4 text-left rounded-xl font-bold text-lg transition relative ${activeTab === tab.name
-                  ? 'bg-primary text-white shadow-xl'
-                  : 'text-gray-700 hover:bg-primary/10 hover:text-primary border-2 border-transparent hover:border-primary/30'
+                className={`w-full p-4 text-left rounded-xl font-bold text-lg transition-all relative flex items-center gap-4 group overflow-hidden ${activeTab === tab.name
+                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200 translate-x-1'
+                  : 'text-gray-500 hover:bg-red-50 hover:text-red-600'
                   }`}
               >
-                <span className="mr-2">{tab.emoji}</span>
-                {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
+                {/* Active Indicator Line */}
+                {activeTab === tab.name && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20"></div>
+                )}
+
+                <span className={`text-2xl transition-transform group-hover:scale-110 ${activeTab === tab.name ? 'scale-110' : ''}`}>{tab.emoji}</span>
+                <span className="tracking-wide">{tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}</span>
+
                 {tab.name === 'orders' && newOrdersCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-pulse shadow-lg">
+                  <span className="ml-auto bg-white text-red-600 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm loading-pulse">
                     {newOrdersCount}
                   </span>
                 )}
                 {tab.name === 'messages' && unreadMessagesCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-pulse shadow-lg">
+                  <span className="ml-auto bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm">
                     {unreadMessagesCount}
                   </span>
                 )}
@@ -465,7 +477,7 @@ const OwnerDashboard = () => {
                     <button
                       onClick={() => {
                         setEditingFood(null);
-                        setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0' });
+                        setNewFood({ name: '', description: '', price: '', category: 'Main Course', discount: '0', priceUnit: 'per_item' });
                         setSelectedImages([]);
                         setShowAddFood(true);
                       }}
@@ -486,73 +498,46 @@ const OwnerDashboard = () => {
               </div>
 
               {showAddFood && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-                  <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] max-w-4xl w-full animate-scale-in border border-white/20 overflow-hidden">
-                    <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-10 flex justify-between items-center relative overflow-hidden">
-                      <div className="absolute -top-10 -right-10 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
+                  <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in border border-white/30">
+                    {/* Header - Compact & Elegant */}
+                    <div className="bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                       <div>
-                        <h3 className="text-4xl font-black mb-2">{editingFood ? 'Edit Masterpiece' : 'Add New Dish'}</h3>
-                        <p className="text-red-100 font-bold opacity-90">{editingFood ? 'Refine your culinary creation' : 'Share your delicious food with the world'}</p>
+                        <h3 className="text-lg font-bold">{editingFood ? 'Edit Dish' : 'Add New Dish'}</h3>
+                        <p className="text-white/70 text-xs">Fill in the details below</p>
                       </div>
                       <button
                         onClick={cancelEdit}
-                        className="hover:rotate-90 transition-transform bg-white/20 p-3 rounded-2xl"
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200"
                       >
-                        <X size={32} />
+                        <X size={16} />
                       </button>
                     </div>
 
-                    <div className="p-12">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                        <div className="space-y-6">
+                    {/* Form - Horizontal 2-column layout */}
+                    <div className="p-5">
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Left Column */}
+                        <div className="space-y-3">
+                          {/* Dish Name */}
                           <div>
-                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Dish Name</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Dish Name</label>
                             <input
                               type="text"
-                              placeholder="e.g. Spicy Grilled Salmon"
+                              placeholder="Enter name"
                               value={newFood.name}
                               onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-                              className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white focus:outline-none transition-all font-bold text-lg"
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white outline-none transition-all text-sm"
                             />
                           </div>
-                          <div>
-                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Description</label>
-                            <textarea
-                              placeholder="Describe the flavors, ingredients, and soul of this dish..."
-                              value={newFood.description}
-                              onChange={(e) => setNewFood({ ...newFood, description: e.target.value })}
-                              className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white focus:outline-none transition-all font-medium text-lg h-32 resize-none"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-6">
-                            <div>
-                              <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Price (₹)</label>
-                              <input
-                                type="number"
-                                value={newFood.price}
-                                onChange={(e) => setNewFood({ ...newFood, price: e.target.value })}
-                                className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white font-black text-lg"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Discount (%)</label>
-                              <input
-                                type="number"
-                                value={newFood.discount}
-                                onChange={(e) => setNewFood({ ...newFood, discount: e.target.value })}
-                                className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white font-black text-lg"
-                              />
-                            </div>
-                          </div>
-                        </div>
 
-                        <div className="space-y-6">
+                          {/* Category */}
                           <div>
-                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Category</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
                             <select
                               value={newFood.category}
                               onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-                              className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary focus:bg-white focus:outline-none transition-all font-bold text-lg appearance-none cursor-pointer"
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm appearance-none cursor-pointer"
                             >
                               <option>Main Course</option>
                               <option>Appetizer</option>
@@ -560,14 +545,65 @@ const OwnerDashboard = () => {
                               <option>Beverage</option>
                             </select>
                           </div>
+
+                          {/* Price */}
                           <div>
-                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Food Photography</label>
-                            <label className="w-full h-48 border-3 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-red-50 transition-all group overflow-hidden bg-gray-50">
-                              <div className="text-center group-hover:scale-110 transition-transform">
-                                <Camera className="mx-auto text-gray-400 group-hover:text-primary mb-2" size={40} />
-                                <p className="text-gray-500 font-bold">Tap to Upload</p>
-                                <p className="text-gray-400 text-xs mt-1 font-medium">Up to 4 premium shots</p>
-                              </div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Price (₹)</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={newFood.price}
+                              onChange={(e) => setNewFood({ ...newFood, price: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            />
+                          </div>
+
+                          {/* Discount */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Discount (%)</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={newFood.discount}
+                              onChange={(e) => setNewFood({ ...newFood, discount: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            />
+                          </div>
+
+                          {/* Price Unit */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Price Unit</label>
+                            <select
+                              value={newFood.priceUnit}
+                              onChange={(e) => setNewFood({ ...newFood, priceUnit: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                            >
+                              <option value="per_item">Per Item</option>
+                              <option value="per_kg">Per KG</option>
+                              <option value="per_piece">Per Piece</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="space-y-3">
+                          {/* Description */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                            <textarea
+                              placeholder="Brief description"
+                              value={newFood.description}
+                              onChange={(e) => setNewFood({ ...newFood, description: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm h-20 resize-none"
+                            />
+                          </div>
+
+                          {/* Photos Upload */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Photos</label>
+                            <label className="w-full h-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group gap-2">
+                              <Camera className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
+                              <span className="text-gray-500 text-xs group-hover:text-primary transition-colors">Upload images</span>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -577,17 +613,10 @@ const OwnerDashboard = () => {
                               />
                             </label>
                             {selectedImages.length > 0 && (
-                              <div className="mt-4 grid grid-cols-4 gap-3">
+                              <div className="mt-2 flex gap-1.5 flex-wrap">
                                 {selectedImages.map((file, idx) => (
-                                  <div key={idx} className="relative group">
-                                    <img
-                                      src={URL.createObjectURL(file)}
-                                      alt=""
-                                      className="w-full h-20 object-cover rounded-xl border-2 border-white shadow-md"
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                      <span className="text-white text-[10px] font-black uppercase">Ready</span>
-                                    </div>
+                                  <div key={idx} className="w-10 h-10 rounded-md overflow-hidden border border-gray-200">
+                                    <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
                                   </div>
                                 ))}
                               </div>
@@ -596,18 +625,19 @@ const OwnerDashboard = () => {
                         </div>
                       </div>
 
-                      <div className="flex gap-6 mt-12">
+                      {/* Buttons Row */}
+                      <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
                         <button
                           onClick={addFood}
-                          className="flex-[2] bg-primary hover:bg-primary-dark text-white py-6 rounded-[1.5rem] font-black text-2xl transition-all shadow-xl shadow-red-200 transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3"
+                          className="flex-1 bg-gradient-to-r from-[#E23744] to-[#d62b38] text-white py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 hover:shadow-lg active:scale-[0.98]"
                         >
-                          {editingFood ? 'Apply Changes ✨' : 'Launch Dish 🚀'}
+                          {editingFood ? 'Save Changes' : 'Add Dish'}
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-6 rounded-[1.5rem] font-black text-2xl transition-all border-2 border-gray-100 shadow-sm"
+                          className="px-5 bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
                         >
-                          Discard
+                          Cancel
                         </button>
                       </div>
                     </div>
@@ -774,130 +804,89 @@ const OwnerDashboard = () => {
               </div>
 
               {/* Statistics Cards */}
+              {/* Statistics Cards - Royal Theme */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-10">
-                <div className="bg-white border-2 border-primary rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">💰</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">{timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)} Sales</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">💰</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">{timePeriod} Sales</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">
+                      ₹{timePeriod === 'today' ? todayRevenue.toLocaleString() :
+                        timePeriod === 'weekly' ? weeklyRevenue.toLocaleString() :
+                          timePeriod === 'monthly' ? monthlyRevenue.toLocaleString() :
+                            timePeriod === 'yearly' ? yearlyRevenue.toLocaleString() : revenue.toLocaleString()}
+                    </p>
+                    <p className="text-red-500 text-[10px] mt-1 font-bold">
+                      {timePeriod === 'today' ? todayOrders :
+                        timePeriod === 'weekly' ? weeklyOrders :
+                          timePeriod === 'monthly' ? monthlyOrders :
+                            timePeriod === 'yearly' ? totalOrders : totalOrders} orders
+                    </p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-primary">
-                    ₹{timePeriod === 'today' ? todayRevenue.toLocaleString() :
-                      timePeriod === 'weekly' ? weeklyRevenue.toLocaleString() :
-                        timePeriod === 'monthly' ? monthlyRevenue.toLocaleString() :
-                          timePeriod === 'yearly' ? yearlyRevenue.toLocaleString() : revenue.toLocaleString()}
-                  </p>
-                  <p className="text-gray-500 text-[10px] mt-1">
-                    {timePeriod === 'today' ? todayOrders :
-                      timePeriod === 'weekly' ? weeklyOrders :
-                        timePeriod === 'monthly' ? monthlyOrders :
-                          timePeriod === 'yearly' ? totalOrders : totalOrders} orders
-                  </p>
                 </div>
 
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">📊</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Total Revenue</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">📊</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Total Revenue</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">₹{revenue.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Lifetime Earnings</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-gray-900">₹{revenue.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">All time earnings</p>
                 </div>
 
-                <div className="bg-white border-2 border-purple-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">📦</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Total Orders</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">📦</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Total Orders</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">{totalOrders.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Completed Orders</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-purple-600">{totalOrders.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">All completed orders</p>
                 </div>
 
-                <div className="bg-white border-2 border-orange-200 rounded-xl p-4 md:p-6 shadow-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl md:text-2xl">🎯</span>
-                    <p className="text-gray-600 text-[10px] md:text-sm font-semibold uppercase tracking-wider">Avg Order Value</p>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
+                      <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest">Avg Order Value</p>
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">₹{avgOrderValue.toLocaleString()}</p>
+                    <p className="text-gray-400 text-[10px] mt-1 font-bold">Per Order</p>
                   </div>
-                  <p className="text-xl md:text-3xl font-bold text-orange-600">₹{avgOrderValue.toLocaleString()}</p>
-                  <p className="text-gray-500 text-[10px] mt-1">Per order</p>
                 </div>
               </div>
 
-              {/* Dynamic Revenue Graph */}
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-8 shadow-md">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 font-display">
-                  Revenue Trend - {revenueMonth || timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)}
-                </h3>
-                {monthlyData && monthlyData.length > 0 ? (
-                  <div className="relative h-80 pl-16">
-                    <svg className="w-full h-full" viewBox="0 0 800 300" preserveAspectRatio="none">
-                      {/* Grid lines */}
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <line
-                          key={i}
-                          x1="0"
-                          y1={i * 60 + 10}
-                          x2="800"
-                          y2={i * 60 + 10}
-                          stroke="#e5e7eb"
-                          strokeWidth="1"
-                        />
-                      ))}
-
-                      {/* Line graph */}
-                      <polyline
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="3"
-                        points={monthlyData
-                          .map((item, index) => {
-                            const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                            const x = (index / (monthlyData.length - 1)) * 800;
-                            const y = 270 - ((item.value || item.revenue || 0) / maxRevenue) * 240;
-                            return `${x},${y}`;
-                          })
-                          .join(' ')}
-                      />
-
-                      {/* Data points */}
-                      {monthlyData.map((item, index) => {
-                        const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                        const x = (index / (monthlyData.length - 1)) * 800;
-                        const y = 270 - ((item.value || item.revenue || 0) / maxRevenue) * 240;
-                        return (
-                          <circle
-                            key={index}
-                            cx={x}
-                            cy={y}
-                            r="5"
-                            fill="#3b82f6"
-                          />
-                        );
-                      })}
-                    </svg>
-
-                    {/* X-axis labels */}
-                    <div className="flex justify-between mt-4">
-                      {monthlyData.map((item, index) => (
-                        <span key={index} className="text-xs text-gray-600 font-medium">
-                          {item.label || item.month || index + 1}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Y-axis label */}
-                    <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-600 font-medium py-2">
-                      {[0, 1, 2, 3, 4].map((i) => {
-                        const maxRevenue = Math.max(...monthlyData.map(d => d.value || d.revenue || 0));
-                        const value = Math.round((maxRevenue * (4 - i)) / 4);
-                        return <span key={i}>₹{value.toLocaleString()}</span>;
-                      })}
-                    </div>
+              {/* Premium Revenue Chart */}
+              <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900">Revenue Trend</h3>
+                    <p className="text-gray-500 text-sm font-medium mt-1">
+                      {revenueMonth || timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)} Performance
+                    </p>
                   </div>
-                ) : (
-                  <div className="h-80 flex items-center justify-center text-gray-500">
-                    <p>No revenue data available for this period</p>
-                  </div>
-                )}
+                </div>
+                <AreaChart
+                  data={(monthlyData || []).map((item: any) => ({
+                    label: item.label || item.month || '',
+                    value: item.value || item.revenue || 0
+                  }))}
+                  height={280}
+                  gradientFrom="#10b981"
+                  gradientTo="#10b98100"
+                  lineColor="#059669"
+                  showYAxis={true}
+                  formatValue={(v) => `₹${v.toLocaleString()}`}
+                />
               </div>
             </div>
           )}
@@ -1130,8 +1119,8 @@ const OwnerDashboard = () => {
             </div>
           )}
         </main>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

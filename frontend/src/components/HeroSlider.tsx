@@ -12,32 +12,32 @@ const HeroSlider = () => {
     },
     {
       image: '/foodimages/f2.jpg',
-      title: 'Delicious Chinese Food',
+      title: 'Delicious Fresh Food',
       subtitle: 'Fresh and flavorful dishes'
     },
     {
       image: '/foodimages/f3.jpg',
-      title: 'Italian Pasta Perfection',
+      title: 'Chef Special',
       subtitle: 'Handcrafted with love'
     },
     {
       image: '/foodimages/f4.jpg',
-      title: 'Traditional Parathas',
+      title: 'Premium Platters',
       subtitle: 'Crispy, buttery, and delicious'
     },
     {
       image: '/foodimages/f5.jpg',
-      title: 'Crispy Cabbage Manchurian',
+      title: 'Gourmet Selection',
       subtitle: 'Tangy and crunchy delight'
     },
     {
       image: '/foodimages/f6.jpg',
-      title: 'Chettinad Fish Fry',
-      subtitle: 'Spicy South Indian specialty'
+      title: 'Fresh Delicacies',
+      subtitle: 'Spicy specialty dishes'
     },
     {
       image: '/foodimages/f7.jpg',
-      title: 'Desi Chow Mein',
+      title: 'Fusion Flavors',
       subtitle: 'Fusion of flavors'
     },
     {
@@ -82,9 +82,8 @@ const HeroSlider = () => {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-            index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-          }`}
+          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
         >
           <img
             src={slide.image}
@@ -103,13 +102,13 @@ const HeroSlider = () => {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-primary p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-primary p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
@@ -120,9 +119,8 @@ const HeroSlider = () => {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
+              }`}
           />
         ))}
       </div>

@@ -2,7 +2,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-const uploadDir = path.join(__dirname, '../../public/uploads');
+// Use process.cwd() instead of __dirname so path resolves correctly in compiled output
+const uploadDir = path.join(process.cwd(), 'public/uploads');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });

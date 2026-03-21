@@ -3,15 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useEffect } from 'react';
 import api from '../utils/api';
-import { Home, Star, Search, ShoppingCart, ShoppingBag, LogOut } from 'lucide-react';
+import { Home, Star, Search, ShoppingCart, ShoppingBag, LogOut, User, ChevronRight, Zap } from 'lucide-react';
+import { getImageUrl } from '../utils/formatters';
 
 const CustomerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, name, profilePhoto, premiumMember, updateProfile } = useAuth();
   const { cart } = useCart();
-
-  // Load profile data on mount
   useEffect(() => {
     loadProfileData();
   }, []);
@@ -30,58 +29,65 @@ const CustomerSidebar = () => {
   const cartItemCount = cart.length;
 
   const menuItems = [
-    { path: '/customer/home', label: 'Home', icon: Home, badge: null },
-    { path: '/customer/best-restaurants', label: 'Best Restaurants', icon: Star, badge: null },
-    { path: '/customer/best-dishes', label: 'Great Deals', icon: Search, badge: null },
+    { path: '/customer/home', label: 'Discovery', icon: Home, badge: null },
+    { path: '/customer/best-restaurants', label: 'Top Rated', icon: Star, badge: null },
+    { path: '/customer/best-dishes', label: 'Best Deals', icon: Search, badge: null },
     { path: '/customer/cart', label: 'My Cart', icon: ShoppingCart, badge: cartItemCount },
-    { path: '/customer/orders', label: 'My Orders', icon: ShoppingBag, badge: null },
+    { path: '/customer/orders', label: 'Order History', icon: ShoppingBag, badge: null },
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[280px] bg-white/95 backdrop-blur-xl border-r border-pink-100 shadow-lg z-40 transition-all duration-300">
-      {/* Logo Section */}
-      <div className="p-8 pb-4 flex items-center justify-center">
-        <div className="flex items-center gap-3 relative group cursor-pointer" onClick={() => navigate('/customer/home')}>
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
-          <img src="/tomato-logo.png" alt="TOMATO" className="w-10 h-10 object-contain relative z-10 drop-shadow-lg" />
-          <h1 className="text-3xl font-display font-bold text-primary tracking-tight relative z-10 group-hover:text-primary transition-colors">
-            TOMATO
-          </h1>
+    <div className="fixed left-0 top-0 h-screen w-80 glass border-r border-white/40 shadow-[20px_0_60px_rgba(0,0,0,0.05)] z-[100] flex flex-col font-display bg-[#FDFBF7]">
+      {/* Premium Logo Section */}
+      <div className="p-10">
+        <div
+          className="flex items-center gap-4 cursor-pointer group"
+          onClick={() => navigate('/customer/home')}
+        >
+          <div className="w-12 h-12 bg-primary rounded-[1.2rem] flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-all duration-500 shadow-primary/20">
+            <img src="/tomato-logo.png" alt="T" className="w-8 h-8 object-contain drop-shadow-sm" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-black text-primary tracking-tighter leading-none">tomato</h1>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] ml-1">Premium Edition</span>
+          </div>
         </div>
       </div>
 
-      {/* User Info Card */}
-      <div className="px-4 py-6">
+      {/* Profile Card - Masterpiece Style */}
+      <div className="px-6 mb-10">
         <div
-          className="glass-card p-4 flex items-center gap-4 cursor-pointer hover:bg-pink-50 transition-all duration-300"
           onClick={() => navigate('/customer/profile')}
+          className="relative glass-card p-6 rounded-[2.5rem] border-white/60 shadow-xl cursor-pointer group overflow-hidden hover:shadow-primary/10 transition-all duration-500"
         >
-          <div className="relative">
-            <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${premiumMember ? 'border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'border-primary shadow-neon'}`}>
-              {profilePhoto ? (
-                <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-lg">
-                  {name?.charAt(0).toUpperCase() || 'U'}
+          <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+
+          <div className="flex items-center gap-5 relative z-10">
+            <div className={`w-16 h-16 rounded-[1.5rem] p-1 ${premiumMember ? 'bg-gradient-to-tr from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30' : 'bg-gray-100'} transition-transform group-hover:scale-105 duration-500`}>
+              <div className="w-full h-full rounded-[1.3rem] bg-white overflow-hidden shadow-inner flex items-center justify-center">
+                {profilePhoto ? (
+                  <img src={getImageUrl(profilePhoto)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="text-gray-300" size={32} />
+                )}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Welcome back</p>
+              <h3 className="font-black text-gray-800 truncate text-xl tracking-tight pr-4">{name || 'Guest'}</h3>
+              {premiumMember && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Zap size={12} className="text-yellow-500 fill-yellow-500" />
+                  <span className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Premium Member</span>
                 </div>
               )}
             </div>
-            {premiumMember && (
-              <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-amber-600 text-[10px] text-white font-bold px-1.5 rounded-full shadow-lg border border-white/20">
-                PRO
-              </div>
-            )}
-          </div>
-
-          <div className="overflow-hidden">
-            <p className="text-xs text-gray-500 font-medium">Welcome,</p>
-            <p className="text-gray-800 font-semibold truncate text-sm">{name}</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="px-4 space-y-2 mt-2">
+      <nav className="flex-1 px-6 space-y-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -89,39 +95,43 @@ const CustomerSidebar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActive
-                  ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-neon'
-                  : 'text-gray-600 hover:text-primary hover:bg-pink-50'
+              className={`w-full group px-8 py-5 rounded-[1.8rem] flex items-center gap-5 transition-all duration-500 relative overflow-hidden ${isActive
+                ? 'bg-[var(--primary)] text-white shadow-2xl shadow-primary/30'
+                : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                 }`}
             >
               {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-30"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-2 bg-primary"></div>
               )}
-              <Icon size={20} className={`${isActive ? 'text-white' : 'text-gray-500 group-hover:text-primary'} transition-colors`} />
-              <span className="font-medium tracking-wide">{item.label}</span>
+              <Icon size={24} className={`transition-transform duration-500 ${isActive ? 'scale-110' : 'group-hover:rotate-12 group-hover:scale-110'}`} />
+              <span className="font-black text-lg tracking-tight">{item.label}</span>
 
-              {/* Notification Badge */}
               {item.badge !== null && item.badge > 0 && (
-                <span className="absolute right-4 bg-gradient-to-r from-primary to-primary-dark text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow-lg animate-pulse">
-                  {item.badge > 9 ? '9+' : item.badge}
-                </span>
+                <div className="ml-auto w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg animate-bounce">
+                  {item.badge}
+                </div>
+              )}
+
+              {isActive && (
+                <ChevronRight size={18} className="ml-auto opacity-40" />
               )}
             </button>
           );
         })}
       </nav>
 
-      {/* Logout Button */}
-      <div className="absolute bottom-6 left-0 right-0 px-4">
+      {/* Logout - Premium Floating Style */}
+      <div className="p-8">
         <button
           onClick={() => { logout(); navigate('/login'); }}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-xl transition-all duration-300 group shadow-sm hover:shadow-lg hover:-translate-y-1"
+          className="w-full relative group/logout h-16 bg-white border-2 border-gray-100 rounded-3xl flex items-center justify-center gap-4 transition-all duration-500 hover:bg-red-500 hover:border-red-500 group overflow-hidden"
         >
-          <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-semibold">Logout</span>
+          <LogOut size={22} className="text-gray-400 group-hover/logout:text-white group-hover/logout:rotate-12 transition-all duration-500 relative z-10" />
+          <span className="font-black text-gray-500 group-hover/logout:text-white transition-all duration-500 relative z-10">Sign Out</span>
+          <div className="absolute inset-0 bg-red-500 translate-y-full group-hover/logout:translate-y-0 transition-transform duration-500"></div>
         </button>
       </div>
-    </aside>
+    </div>
   );
 };
 
