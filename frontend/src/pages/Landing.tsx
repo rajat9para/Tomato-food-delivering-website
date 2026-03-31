@@ -1,18 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Store, Shield, Star, CheckCircle, Search, Bike } from 'lucide-react';
+import { ShoppingCart, Store, Shield, Star, CheckCircle, Bike } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
-import api from '../utils/api';
+
 import GlobalBackground from '../components/GlobalBackground';
 import FloatingActionButton from '../components/FloatingActionButton';
 
 const Landing = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
 
 
@@ -42,103 +39,11 @@ const Landing = () => {
 
 
 
-  useEffect(() => {
-    const searchItems = async () => {
-      if (searchQuery.trim().length > 0) {
-        try {
-          // Search restaurants
-          const restaurantsRes = await api.get('/public/restaurants');
-          const filteredRestaurants = restaurantsRes.data.filter((restaurant: any) =>
-            restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
 
-          // Search dishes
-          const dishesRes = await api.get('/public/dishes');
-          const filteredDishes = dishesRes.data.filter((dish: any) =>
-            dish.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-
-          const suggestionsList = [
-            ...filteredRestaurants.slice(0, 3).map((r: any) => ({ ...r, type: 'restaurant' })),
-            ...filteredDishes.slice(0, 3).map((d: any) => ({ ...d, type: 'dish' }))
-          ];
-
-          setSuggestions(suggestionsList);
-          setShowSuggestions(true);
-        } catch (error) {
-          console.error('Search error:', error);
-          setSuggestions([]);
-        }
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    };
-
-    const debounce = setTimeout(searchItems, 300);
-    return () => clearTimeout(debounce);
-  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-[var(--background)] font-sans selection:bg-primary/10 selection:text-primary">
-      <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4">
-        <div className="max-w-7xl mx-auto glass rounded-[2rem] px-8 py-3 flex justify-between items-center gap-6 shadow-2xl border-2 border-[#E23744]/30 border-b-[#E23744]">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
-              <img src="/tomato-logo.png" alt="T" className="w-7 h-7 object-contain drop-shadow-md" />
-            </div>
-            <span className="text-2xl font-bold text-primary tracking-tight">tomato</span>
-          </div>
 
-          <div className="flex-1 max-w-xl relative hidden md:block">
-            <div className="relative group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-              <input
-                type="text"
-                placeholder="Search for restaurants, cuisines or dishes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => searchQuery && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full pl-14 pr-6 py-3.5 bg-white/50 backdrop-blur-md border-2 border-transparent rounded-2xl focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all duration-300 text-gray-900 placeholder:text-gray-400 font-medium"
-              />
-            </div>
-
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-4 glass-card rounded-[2rem] shadow-2xl overflow-hidden z-50 animate-scale-in border-white/60">
-                {suggestions.map((item: any) => (
-                  <div
-                    key={item._id}
-                    onClick={() => navigate('/login')}
-                    className="px-6 py-4 hover:bg-primary/5 cursor-pointer transition-all flex items-center gap-4 group"
-                  >
-                    <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-md group-hover:scale-110 transition-transform">
-                      {item.type === 'restaurant' ? (
-                        item.imageUrl ? <img src={item.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary text-white flex items-center justify-center font-bold text-lg">{item.name.charAt(0)}</div>
-                      ) : (
-                        item.images?.[0] ? <img src={item.images[0]} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-orange-500 text-white flex items-center justify-center text-xl">🍽️</div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 group-hover:text-primary transition-colors">{item.name}</div>
-                      <div className="text-sm text-gray-500 font-medium capitalize">{item.type} • {item.cuisineType?.join(', ') || (item.price ? `₹${item.price}` : 'Food')}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/login')}
-              className="px-8 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-200 hover:-translate-y-1 transition-all duration-300 active:scale-95 shadow-lg whitespace-nowrap"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </header>
 
       <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">

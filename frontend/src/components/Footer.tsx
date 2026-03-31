@@ -22,10 +22,10 @@ const Footer = () => {
   }, [showTeam]);
 
   const teamMembers = [
-    { name: 'Rajat Singh Rawat', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
-    { name: 'Rikshit Negi', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
-    { name: 'Sneha Kandwal', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
-    { name: 'Priyanshu Jugran', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
+    { name: 'Rajat Singh Rawat', leetcode: 'https://leetcode.com/u/demonQueen/', linkedin: 'https://in.linkedin.com/in/rajat-singh-rawat-9675306079123454321', github: 'https://github.com/rajat9para' },
+    { name: 'Abhishek Bhist', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
+    { name: 'Sneha Kanswal', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
+    { name: 'Priya Kholiya', leetcode: 'https://leetcode.com/', linkedin: 'https://linkedin.com/', github: 'https://github.com/' },
   ];
 
   return (
