@@ -403,7 +403,7 @@ const OwnerDashboard = () => {
 
       <div className="flex flex-col md:flex-row relative z-10">
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-72 bg-white border-r-2 border-primary/20 min-h-screen p-6 shadow-lg sticky top-24 h-[calc(100vh-6rem)]">
+        <aside className="hidden md:block w-72 bg-[#FDFBF7] border-r-2 border-primary/20 min-h-screen p-6 shadow-lg sticky top-24 h-[calc(100vh-6rem)]">
           <div className="space-y-3">
             {[{ name: 'menu', emoji: '🍽️' }, { name: 'orders', emoji: '📦' }, { name: 'revenue', emoji: '📊' }, { name: 'messages', emoji: '💬' }, { name: 'settings', emoji: '⚙️' }].map((tab) => (
               <button
@@ -411,7 +411,7 @@ const OwnerDashboard = () => {
                 onClick={() => setActiveTab(tab.name)}
                 className={`w-full p-4 text-left rounded-xl font-bold text-lg transition-all relative flex items-center gap-4 group overflow-hidden ${activeTab === tab.name
                   ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200 translate-x-1'
-                  : 'text-gray-500 hover:bg-red-50 hover:text-red-600'
+                  : 'text-gray-600 hover:bg-red-50 hover:text-red-600 border-2 border-[#E23744]/30 bg-white/60'
                   }`}
               >
                 {/* Active Indicator Line */}

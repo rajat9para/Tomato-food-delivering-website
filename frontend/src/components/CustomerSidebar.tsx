@@ -97,7 +97,7 @@ const CustomerSidebar = () => {
               onClick={() => navigate(item.path)}
               className={`w-full group px-8 py-5 rounded-[1.8rem] flex items-center gap-5 transition-all duration-500 relative overflow-hidden ${isActive
                 ? 'bg-[var(--primary)] text-white shadow-2xl shadow-primary/30'
-                : 'text-gray-500 hover:text-primary hover:bg-primary/5'
+                : 'text-gray-600 hover:text-primary hover:bg-primary/5 border-2 border-[#E23744]/30 bg-white/60'
                 }`}
             >
               {isActive && (

@@ -35,7 +35,7 @@ const CustomerLayout = () => {
       const { data } = await api.get('/customer/orders');
       if (Array.isArray(data)) {
         const unrated = data.find((order: any) => {
-          const isCompleted = order.orderStatus === 'completed';
+          const isCompleted = order.orderStatus === 'completed' || order.orderStatus === 'delivered';
           const isUnrated = !order.rating || order.rating === 0;
           const isDismissed = localStorage.getItem(`dismissed_rating_${order._id}`);
           return isCompleted && isUnrated && !isDismissed;
@@ -54,7 +54,7 @@ const CustomerLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex font-display selection:bg-primary/10">
+    <div className="min-h-screen bg-[#FDFBF7] flex font-display selection:bg-primary/10">
       <CustomerSidebar />
 
       {/* Main Content Area */}

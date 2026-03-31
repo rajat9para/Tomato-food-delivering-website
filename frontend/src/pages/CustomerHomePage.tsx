@@ -760,7 +760,7 @@ const CustomerHomePage = () => {
                         <div className="w-20 h-20 rounded-[1.5rem] glass p-1 shadow-xl group-hover:rotate-3 transition-all duration-500">
                           <div className="w-full h-full rounded-[1.3rem] overflow-hidden bg-white">
                             {review.customerPhoto ? (
-                              <img src={review.customerPhoto} className="w-full h-full object-cover" alt="" />
+                              <img src={getImageUrl(review.customerPhoto)} className="w-full h-full object-cover" alt="" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-primary text-white font-bold text-2xl">
                                 {review.customerName?.charAt(0)}
@@ -786,7 +786,7 @@ const CustomerHomePage = () => {
                             <div className="flex gap-4 mt-8 overflow-x-auto pb-2 no-scrollbar">
                               {review.images.map((img: string, idx: number) => (
                                 <div key={idx} className="relative w-32 h-32 rounded-[2rem] overflow-hidden shadow-2xl transition-transform hover:scale-110 duration-500 border-4 border-white cursor-zoom-in">
-                                  <img src={img} className="w-full h-full object-cover" alt="" />
+                                  <img src={getImageUrl(img)} className="w-full h-full object-cover" alt="" />
                                 </div>
                               ))}
                             </div>

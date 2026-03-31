@@ -394,9 +394,9 @@ export const rateOrder = async (req: AuthRequest, res: Response) => {
 
     console.log('✅ Order found:', order._id, 'Status:', order.orderStatus);
 
-    if (order.orderStatus !== 'completed') {
-      console.log('❌ Order not completed, status:', order.orderStatus);
-      return res.status(400).json({ message: 'Can only rate completed orders' });
+    if (order.orderStatus !== 'completed' && order.orderStatus !== 'delivered') {
+      console.log('❌ Order not completed/delivered, status:', order.orderStatus);
+      return res.status(400).json({ message: 'Can only rate completed or delivered orders' });
     }
 
     if (order.rating && order.rating > 0) {
@@ -424,7 +424,7 @@ export const rateOrder = async (req: AuthRequest, res: Response) => {
         console.log('🏪 Found restaurant:', restaurant._id);
         const allOrders = await Order.find({
           restaurantId: order.restaurantId,
-          orderStatus: 'completed',
+          orderStatus: { $in: ['completed', 'delivered'] },
           rating: { $gt: 0 }
         });
 
@@ -483,7 +483,7 @@ export const removeRating = async (req: AuthRequest, res: Response) => {
     if (restaurant) {
       const allOrders = await Order.find({
         restaurantId: order.restaurantId,
-        orderStatus: 'completed',
+        orderStatus: { $in: ['completed', 'delivered'] },
         rating: { $gt: 0 }
       });
 
@@ -715,7 +715,7 @@ export const getRestaurantReviews = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const orders = await Order.find({
       restaurantId: id,
-      orderStatus: 'completed',
+      orderStatus: { $in: ['completed', 'delivered'] },
       rating: { $gt: 0 }
     })
       .populate('customerId', 'name profilePhoto')
