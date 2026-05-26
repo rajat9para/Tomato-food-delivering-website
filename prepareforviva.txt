@@ -1,0 +1,868 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           TOMATO FOOD DELIVERY - COMPLETE VIVA PREPARATION GUIDE            ║
+║                    6th Semester PBL Project | Team DevX                      ║
+║      Rajat Singh Rawat | Abhishek Bhist | Sneha Kanswal | Priya Kholiya    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+================================================================================
+   SECTION 1: PROJECT OVERVIEW (Start your viva with this)
+================================================================================
+
+PROJECT NAME: Tomato - Food Delivery Web Application
+TYPE: Full-Stack Web Application (MERN Stack)
+DEPLOYMENT: 
+   - Frontend → Vercel (https://vercel.com)
+   - Backend  → Render (https://render.com)
+   - Database → MongoDB Atlas (Cloud)
+
+WHAT IT DOES:
+   A complete food delivery platform with 4 user roles:
+   1. CUSTOMER - Browse restaurants, order food, pay, rate orders
+   2. OWNER    - Register restaurant, manage menu, handle orders, track revenue
+   3. RIDER    - Accept deliveries, pick up food, deliver to customer
+   4. ADMIN    - Approve restaurants, manage users, oversee platform
+
+
+================================================================================
+   SECTION 2: TECHNOLOGY STACK (Know every technology you used)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           FRONTEND STACK                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ React.js (v18)     → UI library for building component-based interfaces    │
+│ TypeScript         → Type-safe JavaScript for fewer bugs                   │
+│ Vite               → Fast development build tool (replaces Webpack)        │
+│ React Router v6    → Client-side routing and navigation                    │
+│ TailwindCSS        → Utility-first CSS framework for responsive design     │
+│ Lucide React       → Modern icon library                                   │
+│ Axios              → HTTP client for API calls to backend                  │
+│ Context API        → React's built-in state management (Auth + Cart)       │
+│ localStorage       → Browser storage for persisting auth tokens + cart     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           BACKEND STACK                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Node.js            → JavaScript runtime on the server                      │
+│ Express.js         → Web framework for building REST APIs                  │
+│ TypeScript         → Type-safe server code                                 │
+│ MongoDB + Mongoose → NoSQL database + ODM (Object Document Mapper)         │
+│ JWT (jsonwebtoken) → Authentication via JSON Web Tokens                    │
+│ bcrypt             → Password hashing (one-way encryption)                 │
+│ Multer             → File upload middleware (for images)                   │
+│ CORS               → Cross-Origin Resource Sharing configuration           │
+│ Zod                → Schema validation for request data                    │
+│ dotenv             → Environment variable management                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DEPLOYMENT & DEVOPS                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Vercel             → Frontend hosting (auto-deploys from GitHub)            │
+│ Render             → Backend hosting (Node.js server)                      │
+│ MongoDB Atlas      → Cloud database (free tier M0 cluster)                 │
+│ GitHub             → Version control + CI/CD pipeline                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+   SECTION 3: ARCHITECTURE DIAGRAM (Draw this on whiteboard)
+================================================================================
+
+                    ┌──────────────────────────────────────┐
+                    │          TOMATO ARCHITECTURE          │
+                    └──────────────────────────────────────┘
+
+   ┌────────────────────────────────────────────────────────────────────┐
+   │                        FRONTEND (Vercel)                          │
+   │                                                                    │
+   │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+   │  │ Landing  │  │ Customer │  │  Owner   │  │  Rider   │          │
+   │  │  Page    │  │Dashboard │  │Dashboard │  │Dashboard │          │
+   │  └──────────┘  └──────────┘  └──────────┘  └──────────┘          │
+   │                      │              │             │               │
+   │  ┌─────────────────────────────────────────────────────────┐      │
+   │  │     React Router + AuthContext + CartContext             │      │
+   │  └───────────────────────┬─────────────────────────────────┘      │
+   └──────────────────────────┼────────────────────────────────────────┘
+                              │ Axios HTTP Requests
+                              │ (Authorization: Bearer <JWT Token>)
+                              ▼
+   ┌────────────────────────────────────────────────────────────────────┐
+   │                        BACKEND (Render)                            │
+   │                                                                    │
+   │  ┌──────────────────────────────────────────────────────────┐      │
+   │  │                   Express.js Server                      │      │
+   │  │           (server.ts — Entry Point, Port 5000)           │      │
+   │  └──────────┬──────────┬──────────┬──────────┬──────────────┘      │
+   │             │          │          │          │                     │
+   │  ┌──────────▼──┐ ┌────▼─────┐ ┌──▼──────┐ ┌▼──────────┐          │
+   │  │ auth.ts     │ │ admin    │ │ owner   │ │ customer  │          │
+   │  │ Middleware   │ │ Routes   │ │ Routes  │ │ Routes    │          │
+   │  │ (JWT verify) │ │          │ │         │ │           │          │
+   │  └──────────────┘ └──────────┘ └─────────┘ └───────────┘          │
+   │             │          │          │          │                     │
+   │  ┌──────────▼──────────▼──────────▼──────────▼──────────┐          │
+   │  │              CONTROLLERS (Business Logic)            │          │
+   │  │   authController | customerController | ownerController        │
+   │  │   adminController | riderDashController | chatbotController    │
+   │  └─────────────────────────┬────────────────────────────┘          │
+   │                            │                                      │
+   │  ┌─────────────────────────▼────────────────────────────┐          │
+   │  │              MONGOOSE MODELS (Data Layer)            │          │
+   │  │   User | Restaurant | FoodItem | Order | Transaction │          │
+   │  │   Rider | Contact | Message                          │          │
+   │  └─────────────────────────┬────────────────────────────┘          │
+   └────────────────────────────┼──────────────────────────────────────┘
+                                │
+                                ▼
+                    ┌──────────────────────┐
+                    │   MongoDB Atlas      │
+                    │   (Cloud Database)   │
+                    │                      │
+                    │  Collections:        │
+                    │  - users             │
+                    │  - restaurants       │
+                    │  - fooditems         │
+                    │  - orders            │
+                    │  - transactions      │
+                    │  - contacts          │
+                    │  - messages          │
+                    └──────────────────────┘
+
+
+================================================================================
+   SECTION 4: COMPLETE ORDER FLOW (Most Important for Viva!)
+================================================================================
+
+   This is the CORE of the project. You MUST know this end-to-end.
+
+   ─── PHASE 1: CUSTOMER PLACES ORDER ────────────────────────────────
+
+   Step 1: Customer logs in
+      Frontend: Login.tsx → calls POST /api/auth/login
+      Backend:  authController.ts → login() → verifies password with bcrypt
+                → creates JWT token → sends { token, role, userId, name }
+      Frontend: AuthContext.tsx → stores token in localStorage
+                → redirects to /customer/home
+
+   Step 2: Customer browses restaurants
+      Frontend: CustomerHomePage.tsx → calls GET /api/customer/restaurants
+      Backend:  customerController.ts → getRestaurants()
+                → finds restaurants with approvalStatus='approved' & activeStatus=true
+                → returns list with cover images
+
+   Step 3: Customer selects restaurant → sees menu
+      Frontend: CustomerHomePage.tsx → selectRestaurant() → calls GET /api/customer/restaurants/:id/menu
+      Backend:  customerController.ts → getRestaurantMenu()
+                → finds FoodItems where restaurantId matches & availability=true
+
+   Step 4: Customer adds items to cart
+      Frontend: CartContext.tsx → addToCart()
+                → stores { foodId, name, price, discount, quantity, restaurantId }
+                → persists to localStorage (survives page refresh)
+
+   Step 5: Customer clicks Checkout
+      Frontend: CustomerHomePage.tsx → handleCheckoutClick()
+                → first validates: calls GET /api/customer/profile
+                → checks if name, phone, address are filled
+                → if not → redirects to profile page
+                → if yes → shows Checkout Modal
+
+   Step 6: Customer selects payment method & confirms
+      Frontend: CustomerHomePage.tsx → checkout(paymentMethod)
+                → calculates: baseAmount + GST(5%) + platformFee(2%) + delivery(₹30)
+                → calls POST /api/customer/orders with:
+                  { restaurantId, items, totalAmount, paymentMethod, deliveryAddress }
+      Backend:  customerController.ts → placeOrder()
+                → validates: restaurant exists, items are available
+                → calculates: baseAmount + gstAmount + platformFeeAmount + deliveryFeeAmount
+                → creates Order document (status: 'pending')
+                → creates Transaction document
+                → returns { orderId, transactionId }
+
+   ─── PHASE 2: OWNER PROCESSES ORDER ───────────────────────────────
+
+   Step 7: Owner sees new order notification
+      Frontend: OwnerDashboard.tsx → checkNewOrders() (polling every 30s)
+                → calls GET /api/owner/orders
+                → filters pendingOrders → shows 🔔 badge
+      Backend:  ownerController.ts → getOrders()
+                → finds orders where restaurantId matches owner's restaurant
+
+   Step 8: Owner accepts → starts preparing
+      Frontend: OwnerDashboard.tsx → updateOrderStatus(orderId, 'preparing')
+                → calls PATCH /api/owner/orders/:id { orderStatus: 'preparing' }
+      Backend:  ownerController.ts → updateOrderStatus()
+                → updates Order.orderStatus = 'preparing'
+
+   Step 9: Owner marks food as ready
+      Frontend: OwnerDashboard.tsx → updateOrderStatus(orderId, 'ready')
+                → calls PATCH /api/owner/orders/:id { orderStatus: 'ready' }
+      Backend:  ownerController.ts → updateOrderStatus()
+                → updates Order.orderStatus = 'ready'
+                → now the order enters the RIDER QUEUE
+
+   ─── PHASE 3: RIDER DELIVERS ORDER ────────────────────────────────
+
+   Step 10: Rider sees available deliveries
+      Frontend: RiderDashboard.tsx → loads available orders
+                → calls GET /api/rider/available-orders
+      Backend:  riderDashController.ts → getAvailableOrders()
+                → finds orders where orderStatus='ready' and riderId is not set
+
+   Step 11: Rider accepts delivery
+      Frontend: RiderDashboard.tsx → accepts order
+                → calls POST /api/rider/accept-order { orderId }
+      Backend:  riderDashController.ts → acceptOrder()
+                → sets Order.riderId = rider's userId
+                → sets Order.riderAssignedAt = now
+                → sets Order.orderStatus = 'out_for_delivery'
+
+   Step 12: Rider picks up food → delivers to customer
+      Frontend: RiderDashboard.tsx → marks as delivered
+                → calls POST /api/rider/complete-delivery { orderId }
+      Backend:  riderDashController.ts → completeDelivery()
+                → sets Order.orderStatus = 'delivered'
+                → sets Order.deliveredAt = now
+                → calculates rider earnings (deliveryFee)
+
+   ─── PHASE 4: CUSTOMER RATES ORDER ────────────────────────────────
+
+   Step 13: Rating popup appears on customer dashboard
+      Frontend: CustomerLayout.tsx → checkUnratedOrders()
+                → calls GET /api/customer/orders
+                → finds orders with status 'completed' OR 'delivered' & rating=0
+                → shows RatingBanner notification
+
+   Step 14: Customer submits rating
+      Frontend: RatingBanner.tsx → handleSubmit()
+                → creates FormData with { orderId, rating, review, images }
+                → calls POST /api/customer/orders/rate (multipart/form-data)
+      Backend:  customerController.ts → rateOrder()
+                → validates order belongs to customer
+                → validates status is 'completed' or 'delivered'
+                → saves rating, review text, and uploaded images
+                → recalculates restaurant's average rating
+                → updates Restaurant.rating and Restaurant.totalReviews
+
+   ORDER STATUS LIFECYCLE:
+   ┌─────────┐    ┌───────────┐    ┌───────┐    ┌──────────────────┐    ┌───────────┐
+   │ PENDING │───→│ PREPARING │───→│ READY │───→│ OUT_FOR_DELIVERY │───→│ DELIVERED │
+   └─────────┘    └───────────┘    └───────┘    └──────────────────┘    └───────────┘
+        │                                                                      │
+        │                                                                      ▼
+        ▼                                                               ┌───────────┐
+   ┌───────────┐                                                        │ COMPLETED │
+   │ CANCELLED │                                                        │ (after    │
+   └───────────┘                                                        │  rating)  │
+                                                                        └───────────┘
+
+
+================================================================================
+   SECTION 5: BACKEND — FILE-BY-FILE STUDY GUIDE
+================================================================================
+
+   Study each file carefully. Know what every function does.
+
+   ─── 5.1 ENTRY POINT ──────────────────────────────────────────────
+
+   📄 backend/src/server.ts (MOST IMPORTANT — Start here)
+      - Creates Express app
+      - Configures CORS (allows frontend origin)
+      - Sets up body parsers (JSON limit: 50MB for base64 images)
+      - Serves static files from /public/uploads
+      - Mounts all API routes under /api prefix:
+        /api/auth     → authRoutes
+        /api/admin    → adminRoutes
+        /api/owner    → ownerRoutes
+        /api/customer → customerRoutes
+        /api/chatbot  → chatbotRoutes
+        /api/riders   → riderRoutes
+        /api/rider    → riderDashRoutes
+      - Connects to MongoDB Atlas → then starts listening on port
+
+   ─── 5.2 CONFIGURATION ────────────────────────────────────────────
+
+   📄 backend/src/config/index.ts
+      - Exports: JWT_SECRET, API_PORT, BASE_URL, MONGO_URI
+      - Loads from .env file via dotenv
+
+   📄 backend/src/config/db.ts
+      - connectDB() function
+      - Uses mongoose.connect(MONGO_URI) to connect to MongoDB Atlas
+
+   📄 backend/src/config/multer.ts
+      - Configures Multer for file uploads
+      - Sets destination: public/uploads/
+      - Sets filename: timestamp + original name
+      - File filter: only images (jpeg, png, gif, webp)
+      - Max file size: 10MB
+
+   📄 backend/.env (NEVER share this in public!)
+      - MONGO_URI=mongodb+srv://...
+      - JWT_SECRET=your-secret-key
+      - PORT=5000
+      - FRONTEND_URL=https://your-app.vercel.app
+
+   ─── 5.3 MODELS (Database Schema Definitions) ─────────────────────
+
+   📄 backend/src/models/User.ts
+      Schema: { name, email, password, role, status, address, phone,
+               profilePhoto, walletBalance, premiumMember, premiumExpiry,
+               vehicleType, isAvailable, createdAt }
+      Roles: 'admin' | 'owner' | 'customer' | 'rider'
+      KEY POINT: Single user model for ALL roles (discriminated by 'role' field)
+
+   📄 backend/src/models/Restaurant.ts
+      Schema: { restaurantId, name, ownerId, cuisineType, description,
+               address, phone, openingTime, closingTime, imageUrl, coverImage,
+               rating, totalReviews, totalRevenue, approvalStatus, activeStatus,
+               isRemoved, createdAt }
+      KEY POINT: approvalStatus ('pending'→'approved'→'rejected') — Admin must approve
+      KEY POINT: Has a pre-save hook to auto-generate restaurantId (e.g., 'TOM-384729')
+
+   📄 backend/src/models/FoodItem.ts
+      Schema: { restaurantId, name, description, price, priceUnit, discount,
+               availability, images, category }
+      KEY POINT: Has database indexes for performance optimization
+      KEY POINT: images are stored as base64 strings or /uploads/ paths
+
+   📄 backend/src/models/Order.ts
+      Schema: { customerId, restaurantId, riderId, items[], baseAmount,
+               gstAmount, platformFeeAmount, deliveryFeeAmount, totalAmount,
+               orderStatus, rating, review, ratingImages, deliveryAddress,
+               riderAssignedAt, deliveryStartedAt, deliveredAt, createdAt }
+      KEY POINT: orderStatus enum has 7 states (see lifecycle diagram above)
+      KEY POINT: items[] is an embedded array of { foodId, quantity, price }
+
+   📄 backend/src/models/Transaction.ts
+      Schema: { transactionId, orderId, userId, restaurantId, amount,
+               gstAmount, platformFeeAmount, paymentMethod, paymentStatus,
+               transactionType, createdAt }
+      KEY POINT: Tracks all money flow — orders, wallet recharges, premium purchases
+
+   📄 backend/src/models/Rider.ts
+      Schema: { name, phone, vehicle_type, current_location{lat,lng}, status }
+
+   📄 backend/src/models/Contact.ts
+      Schema: { customerId, senderName, message, images, status }
+      KEY POINT: For customer → admin communication
+
+   📄 backend/src/models/User.ts (also exports Message model)
+      Schema: { fromUserId, toUserId, subject, message, isRead, attachments }
+      KEY POINT: For admin → owner communication
+
+   ─── 5.4 MIDDLEWARE ────────────────────────────────────────────────
+
+   📄 backend/src/middleware/auth.ts
+      TWO exports:
+      1. auth() — JWT verification middleware
+         → Extracts token from Authorization header
+         → Verifies with jwt.verify(token, JWT_SECRET)
+         → Loads user from DB → checks if blocked
+         → If owner, checks if restaurant isRemoved
+         → Attaches user to req.user
+
+      2. authorize(...roles) — Role-based access control
+         → Checks if req.user.role is in allowed roles
+         → Returns 403 if not authorized
+
+   📄 backend/src/lib/validation.ts
+      - Uses Zod for request validation
+      - registerSchema: validates { name, email, password, role }
+      - loginSchema: validates { email, password }
+
+   ─── 5.5 ROUTES (API Endpoints Map) ───────────────────────────────
+
+   📄 backend/src/routes/authRoutes.ts
+      POST /api/auth/register    → register a new user
+      POST /api/auth/login       → login and get JWT token
+      GET  /api/auth/verify      → verify current session (requires auth)
+
+   📄 backend/src/routes/customerRoutes.ts
+      GET  /api/customer/restaurants              → list approved restaurants
+      GET  /api/customer/restaurants/:id/menu      → get restaurant menu
+      GET  /api/customer/restaurants/:id/reviews   → get restaurant reviews
+      GET  /api/customer/best-restaurants          → top rated restaurants
+      GET  /api/customer/featured-dishes           → trending dishes
+      GET  /api/customer/best-dishes               → best deals
+      GET  /api/customer/great-deals               → dishes with discounts
+      GET  /api/customer/search-dishes             → search by name
+      POST /api/customer/orders                    → place new order
+      GET  /api/customer/orders                    → get my orders
+      POST /api/customer/orders/cancel             → cancel pending order
+      POST /api/customer/orders/rate               → rate delivered order (multipart)
+      DELETE /api/customer/orders/:orderId/rating  → remove rating
+      GET  /api/customer/profile                   → get profile
+      PUT  /api/customer/profile                   → update profile (multipart)
+      POST /api/customer/wallet/recharge           → recharge wallet
+      POST /api/customer/premium/purchase          → buy premium membership
+      POST /api/customer/contact                   → send message to admin
+
+   📄 backend/src/routes/ownerRoutes.ts
+      GET    /api/owner/restaurant          → get my restaurant
+      POST   /api/owner/restaurant          → create new restaurant
+      PATCH  /api/owner/restaurant/details  → update restaurant details
+      PATCH  /api/owner/restaurant/image    → update restaurant image
+      PATCH  /api/owner/restaurant/toggle-status → toggle online/offline
+      GET    /api/owner/food                → get menu items
+      POST   /api/owner/food                → add food item
+      PATCH  /api/owner/food/:id            → edit food item
+      DELETE /api/owner/food/:id            → delete food item
+      GET    /api/owner/orders              → get incoming orders
+      PATCH  /api/owner/orders/:id          → update order status
+      GET    /api/owner/revenue             → get revenue analytics
+      DELETE /api/owner/account             → delete account permanently
+
+   📄 backend/src/routes/riderDashRoutes.ts
+      GET  /api/rider/available-orders    → orders ready for pickup
+      POST /api/rider/accept-order        → accept a delivery
+      POST /api/rider/complete-delivery   → mark as delivered
+      GET  /api/rider/my-deliveries       → delivery history
+      GET  /api/rider/earnings            → earnings dashboard
+      GET  /api/rider/stats               → delivery statistics
+
+   📄 backend/src/routes/adminRoutes.ts
+      GET    /api/admin/users             → list all users
+      PATCH  /api/admin/users/:id/block   → block/unblock user
+      GET    /api/admin/restaurants        → list all restaurants
+      PATCH  /api/admin/restaurants/:id/approve → approve/reject restaurant
+      DELETE /api/admin/restaurants/:id    → remove restaurant
+      GET    /api/admin/orders             → all platform orders
+      GET    /api/admin/analytics          → platform analytics
+      GET    /api/admin/revenue            → revenue reports
+
+   ─── 5.6 CONTROLLERS (Business Logic — KNOW THESE!) ───────────────
+
+   📄 backend/src/controllers/authController.ts
+      register() → validates input → checks email uniqueness → hashes password
+                   → creates User document → returns success
+      login()    → finds user by email → compares password with bcrypt
+                   → generates JWT token (7 day expiry)
+                   → returns { token, role, userId, name }
+      verify()   → returns current user data from req.user
+
+   📄 backend/src/controllers/customerController.ts (LARGEST FILE)
+      getRestaurants()     → aggregation pipeline for cover images
+      getBestRestaurants() → sorted by rating
+      getFeaturedDishes()  → latest 4 dishes with images
+      getRestaurantMenu()  → menu items for specific restaurant
+      placeOrder()         → CRITICAL: validates everything → creates Order + Transaction
+      getMyOrders()        → all orders for logged-in customer
+      cancelOrder()        → only pending orders can be cancelled
+      rateOrder()          → multipart upload → saves rating + images → updates avg rating
+      searchDishes()       → text search with regex
+      getProfile()         → user profile data
+      updateProfile()      → handles file upload for profile photo
+      getRestaurantReviews() → aggregates reviews with customer info
+
+   📄 backend/src/controllers/ownerController.ts
+      getRestaurant()       → finds restaurant by ownerId
+      createRestaurant()    → creates with base64 image
+      updateDetails()       → updates name, address, phone, hours
+      updateImage()         → updates restaurant logo
+      getOrders()           → all orders for this restaurant
+      updateOrderStatus()   → pending→preparing→ready (owner's part)
+      getRevenue()          → revenue analytics with chart data
+      deleteAccount()       → permanently deletes owner + restaurant + food items
+
+   📄 backend/src/controllers/riderDashController.ts
+      getAvailableOrders() → orders with status='ready' and no rider
+      acceptOrder()        → assigns rider, changes to 'out_for_delivery'
+      completeDelivery()   → marks 'delivered', calculates earnings
+      getMyDeliveries()    → rider's delivery history
+      getEarnings()        → daily/weekly/monthly earnings breakdown
+      getStats()           → total deliveries, today's count, avg
+
+   📄 backend/src/controllers/adminController.ts
+      getAllUsers()          → all users with pagination
+      blockUser()           → toggle user active/blocked
+      getAllRestaurants()    → all restaurants with owner info
+      approveRestaurant()   → approve/reject restaurant
+      removeRestaurant()    → soft-delete restaurant
+      getAllOrders()         → platform-wide order view
+      getAnalytics()        → user counts, order counts, revenue
+      getRevenueReport()    → detailed financial breakdown
+
+   📄 backend/src/controllers/chatbotController.ts
+      handleQuery() → AI chatbot that queries the database
+                    → searches restaurants and dishes
+                    → returns structured results
+
+
+================================================================================
+   SECTION 6: FRONTEND — FILE-BY-FILE STUDY GUIDE
+================================================================================
+
+   ─── 6.1 ENTRY POINT & ROUTING ────────────────────────────────────
+
+   📄 frontend/src/main.tsx
+      - Entry point → renders <App /> into DOM
+
+   📄 frontend/src/App.tsx (KNOW THIS!)
+      - Wraps app in AuthProvider → CartProvider → BrowserRouter
+      - Defines ALL routes:
+        /                     → Landing page (public)
+        /login                → Login page (public)
+        /register/:type       → Registration (customer/owner/rider)
+        /admin/dashboard      → Admin (protected, role: admin)
+        /owner/dashboard      → Owner (protected, role: owner)
+        /rider/dashboard      → Rider (protected, role: rider)
+        /customer/*           → Customer pages (protected, role: customer)
+          ├── home            → Discovery page
+          ├── best-restaurants → Top restaurants
+          ├── best-dishes     → Great deals
+          ├── cart             → Shopping cart
+          ├── orders           → Order history
+          └── profile          → User profile
+      - Shows Preloader animation on first load
+
+   ─── 6.2 CONTEXT (Global State Management) ────────────────────────
+
+   📄 frontend/src/context/AuthContext.tsx (CRITICAL!)
+      PURPOSE: Manages authentication state across the entire app
+      STORES: token, role, userId, name, profilePhoto, premiumMember
+      FUNCTIONS:
+        login()        → saves to state + localStorage
+        logout()       → clears everything
+        updateProfile() → updates photo/premium status
+        checkSession() → on mount, calls GET /api/auth/verify to validate token
+      KEY POINT: Uses localStorage so login persists across browser refreshes
+
+   📄 frontend/src/context/CartContext.tsx (CRITICAL!)
+      PURPOSE: Manages shopping cart state
+      STORES: cart[] (array of CartItem objects)
+      FUNCTIONS:
+        addToCart()         → adds item or increments quantity
+        updateQuantity()    → +1 or -1 (removes if 0)
+        removeFromCart()    → removes specific item
+        clearCart()         → empties entire cart
+        getTotal()          → calculates total with discounts
+        getItemsByRestaurant() → groups items by restaurant
+      KEY POINT: Persists to localStorage (cart survives page refresh)
+
+   ─── 6.3 UTILITIES ────────────────────────────────────────────────
+
+   📄 frontend/src/utils/api.ts
+      - Creates Axios instance with baseURL pointing to backend
+      - Adds Authorization header interceptor (attaches JWT token)
+      - Handles 401 errors → auto-logout on token expiry
+      KEY POINT: Every API call goes through this → centralized auth handling
+
+   📄 frontend/src/utils/formatters.ts
+      - formatDate(), formatTime(), formatCurrency()
+      - getImageUrl() → converts relative paths (/uploads/x.jpg) to full backend URL
+      KEY POINT: getImageUrl() is CRUCIAL — without it images show as broken squares
+
+   ─── 6.4 COMPONENTS ───────────────────────────────────────────────
+
+   📄 frontend/src/components/ProtectedRoute.tsx
+      - Checks if user is logged in and has correct role
+      - Redirects to /login if not authenticated
+
+   📄 frontend/src/components/CustomerLayout.tsx
+      - Layout wrapper for all customer pages
+      - Renders CustomerSidebar + Outlet (child route)
+      - Contains RATING POPUP logic:
+        → checkUnratedOrders() polls for delivered/completed unrated orders
+        → Shows notification banner → opens RatingBanner modal
+
+   📄 frontend/src/components/CustomerSidebar.tsx
+      - Fixed left sidebar with navigation links
+      - Shows profile card with photo + premium badge
+      - Menu items: Discovery, Top Rated, Best Deals, Cart, Orders
+      - Cart badge with item count, Logout button
+
+   📄 frontend/src/components/RatingBanner.tsx
+      - Star rating interaction (1-5 stars with hover effects)
+      - Text review input
+      - Image upload (up to 5 photos)
+      - Submits to POST /api/customer/orders/rate
+
+   📄 frontend/src/components/ChatbotWidget.tsx
+      - AI chatbot slide-in panel
+      - Sends queries to /api/chatbot/query
+      - Displays rich results (dishes, restaurants)
+
+   📄 frontend/src/components/Preloader.tsx
+      - Animated Tomato logo loading screen
+
+   📄 frontend/src/components/GlobalBackground.tsx
+      - Decorative background gradient orbs
+
+   📄 frontend/src/components/Footer.tsx
+      - Team DevX credits with social links
+      - GitHub, LeetCode, LinkedIn icons
+
+   ─── 6.5 PAGES ─────────────────────────────────────────────────────
+
+   📄 frontend/src/pages/Landing.tsx
+      - Public landing page with hero slideshow
+      - Role selection cards (Customer, Owner, Rider, Admin)
+      - CTA buttons to register/login
+
+   📄 frontend/src/pages/Login.tsx
+      - Email + password form
+      - Calls POST /api/auth/login
+      - On success → redirects based on role
+
+   📄 frontend/src/pages/Register.tsx
+      - Dynamic form based on URL param (:type = customer/owner/rider)
+      - Calls POST /api/auth/register
+      - Rider registration includes vehicle type selection
+
+   📄 frontend/src/pages/CustomerHomePage.tsx (LARGEST & MOST COMPLEX)
+      - Restaurant discovery with search
+      - Featured dishes carousel
+      - Restaurant cards with ratings + reviews count
+      - Restaurant detail view with full menu
+      - Add to cart → quantity controls
+      - Floating cart sidebar with bill breakdown
+      - Checkout modal (UPI / Card / COD)
+      - Reviews modal with customer photos
+
+   📄 frontend/src/pages/CustomerOrdersPage.tsx
+      - Order history list sorted by status priority
+      - Cancel pending orders
+      - Order detail modal with bill breakdown
+
+   📄 frontend/src/pages/CustomerProfile.tsx
+      - Edit name, email, phone, address
+      - Profile photo upload
+      - Premium membership purchase
+      - Wallet recharge
+
+   📄 frontend/src/pages/CustomerCart.tsx
+      - Full cart view with quantity controls
+      - Group items by restaurant
+      - Checkout flow
+
+   📄 frontend/src/pages/OwnerDashboard.tsx (SECOND LARGEST)
+      - Tab-based layout: Menu | Orders | Revenue | Messages | Settings
+      - Menu Management: Add/Edit/Delete food items with images
+      - Order Management: Accept → Prepare → Ready workflow
+      - Revenue Analytics: Charts, daily/weekly/monthly/yearly breakdown
+      - Settings: Edit restaurant details, upload logo, toggle online/offline
+      - Kitchen status toggle (Online/Offline)
+
+   📄 frontend/src/pages/RiderDashboard.tsx
+      - Available orders queue
+      - Accept delivery → start navigation
+      - Complete delivery button
+      - Earnings dashboard with daily stats
+      - Delivery history
+
+   📄 frontend/src/pages/AdminDashboard.tsx
+      - User management (block/unblock)
+      - Restaurant approvals (approve/reject)
+      - Platform-wide order view
+      - Revenue analytics and charts
+      - Message system to communicate with owners
+
+   ─── 6.6 STYLING ──────────────────────────────────────────────────
+
+   📄 frontend/src/index.css
+      - CSS custom properties (--primary: #E23744, --background: #FDFBF7)
+      - Google Fonts: Outfit + Lato
+      - Glassmorphism classes: .glass, .glass-card, .glass-dark
+      - Custom animations: slideInUp, slideInDown, fadeIn, scaleIn, float, bounce
+      - Scrollbar styling, focus states, selection colors
+      - Responsive breakpoints at 768px and 640px
+
+
+================================================================================
+   SECTION 7: KEY CONCEPTS TO EXPLAIN IN VIVA
+================================================================================
+
+   7.1 AUTHENTICATION FLOW
+   ─────────────────────────
+   Q: "How does authentication work in your project?"
+   A: We use JWT (JSON Web Token) based authentication.
+      1. User submits email + password to POST /api/auth/login
+      2. Backend verifies password using bcrypt.compare()
+      3. If valid → generates JWT token with { userId, role } payload
+         Token expires in 7 days
+      4. Frontend stores token in localStorage
+      5. Every API call sends token in Authorization: Bearer <token> header
+      6. Backend middleware (auth.ts) verifies token on protected routes
+      7. If token is invalid/expired → returns 401 → frontend auto-logouts
+
+   7.2 ROLE-BASED ACCESS CONTROL
+   ──────────────────────────────
+   Q: "How do you restrict access based on user roles?"
+   A: Two layers:
+      Frontend: ProtectedRoute component checks role before rendering page
+      Backend: authorize() middleware checks req.user.role against allowed roles
+      Example: /api/owner/orders only accessible if role === 'owner'
+
+   7.3 FILE UPLOADS
+   ────────────────
+   Q: "How do you handle image uploads?"
+   A: Two methods:
+      1. Base64 encoding: For restaurant/food images (stored in DB as strings)
+      2. Multer middleware: For profile photos and rating images
+         → Stores files in /public/uploads/ directory
+         → Returns path like "/uploads/1711234567-photo.jpg"
+         → Frontend uses getImageUrl() to construct full URL
+
+   7.4 PAYMENT BREAKDOWN
+   ──────────────────────
+   Q: "How is the bill calculated?"
+   A: baseAmount = sum of (item.price × quantity × (1 - discount/100))
+      gstAmount = baseAmount × 1%
+      platformFeeAmount = baseAmount × 1%
+      deliveryFeeAmount = ₹30 (fixed, goes to rider)
+      totalAmount = baseAmount + gstAmount + platformFeeAmount + deliveryFeeAmount
+
+   7.5 REAL-TIME UPDATES
+   ─────────────────────
+   Q: "How does the owner see new orders in real-time?"
+   A: We use polling — every 30 seconds the owner dashboard calls GET /api/owner/orders
+      and checks for new pending orders. This is simpler than WebSockets.
+      (Bonus: Mention you could upgrade to Socket.io for true real-time)
+
+   7.6 DATABASE DESIGN
+   ───────────────────
+   Q: "Why MongoDB and not SQL?"
+   A: - Flexible schema (food items can have varying fields)
+      - JSON-like documents match our API request/response format
+      - Embedded documents (order.items[], deliveryAddress)
+      - Easy horizontal scaling
+      - Mongoose ODM gives us schema validation + type safety
+
+   7.7 SECURITY MEASURES
+   ─────────────────────
+   Q: "What security measures have you implemented?"
+   A: - Passwords hashed with bcrypt (one-way, salted)
+      - JWT tokens with expiry (7 days)
+      - CORS configuration (only frontend origin allowed)
+      - Input validation with Zod
+      - Role-based authorization on every API endpoint
+      - Account blocking system (admin can block any user)
+      - Protected routes on frontend (can't access without login)
+
+   7.8 STATE MANAGEMENT
+   ────────────────────
+   Q: "How do you manage state in the frontend?"
+   A: React Context API (no Redux needed for this scale):
+      - AuthContext: token, role, user info (persisted in localStorage)
+      - CartContext: cart items (persisted in localStorage)
+      - Component-level state: useState for UI state (modals, forms, loading)
+
+
+================================================================================
+   SECTION 8: POTENTIAL VIVA QUESTIONS & ANSWERS
+================================================================================
+
+   Q1: "What happens if the user refreshes the page? Does the login persist?"
+   A: Yes! We store the JWT token in localStorage. On app mount, AuthContext
+      calls checkSession() which hits GET /api/auth/verify to validate the token.
+      If valid → session continues. If expired → auto-logout.
+
+   Q2: "Can a customer order from multiple restaurants in one checkout?"
+   A: Yes! The CartContext groups items by restaurantId using getItemsByRestaurant().
+      During checkout, we create SEPARATE Order documents for each restaurant using
+      Promise.all() to process them in parallel.
+
+   Q3: "What if the rider's app crashes mid-delivery?"
+   A: The order status is stored in MongoDB. When the rider reopens the app,
+      it fetches their active deliveries from GET /api/rider/my-deliveries.
+      The order will still be in 'out_for_delivery' status.
+
+   Q4: "How is the restaurant rating calculated?"
+   A: Weighted average of all rated orders. After each new rating:
+      1. Query all orders for that restaurant with rating > 0
+      2. Calculate average = sum(ratings) / count
+      3. Update Restaurant.rating and Restaurant.totalReviews
+
+   Q5: "Why did you choose Vite over Create React App?"
+   A: Vite is significantly faster — uses esbuild for development (100x faster
+      than Webpack), supports Hot Module Replacement (HMR), and produces
+      optimized production builds with Rollup.
+
+   Q6: "Explain the MVC architecture of your backend"
+   A: - Models → Mongoose schemas (User.ts, Order.ts, etc.) — Data layer
+      - Routes → Define API endpoints and chain middleware — Routing layer
+      - Controllers → Business logic functions — Logic layer
+      - Middleware → Cross-cutting concerns (auth, file upload) — Service layer
+      Flow: Request → Route → Middleware → Controller → Model → Database
+
+   Q7: "What is the purpose of the Transaction model?"
+   A: Financial auditing. Every payment is recorded with a unique transactionId,
+      the amount breakdown (GST, platform fee), payment method, and status.
+      This creates a complete audit trail for all money flowing through the platform.
+
+   Q8: "How do you handle errors?"
+   A: Backend: try-catch in every controller → sends appropriate HTTP status codes
+      (400 for validation, 401 for auth, 403 for forbidden, 404 for not found, 500 for server)
+      Frontend: Axios interceptor catches 401 → auto-logout. Other errors shown via alert().
+
+
+================================================================================
+   SECTION 9: STUDY PRIORITY CHECKLIST
+================================================================================
+
+   ✅ HIGH PRIORITY (Must know — will definitely be asked):
+   ─────────────────────────────────────────────────────────
+   [ ] Complete order flow (Section 4) — Customer → Owner → Rider → Rating
+   [ ] Authentication flow — JWT, bcrypt, login/register
+   [ ] Technology stack — What each technology does and WHY you chose it
+   [ ] Database models — Especially Order.ts and User.ts
+   [ ] Architecture diagram — Be able to draw on whiteboard
+
+   ✅ MEDIUM PRIORITY (Should know — may be asked):
+   ─────────────────────────────────────────────────────────
+   [ ] File upload mechanism (base64 vs Multer)
+   [ ] Payment breakdown calculation
+   [ ] Role-based access control (ProtectedRoute + authorize middleware)
+   [ ] State management (AuthContext + CartContext)
+   [ ] CORS and deployment setup
+
+   ✅ LOW PRIORITY (Good to know — bonus points):
+   ─────────────────────────────────────────────────────────
+   [ ] Chatbot implementation
+   [ ] Revenue analytics charts
+   [ ] Premium membership system
+   [ ] Admin messaging system
+   [ ] Database indexing for performance
+
+
+================================================================================
+   SECTION 10: HOW TO PRESENT IN VIVA
+================================================================================
+
+   STRATEGY: Start BIG → Go SMALL → Show DEMO
+
+   1. START with the architecture diagram (2 minutes)
+      "Our project is a MERN stack food delivery platform with 4 user roles..."
+
+   2. EXPLAIN the complete order flow (3 minutes)
+      "Let me walk you through how a food order works from start to finish..."
+      (This shows you understand the WHOLE system)
+
+   3. SHOW the live demo (3-5 minutes)
+      - Place an order as customer
+      - Switch to owner → accept → prepare → ready
+      - Switch to rider → accept → deliver
+      - Switch back to customer → show rating popup
+
+   4. ANSWER technical questions confidently
+      If you don't know → say "We focused on X approach, but Y could be
+      an improvement for future versions."
+
+   5. MENTION future improvements (shows depth of thinking):
+      - WebSocket for real-time updates (replace polling)
+      - Payment gateway integration (Razorpay/Stripe)
+      - GPS tracking for rider location
+      - Push notifications
+      - Rate limiting and API throttling
+      - Unit testing with Jest
+
+
+================================================================================
+   END OF PREPARATION GUIDE
+   Good luck with the viva! 🍅🎓
+================================================================================
