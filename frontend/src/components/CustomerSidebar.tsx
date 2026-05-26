@@ -9,7 +9,7 @@ import { getImageUrl } from '../utils/formatters';
 const CustomerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, name, profilePhoto, premiumMember, updateProfile } = useAuth();
+  const { logout, name, profilePhoto, premiumMember, premiumExpiry, updateProfile } = useAuth();
   const { cart } = useCart();
   useEffect(() => {
     loadProfileData();
@@ -18,15 +18,14 @@ const CustomerSidebar = () => {
   const loadProfileData = async () => {
     try {
       const { data } = await api.get('/customer/profile');
-      if (data.profilePhoto) {
-        updateProfile(data.profilePhoto, data.premiumMember);
-      }
+      updateProfile(data.profilePhoto || null, Boolean(data.premiumMember), data.premiumExpiry || null);
     } catch (error) {
       console.error('Error loading profile:', error);
     }
   };
 
   const cartItemCount = cart.length;
+  const hasActivePremium = premiumMember && (!premiumExpiry || new Date(premiumExpiry) > new Date());
 
   const menuItems = [
     { path: '/customer/home', label: 'Discovery', icon: Home, badge: null },
@@ -63,7 +62,7 @@ const CustomerSidebar = () => {
           <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
 
           <div className="flex items-center gap-5 relative z-10">
-            <div className={`w-16 h-16 rounded-[1.5rem] p-1 ${premiumMember ? 'bg-gradient-to-tr from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30' : 'bg-gray-100'} transition-transform group-hover:scale-105 duration-500`}>
+            <div className={`w-16 h-16 rounded-[1.5rem] p-1 ${hasActivePremium ? 'bg-gradient-to-tr from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30' : 'bg-gray-100'} transition-transform group-hover:scale-105 duration-500`}>
               <div className="w-full h-full rounded-[1.3rem] bg-white overflow-hidden shadow-inner flex items-center justify-center">
                 {profilePhoto ? (
                   <img src={getImageUrl(profilePhoto)} alt="" className="w-full h-full object-cover" />
@@ -75,7 +74,7 @@ const CustomerSidebar = () => {
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Welcome back</p>
               <h3 className="font-black text-gray-800 truncate text-xl tracking-tight pr-4">{name || 'Guest'}</h3>
-              {premiumMember && (
+              {hasActivePremium && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <Zap size={12} className="text-yellow-500 fill-yellow-500" />
                   <span className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Premium Member</span>

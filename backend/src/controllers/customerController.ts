@@ -6,6 +6,7 @@ import FoodItem from '../models/FoodItem';
 import Order from '../models/Order';
 import Transaction from '../models/Transaction';
 import Contact from '../models/Contact';
+import { geocodeAddress } from '../lib/tomtom';
 
 export const getRestaurants = async (req: AuthRequest, res: Response) => {
   try {
@@ -218,12 +219,23 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
     const baseAmount = totalAmount;
     const gstAmount = Math.round(baseAmount * 0.01); // 1% GST
     const platformFeeAmount = Math.round(baseAmount * 0.01); // 1% Platform fee
-    const deliveryFeeAmount = 30; // ₹30 delivery fee for rider
-    const finalTotalAmount = baseAmount + gstAmount + platformFeeAmount + deliveryFeeAmount;
+    const deliveryFeeAmount = 30; // rider earning
+    const hasActivePremium = Boolean(req.user!.premiumMember && req.user!.premiumExpiry && new Date(req.user!.premiumExpiry) > new Date());
+    const customerDeliveryFeeAmount = hasActivePremium ? 0 : deliveryFeeAmount;
+    const finalTotalAmount = baseAmount + gstAmount + platformFeeAmount + customerDeliveryFeeAmount;
 
-    console.log('💰 Payment breakdown:', { baseAmount, gstAmount, platformFeeAmount, deliveryFeeAmount, finalTotalAmount });
+    console.log('💰 Payment breakdown:', { baseAmount, gstAmount, platformFeeAmount, deliveryFeeAmount, customerDeliveryFeeAmount, finalTotalAmount });
 
     const transactionId = `TXN${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
+
+    const geocodedDeliveryAddress = await geocodeAddress(deliveryAddress.address);
+    const enrichedDeliveryAddress = {
+      ...deliveryAddress,
+      formattedAddress: geocodedDeliveryAddress?.formattedAddress,
+      lat: geocodedDeliveryAddress?.lat,
+      lng: geocodedDeliveryAddress?.lng,
+      locationConfidence: geocodedDeliveryAddress?.confidence
+    };
 
     const orderData = {
       customerId: req.user!._id,
@@ -234,7 +246,7 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
       platformFeeAmount,
       deliveryFeeAmount,
       totalAmount: finalTotalAmount,
-      deliveryAddress,
+      deliveryAddress: enrichedDeliveryAddress,
       orderStatus: 'pending'
     };
 
@@ -565,7 +577,13 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    const userObject = user.toObject();
+    const hasActivePremium = Boolean(user.premiumMember && user.premiumExpiry && new Date(user.premiumExpiry) > new Date());
+    res.json({
+      ...userObject,
+      premiumMember: hasActivePremium,
+      premiumExpiry: hasActivePremium ? user.premiumExpiry : null
+    });
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -601,7 +619,17 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     }
 
     console.log('✅ Profile updated successfully for:', user.email);
-    res.json({ message: 'Profile updated successfully', user });
+    const userObject = user.toObject();
+    const hasActivePremium = Boolean(user.premiumMember && user.premiumExpiry && new Date(user.premiumExpiry) > new Date());
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        ...userObject,
+        premiumMember: hasActivePremium,
+        premiumExpiry: hasActivePremium ? user.premiumExpiry : null
+      }
+    });
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -668,8 +696,8 @@ export const purchasePremium = async (req: AuthRequest, res: Response) => {
 
     // Premium pricing
     const pricing: any = {
-      monthly: 9.99,
-      yearly: 99.99
+      monthly: 79,
+      yearly: 699
     };
 
     const amount = pricing[plan] || pricing.monthly;

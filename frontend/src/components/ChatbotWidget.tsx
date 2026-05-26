@@ -1,16 +1,53 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Loader2, Mic, MicOff, Star, IndianRupee } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Bot,
+  ChevronRight,
+  IndianRupee,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Mic,
+  MicOff,
+  Send,
+  SlidersHorizontal,
+  Star,
+  Store,
+  X
+} from 'lucide-react';
 import api from '../utils/api';
+import { getImageUrl } from '../utils/formatters';
+
+type SortOption = 'rating' | 'price' | 'discount';
+
+interface RestaurantResult {
+  _id: string;
+  type?: 'restaurant';
+  name: string;
+  cuisineType?: string[];
+  rating: number;
+  totalReviews?: number;
+  address?: string;
+  phone?: string;
+  imageUrl?: string;
+  coverImage?: string;
+  openingTime?: string;
+  closingTime?: string;
+  averagePrice?: number;
+  maxDiscount?: number;
+  menuCount?: number;
+}
 
 interface FoodResult {
   _id: string;
+  type?: 'food';
   name: string;
   price: number;
   discount: number;
   category: string;
   images: string[];
   description: string;
-  restaurant: { name: string; rating: number; imageUrl?: string };
+  restaurant: RestaurantResult;
 }
 
 interface ChatMessage {
@@ -19,39 +56,46 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   foods?: FoodResult[];
+  restaurants?: RestaurantResult[];
 }
 
-export default function ChatbotWidget() {
+interface ChatbotWidgetProps {
+  onRestaurantSelect?: (restaurant: RestaurantResult) => void;
+}
+
+export default function ChatbotWidget({ onRestaurantSelect }: ChatbotWidgetProps) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hey there! 👋 I\'m your Tomato AI assistant. Ask me about dishes, restaurants, or anything food-related!\n\nTry: "Show me gulab jamun" or "What does [restaurant] serve?"',
+      content: 'Hi, I am your Tomato assistant. Ask for a dish, cuisine, restaurant, price range, or discount and I will search the live database.',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'discount'>('rating');
+  const [sortBy, setSortBy] = useState<SortOption>('rating');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
+    if (isOpen) {
+      window.setTimeout(() => inputRef.current?.focus(), 250);
+    }
   }, [isOpen]);
 
-  // Web Speech API for voice input
   const startListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Voice input is not supported in your browser. Try Chrome!');
+      alert('Voice input is not supported in this browser.');
       return;
     }
 
@@ -59,34 +103,21 @@ export default function ChatbotWidget() {
     recognition.lang = 'en-IN';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
-
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
       setIsListening(false);
-      // Auto-send after voice input
-      setTimeout(() => {
-        sendMessageWithText(transcript);
-      }, 300);
+      window.setTimeout(() => sendMessageWithText(transcript), 250);
     };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
+    recognitionRef.current?.stop();
     setIsListening(false);
   };
 
@@ -94,460 +125,312 @@ export default function ChatbotWidget() {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: trimmed,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `${Date.now()}-user`,
+        role: 'user',
+        content: trimmed,
+        timestamp: new Date()
+      }
+    ]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await api.post('/chatbot/chat', { message: trimmed });
-      const { response: aiText, foods } = response.data;
-      const botMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: aiText || 'I couldn\'t process that. Please try again!',
-        timestamp: new Date(),
-        foods: foods || []
-      };
-      setMessages(prev => [...prev, botMsg]);
-    } catch {
-      const errMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Oops! Something went wrong. Please try again in a moment. 🙏',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errMsg]);
+      const { data } = await api.post('/chatbot/chat', { message: trimmed, sortBy });
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `${Date.now()}-assistant`,
+          role: 'assistant',
+          content: data.response || 'I found these matches from the database.',
+          timestamp: new Date(),
+          foods: data.foods || [],
+          restaurants: data.restaurants || []
+        }
+      ]);
+    } catch (error: any) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `${Date.now()}-assistant-error`,
+          role: 'assistant',
+          content: error.response?.data?.response || 'The chatbot could not respond right now. Please try again.',
+          timestamp: new Date()
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const sendMessage = async () => {
-    await sendMessageWithText(input);
+  const openRestaurant = (restaurant: RestaurantResult) => {
+    const normalizedRestaurant = {
+      ...restaurant,
+      coverImage: restaurant.coverImage || restaurant.imageUrl
+    };
+
+    if (onRestaurantSelect) {
+      onRestaurantSelect(normalizedRestaurant);
+      setIsOpen(false);
+      return;
+    }
+
+    navigate('/customer/home', { state: { selectedRestaurant: normalizedRestaurant } });
+    setIsOpen(false);
   };
 
   const sortFoods = (foods: FoodResult[]) => {
     return [...foods].sort((a, b) => {
-      if (sortBy === 'price') return a.price - b.price;
+      if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
       if (sortBy === 'discount') return (b.discount || 0) - (a.discount || 0);
-      return (b.restaurant.rating || 0) - (a.restaurant.rating || 0);
+      return (b.restaurant?.rating || 0) - (a.restaurant?.rating || 0);
     });
   };
 
-  const getDiscountedPrice = (price: number, discount: number) => {
-    return Math.round(price * (1 - discount / 100));
+  const sortRestaurants = (restaurants: RestaurantResult[]) => {
+    return [...restaurants].sort((a, b) => {
+      if (sortBy === 'price') return (a.averagePrice || 0) - (b.averagePrice || 0);
+      if (sortBy === 'discount') return (b.maxDiscount || 0) - (a.maxDiscount || 0);
+      return (b.rating || 0) - (a.rating || 0);
+    });
   };
 
-  const getImageUrl = (img: string) => {
-    if (!img) return '';
-    if (img.startsWith('http')) return img;
-    const base = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
-    return `${base}${img}`;
+  const discountedPrice = (food: FoodResult) => {
+    return Math.round(food.price * (1 - (food.discount || 0) / 100));
+  };
+
+  const sortLabel = (option: SortOption) => {
+    if (option === 'price') return 'Lowest price';
+    if (option === 'discount') return 'Best discount';
+    return 'Top rated';
   };
 
   return (
     <>
-      {/* Floating Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           id="chatbot-toggle"
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #E23744, #d62b38)',
-            border: '3px solid #fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15)',
-            zIndex: 9999,
-            transition: 'all 0.3s ease',
-            animation: 'chatPulse 2s ease-in-out infinite'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'scale(1.12)';
-            e.currentTarget.style.boxShadow = '0 12px 40px rgba(226, 55, 68, 0.55), 0 0 0 6px rgba(226, 55, 68, 0.2)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15)';
-          }}
+          aria-label="Open Tomato AI assistant"
+          className="fixed bottom-6 right-6 z-[9999] h-[60px] w-[60px] rounded-full border-[3px] border-white bg-primary text-white shadow-[0_8px_32px_rgba(226,55,68,0.45)] transition hover:scale-110"
         >
-          <MessageCircle size={26} color="#fff" />
+          <MessageCircle size={26} className="mx-auto" />
         </button>
       )}
 
-      {/* Slide-in Panel from Right */}
       {isOpen && (
         <>
-          {/* Overlay */}
           <div
+            className="fixed inset-0 z-[9998] bg-black/30 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)',
-              backdropFilter: 'blur(4px)', zIndex: 9998,
-              animation: 'fadeIn 0.2s ease-out'
-            }}
           />
-
-          {/* Panel */}
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              width: '420px',
-              maxWidth: '100vw',
-              height: '100vh',
-              zIndex: 9999,
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#fff',
-              borderLeft: '3px solid #E23744',
-              boxShadow: '-20px 0 60px rgba(0,0,0,0.15)',
-              animation: 'slideInRight 0.3s ease-out'
-            }}
-          >
-            {/* Header */}
-            <div style={{
-              background: 'linear-gradient(135deg, #E23744, #d62b38)',
-              padding: '18px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexShrink: 0
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '42px', height: '42px', borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.2)', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <Bot size={22} color="#fff" />
+          <aside className="fixed right-0 top-0 z-[9999] flex h-screen w-[430px] max-w-full flex-col border-l-[3px] border-primary bg-white shadow-2xl">
+            <header className="flex items-center justify-between bg-primary px-5 py-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20">
+                  <Bot size={22} />
                 </div>
                 <div>
-                  <div style={{ color: '#fff', fontWeight: 800, fontSize: '17px', letterSpacing: '-0.02em' }}>
-                    Tomato AI Assistant
-                  </div>
-                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '11px', fontWeight: 600 }}>
-                    🟢 Online • Powered by AI + Database
-                  </div>
+                  <div className="text-lg font-black">Tomato AI Assistant</div>
+                  <div className="text-xs font-bold text-white/80">Live dishes, menus, and restaurants</div>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
                 id="chatbot-close"
-                style={{
-                  background: 'rgba(255,255,255,0.2)', border: 'none',
-                  borderRadius: '50%', width: '36px', height: '36px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', transition: 'background 0.2s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.35)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                aria-label="Close Tomato AI assistant"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition hover:bg-white/30"
               >
-                <X size={20} color="#fff" />
+                <X size={20} />
               </button>
+            </header>
+
+            <div className="border-b border-red-100 bg-white px-4 py-3">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-gray-400">
+                <SlidersHorizontal size={14} />
+                Sort results
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {(['rating', 'price', 'discount'] as SortOption[]).map(option => (
+                  <button
+                    key={option}
+                    onClick={() => setSortBy(option)}
+                    className={`rounded-lg px-2 py-2 text-xs font-black transition ${
+                      sortBy === option
+                        ? 'bg-primary text-white shadow-md shadow-red-100'
+                        : 'bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-primary'
+                    }`}
+                  >
+                    {sortLabel(option)}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Messages Area */}
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px',
-              background: '#f9fafb',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px'
-            }}>
-              {messages.map(msg => (
-                <div key={msg.id}>
-                  {/* Message bubble */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    alignItems: 'flex-start',
-                    gap: '8px'
-                  }}>
-                    {msg.role === 'assistant' && (
-                      <div style={{
-                        width: '30px', height: '30px', borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #E23744, #d62b38)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, marginTop: '2px'
-                      }}>
-                        <Bot size={14} color="#fff" />
+            <main className="flex-1 space-y-4 overflow-y-auto bg-gray-50 p-4">
+              {messages.map(message => (
+                <div key={message.id}>
+                  <div className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {message.role === 'assistant' && (
+                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                        <Bot size={15} />
                       </div>
                     )}
-                    <div style={{
-                      maxWidth: '80%',
-                      padding: '11px 15px',
-                      borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      background: msg.role === 'user'
-                        ? 'linear-gradient(135deg, #E23744, #d62b38)' : '#fff',
-                      color: msg.role === 'user' ? '#fff' : '#1f2937',
-                      fontSize: '13.5px', lineHeight: '1.6',
-                      wordBreak: 'break-word',
-                      border: msg.role === 'assistant' ? '1px solid #e5e7eb' : 'none',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                    }}>
-                      <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+                    <div
+                      className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                        message.role === 'user'
+                          ? 'rounded-br-md bg-primary text-white'
+                          : 'rounded-bl-md border border-gray-200 bg-white text-gray-800'
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{message.content}</div>
                     </div>
                   </div>
 
-                  {/* Rich Food Cards — shown below assistant messages */}
-                  {msg.role === 'assistant' && msg.foods && msg.foods.length > 0 && (
-                    <div style={{ marginTop: '10px', marginLeft: '38px' }}>
-                      {/* Sort controls */}
-                      <div style={{
-                        display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap'
-                      }}>
-                        {(['rating', 'price', 'discount'] as const).map(s => (
-                          <button
-                            key={s}
-                            onClick={() => setSortBy(s)}
-                            style={{
-                              padding: '4px 10px', borderRadius: '8px',
-                              fontSize: '10px', fontWeight: 700, border: 'none',
-                              cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em',
-                              background: sortBy === s ? '#E23744' : '#f3f4f6',
-                              color: sortBy === s ? '#fff' : '#6b7280',
-                              transition: 'all 0.2s'
-                            }}
-                          >
-                            {s === 'rating' ? '⭐ Rating' : s === 'price' ? '💰 Price' : '🏷️ Discount'}
-                          </button>
-                        ))}
-                      </div>
+                  {message.role === 'assistant' && Boolean(message.restaurants?.length) && (
+                    <section className="ml-10 mt-3 space-y-2">
+                      <p className="text-xs font-black uppercase tracking-wide text-gray-400">Restaurants</p>
+                      {sortRestaurants(message.restaurants || []).map(restaurant => (
+                        <button
+                          key={restaurant._id}
+                          onClick={() => openRestaurant(restaurant)}
+                          className="flex w-full gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition hover:border-primary hover:shadow-md"
+                        >
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-red-50">
+                            {restaurant.coverImage || restaurant.imageUrl ? (
+                              <img
+                                src={getImageUrl(restaurant.coverImage || restaurant.imageUrl)}
+                                alt={restaurant.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-primary">
+                                <Store size={22} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-black text-gray-900">{restaurant.name}</div>
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold text-gray-500">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-green-700">
+                                <Star size={10} fill="currentColor" /> {restaurant.rating?.toFixed(1) || 'New'}
+                              </span>
+                              <span>{restaurant.menuCount || 0} items</span>
+                              {restaurant.maxDiscount ? <span>{restaurant.maxDiscount}% off</span> : null}
+                            </div>
+                            {restaurant.address && (
+                              <div className="mt-1 flex items-center gap-1 truncate text-[11px] text-gray-400">
+                                <MapPin size={10} />
+                                <span className="truncate">{restaurant.address}</span>
+                              </div>
+                            )}
+                          </div>
+                          <ChevronRight size={18} className="mt-5 shrink-0 text-primary" />
+                        </button>
+                      ))}
+                    </section>
+                  )}
 
-                      {/* Dish cards */}
-                      <div style={{
-                        display: 'flex', flexDirection: 'column', gap: '8px',
-                        maxHeight: '320px', overflowY: 'auto'
-                      }}>
-                        {sortFoods(msg.foods).map(food => (
-                          <div key={food._id} style={{
-                            display: 'flex', gap: '10px', padding: '10px',
-                            background: '#fff', borderRadius: '14px',
-                            border: '1px solid #e5e7eb', cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
-                          }}
-                            onMouseEnter={e => {
-                              e.currentTarget.style.borderColor = '#E23744';
-                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(226,55,68,0.12)';
-                            }}
-                            onMouseLeave={e => {
-                              e.currentTarget.style.borderColor = '#e5e7eb';
-                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
-                            }}
-                          >
-                            {/* Food Image */}
-                            <div style={{
-                              width: '70px', height: '70px', borderRadius: '10px',
-                              overflow: 'hidden', flexShrink: 0, background: '#f3f4f6'
-                            }}>
-                              {food.images?.[0] ? (
-                                <img
-                                  src={getImageUrl(food.images[0])}
-                                  alt={food.name}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                  onError={(e: any) => { e.target.style.display = 'none'; }}
-                                />
-                              ) : (
-                                <div style={{
-                                  width: '100%', height: '100%',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  background: 'linear-gradient(135deg, #fef2f2, #fee2e2)',
-                                  color: '#E23744', fontWeight: 800, fontSize: '20px'
-                                }}>
-                                  {food.name.charAt(0)}
-                                </div>
+                  {message.role === 'assistant' && Boolean(message.foods?.length) && (
+                    <section className="ml-10 mt-3 space-y-2">
+                      <p className="text-xs font-black uppercase tracking-wide text-gray-400">Dishes</p>
+                      {sortFoods(message.foods || []).map(food => (
+                        <button
+                          key={food._id}
+                          onClick={() => openRestaurant(food.restaurant)}
+                          className="flex w-full gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition hover:border-primary hover:shadow-md"
+                        >
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-red-50">
+                            {food.images?.[0] ? (
+                              <img
+                                src={getImageUrl(food.images[0])}
+                                alt={food.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-lg font-black text-primary">
+                                {food.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-black text-gray-900">{food.name}</div>
+                            <div className="mt-1 truncate text-[11px] font-bold text-gray-500">
+                              {food.restaurant?.name || 'Restaurant'}
+                            </div>
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="inline-flex items-center text-sm font-black text-primary">
+                                <IndianRupee size={12} />
+                                {food.discount > 0 ? discountedPrice(food) : food.price}
+                              </span>
+                              {food.discount > 0 && (
+                                <>
+                                  <span className="text-xs font-bold text-gray-300 line-through">Rs {food.price}</span>
+                                  <span className="rounded-md bg-green-50 px-2 py-0.5 text-[10px] font-black text-green-700">
+                                    {food.discount}% off
+                                  </span>
+                                </>
                               )}
                             </div>
-
-                            {/* Food Details */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{
-                                fontSize: '13px', fontWeight: 700, color: '#1f2937',
-                                marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {food.name}
-                              </div>
-                              <div style={{
-                                fontSize: '11px', color: '#9ca3af', fontWeight: 600,
-                                display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px'
-                              }}>
-                                {food.restaurant.name}
-                                {food.restaurant.rating > 0 && (
-                                  <span style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '2px',
-                                    background: '#f0fdf4', color: '#16a34a',
-                                    padding: '1px 5px', borderRadius: '4px', fontSize: '10px', fontWeight: 700
-                                  }}>
-                                    <Star size={9} fill="#16a34a" /> {food.restaurant.rating.toFixed(1)}
-                                  </span>
-                                )}
-                              </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{
-                                  fontSize: '14px', fontWeight: 800, color: '#E23744',
-                                  display: 'flex', alignItems: 'center'
-                                }}>
-                                  <IndianRupee size={12} />
-                                  {food.discount > 0 ? getDiscountedPrice(food.price, food.discount) : food.price}
-                                </span>
-                                {food.discount > 0 && (
-                                  <>
-                                    <span style={{
-                                      fontSize: '11px', color: '#d1d5db', textDecoration: 'line-through'
-                                    }}>
-                                      ₹{food.price}
-                                    </span>
-                                    <span style={{
-                                      fontSize: '10px', fontWeight: 700, background: '#dcfce7',
-                                      color: '#16a34a', padding: '1px 5px', borderRadius: '4px'
-                                    }}>
-                                      {food.discount}% OFF
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                          <ChevronRight size={18} className="mt-5 shrink-0 text-primary" />
+                        </button>
+                      ))}
+                    </section>
                   )}
                 </div>
               ))}
 
               {isLoading && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '30px', height: '30px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #E23744, #d62b38)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                  }}>
-                    <Bot size={14} color="#fff" />
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
+                    <Bot size={15} />
                   </div>
-                  <div style={{
-                    padding: '10px 14px', borderRadius: '16px 16px 16px 4px',
-                    background: '#fff', border: '1px solid #e5e7eb',
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    color: '#9ca3af', fontSize: '13px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
-                  }}>
-                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                    Searching database...
+                  <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-500 shadow-sm">
+                    <Loader2 size={15} className="animate-spin" />
+                    Searching live database...
                   </div>
                 </div>
               )}
-
               <div ref={messagesEndRef} />
-            </div>
+            </main>
 
-            {/* Input with Voice */}
-            <div style={{
-              padding: '12px 16px',
-              background: '#fff',
-              borderTop: '2px solid #fee2e2',
-              display: 'flex',
-              gap: '8px',
-              flexShrink: 0
-            }}>
-              {/* Voice Button */}
+            <footer className="flex gap-2 border-t-2 border-red-100 bg-white p-3">
               <button
                 onClick={isListening ? stopListening : startListening}
-                style={{
-                  width: '42px', height: '42px', borderRadius: '12px',
-                  background: isListening ? '#E23744' : '#f3f4f6',
-                  border: isListening ? '2px solid #E23744' : '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', flexShrink: 0,
-                  animation: isListening ? 'voicePulse 1.5s ease-in-out infinite' : 'none'
-                }}
+                aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition ${
+                  isListening ? 'border-primary bg-primary text-white' : 'border-gray-200 bg-gray-100 text-gray-500'
+                }`}
               >
-                {isListening ? <MicOff size={18} color="#fff" /> : <Mic size={18} color="#6b7280" />}
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
               </button>
-
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                placeholder={isListening ? '🎤 Listening...' : 'Ask about dishes, restaurants...'}
+                onChange={event => setInput(event.target.value)}
+                onKeyDown={event => event.key === 'Enter' && sendMessageWithText(input)}
+                placeholder={isListening ? 'Listening...' : 'Ask about dishes, offers, or restaurants'}
                 id="chatbot-input"
                 disabled={isLoading}
-                style={{
-                  flex: 1, padding: '10px 16px', borderRadius: '12px',
-                  border: '1px solid #e5e7eb', background: '#f9fafb',
-                  color: '#1f2937', fontSize: '14px', outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={e => e.currentTarget.style.borderColor = '#E23744'}
-                onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-900 outline-none transition focus:border-primary"
               />
-
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessageWithText(input)}
                 disabled={isLoading || !input.trim()}
                 id="chatbot-send"
-                style={{
-                  width: '42px', height: '42px', borderRadius: '12px',
-                  background: input.trim() && !isLoading
-                    ? 'linear-gradient(135deg, #E23744, #d62b38)' : '#f3f4f6',
-                  border: 'none',
-                  cursor: input.trim() && !isLoading ? 'pointer' : 'default',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', flexShrink: 0
-                }}
+                aria-label="Send chatbot message"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white transition disabled:bg-gray-100 disabled:text-gray-300"
               >
-                <Send size={18} color={input.trim() && !isLoading ? '#fff' : '#d1d5db'} />
+                <Send size={18} />
               </button>
-            </div>
-          </div>
+            </footer>
+          </aside>
         </>
       )}
-
-      <style>{`
-        @keyframes chatPulse {
-          0%, 100% { box-shadow: 0 8px 32px rgba(226, 55, 68, 0.45), 0 0 0 4px rgba(226, 55, 68, 0.15); }
-          50% { box-shadow: 0 8px 32px rgba(226, 55, 68, 0.6), 0 0 0 8px rgba(226, 55, 68, 0.1); }
-        }
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes voicePulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(226, 55, 68, 0.4); }
-          50% { box-shadow: 0 0 0 10px rgba(226, 55, 68, 0); }
-        }
-      `}</style>
     </>
   );
 }

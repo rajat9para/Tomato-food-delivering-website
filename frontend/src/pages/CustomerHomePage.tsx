@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import DishCarousel from '../components/DishCarousel';
 import SkeletonCard from '../components/SkeletonCard';
@@ -12,6 +13,7 @@ const CustomerHomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cart, addToCart, updateQuantity, clearCart, getTotal, getItemsByRestaurant } = useCart();
+  const { premiumMember, premiumExpiry } = useAuth();
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [menu, setMenu] = useState<any[]>([]);
@@ -30,6 +32,7 @@ const CustomerHomePage = () => {
 
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const hasActivePremium = premiumMember && (!premiumExpiry || new Date(premiumExpiry) > new Date());
 
   useEffect(() => {
     loadRestaurants();
@@ -223,7 +226,7 @@ const CustomerHomePage = () => {
             </div>
 
             {/* Chatbot Toggle Button — Right of Search Bar */}
-            <ChatbotWidget />
+            <ChatbotWidget onRestaurantSelect={selectRestaurant} />
 
             {showSuggestions && searchSuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-16 mt-4 glass-card rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] max-h-80 overflow-y-auto z-[100] border-white/80 animate-scale-in">
@@ -280,7 +283,7 @@ const CustomerHomePage = () => {
                 >
                   <div className="h-56 relative overflow-hidden">
                     {dish.images?.[0] ? (
-                      <img src={dish.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <img src={getImageUrl(dish.images[0])} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                         <span className="text-5xl font-black text-primary opacity-20">{dish.name.charAt(0)}</span>
@@ -664,6 +667,11 @@ const CustomerHomePage = () => {
 
             {/* Bill Breakdown */}
             <div className="bg-gray-50 rounded-2xl p-5 mb-6 space-y-3">
+              {hasActivePremium && (
+                <div className="rounded-xl bg-yellow-50 px-4 py-2 text-sm font-black text-yellow-700">
+                  Premium active: delivery fee will be waived at checkout.
+                </div>
+              )}
               <div className="flex justify-between text-sm font-semibold text-gray-600">
                 <span>Items Subtotal</span>
                 <span>₹{getTotal().toFixed(0)}</span>

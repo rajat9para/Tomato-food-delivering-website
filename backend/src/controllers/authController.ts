@@ -5,6 +5,14 @@ import User from '../models/User';
 import Restaurant from '../models/Restaurant';
 import { JWT_SECRET } from '../config';
 
+const getPremiumState = (user: any) => {
+  const hasActivePremium = Boolean(user.premiumMember && user.premiumExpiry && new Date(user.premiumExpiry) > new Date());
+  return {
+    premiumMember: hasActivePremium,
+    premiumExpiry: hasActivePremium ? user.premiumExpiry : null
+  };
+};
+
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
@@ -121,6 +129,8 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
 
+    const premium = getPremiumState(user);
+
     // Return success with user data
     res.json({
       token,
@@ -128,7 +138,8 @@ export const login = async (req: Request, res: Response) => {
       userId: user._id,
       name: user.name,
       profilePhoto: user.profilePhoto || null,
-      premiumMember: user.premiumMember || false
+      premiumMember: premium.premiumMember,
+      premiumExpiry: premium.premiumExpiry
     });
   } catch (error: any) {
     console.error('❌ Login error:', error.message);
@@ -146,6 +157,8 @@ export const verify = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Session invalid' });
     }
 
+    const premium = getPremiumState(user);
+
     res.status(200).json({
       status: 'success',
       user: {
@@ -154,7 +167,8 @@ export const verify = async (req: Request, res: Response) => {
         email: user.email,
         role: user.role,
         profilePhoto: user.profilePhoto || null,
-        premiumMember: user.premiumMember || false
+        premiumMember: premium.premiumMember,
+        premiumExpiry: premium.premiumExpiry
       }
     });
   } catch (error) {

@@ -24,7 +24,7 @@ const Login = () => {
       console.log('✅ [LOGIN DEBUG] Response received:', response.status, response.data);
 
       const { data } = response;
-      login(data.token, data.role, data.userId, data.name, data.profilePhoto, data.premiumMember);
+      login(data.token, data.role, data.userId, data.name, data.profilePhoto, data.premiumMember, data.premiumExpiry);
 
       if (data.role === 'admin') navigate('/admin/dashboard');
       else if (data.role === 'owner') navigate('/owner/dashboard');

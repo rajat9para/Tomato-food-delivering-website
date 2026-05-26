@@ -11,3 +11,4 @@ export const BASE_URL = process.env.NODE_ENV === 'production'
     : `http://localhost:${API_PORT}/api`;
 export const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/tomato';
 export const JWT_SECRET = process.env.JWT_SECRET || 'secret_tomato_key_2026';
+export const TOMTOM_API_KEY = process.env.TOMTOM_API_KEY || '';

@@ -18,6 +18,10 @@ export interface IOrder extends Document {
     name: string;
     phone: string;
     address: string;
+    formattedAddress?: string;
+    lat?: number;
+    lng?: number;
+    locationConfidence?: number;
   };
   riderAssignedAt?: Date;
   deliveryStartedAt?: Date;
@@ -46,7 +50,11 @@ const orderSchema = new Schema<IOrder>({
   deliveryAddress: {
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    address: { type: String, required: true }
+    address: { type: String, required: true },
+    formattedAddress: { type: String },
+    lat: { type: Number },
+    lng: { type: Number },
+    locationConfidence: { type: Number }
   },
   riderAssignedAt: { type: Date },
   deliveryStartedAt: { type: Date },

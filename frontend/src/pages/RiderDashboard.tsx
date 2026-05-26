@@ -17,7 +17,15 @@ interface Order {
   totalAmount: number;
   deliveryFeeAmount?: number;
   orderStatus: string;
-  deliveryAddress: { name: string; phone: string; address: string };
+  deliveryAddress: {
+    name: string;
+    phone: string;
+    address: string;
+    formattedAddress?: string;
+    lat?: number;
+    lng?: number;
+    locationConfidence?: number;
+  };
   riderAssignedAt?: string;
   deliveryStartedAt?: string;
   deliveredAt?: string;
@@ -41,6 +49,7 @@ export default function RiderDashboard() {
   const [stats, setStats] = useState<RiderStats>({ totalDeliveries: 0, todayDeliveries: 0, totalEarnings: 0, todayEarnings: 0 });
   const [isAvailable, setIsAvailable] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -49,9 +58,13 @@ export default function RiderDashboard() {
     setTimeout(() => setNotification(null), 3000);
   }, []);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (background = false) => {
     try {
-      setLoading(true);
+      if (background) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const [ordersRes, activeRes, historyRes, statsRes, profileRes] = await Promise.all([
         api.get('/rider/available-orders'),
         api.get('/rider/active-delivery'),
@@ -70,12 +83,13 @@ export default function RiderDashboard() {
       console.error('Fetch error:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 15000);
+    fetchData(false);
+    const interval = setInterval(() => fetchData(true), 20000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -84,7 +98,7 @@ export default function RiderDashboard() {
       setActionLoading(true);
       await api.post(`/rider/accept-order/${orderId}`);
       showNotification('success', 'Order accepted! Head to the restaurant.');
-      await fetchData();
+      await fetchData(true);
       setTab('active');
     } catch (err: any) {
       showNotification('error', err.response?.data?.message || 'Failed to accept order');
@@ -98,7 +112,7 @@ export default function RiderDashboard() {
       setActionLoading(true);
       await api.post(`/rider/start-delivery/${orderId}`);
       showNotification('success', 'Delivery started! Head to the customer.');
-      await fetchData();
+      await fetchData(true);
     } catch (err: any) {
       showNotification('error', err.response?.data?.message || 'Failed to start delivery');
     } finally {
@@ -111,7 +125,7 @@ export default function RiderDashboard() {
       setActionLoading(true);
       await api.post(`/rider/complete-delivery/${orderId}`);
       showNotification('success', 'Delivery completed! ₹30 earned! 🎉');
-      await fetchData();
+      await fetchData(true);
       setTab('queue');
     } catch (err: any) {
       showNotification('error', err.response?.data?.message || 'Failed to complete delivery');
@@ -143,8 +157,25 @@ export default function RiderDashboard() {
     return new Date(dateStr).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  const getMapUrl = (_address: string) => {
-    return `https://www.openstreetmap.org/export/embed.html?bbox=72.5,18.5,73.5,19.5&layer=mapnik&marker=19.0760,72.8777`;
+  const getMapUrl = (order: Order) => {
+    const lat = order.deliveryAddress?.lat;
+    const lng = order.deliveryAddress?.lng;
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      const offset = 0.01;
+      return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - offset},${lat - offset},${lng + offset},${lat + offset}&layer=mapnik&marker=${lat},${lng}`;
+    }
+
+    return `https://www.openstreetmap.org/export/embed.html?bbox=72.5,18.5,73.5,19.5&layer=mapnik`;
+  };
+
+  const getNavigationUrl = (order: Order) => {
+    const lat = order.deliveryAddress?.lat;
+    const lng = order.deliveryAddress?.lng;
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.deliveryAddress?.address || '')}`;
   };
 
   if (loading) {
@@ -271,8 +302,8 @@ export default function RiderDashboard() {
 
         {/* Refresh */}
         <div className="flex justify-end mb-4">
-          <button onClick={fetchData} className="bg-white border-2 border-gray-200 rounded-lg px-4 py-2 text-gray-600 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 shadow-sm">
-            <RefreshCw size={14} /> Refresh
+          <button onClick={() => fetchData(true)} className="bg-white border-2 border-gray-200 rounded-lg px-4 py-2 text-gray-600 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 shadow-sm">
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> {refreshing ? 'Refreshing' : 'Refresh'}
           </button>
         </div>
 
@@ -329,7 +360,7 @@ export default function RiderDashboard() {
                       <MapPin size={16} className="text-primary mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-semibold text-gray-800">{order.deliveryAddress.name}</p>
-                        <p className="text-gray-500 text-xs">{order.deliveryAddress.address}</p>
+                        <p className="text-gray-500 text-xs">{order.deliveryAddress.formattedAddress || order.deliveryAddress.address}</p>
                       </div>
                     </div>
 
@@ -429,7 +460,15 @@ export default function RiderDashboard() {
                     <div className="flex-1">
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">DELIVERY</p>
                       <h4 className="text-base font-bold text-gray-900 mb-1">📍 {activeDelivery.deliveryAddress.name}</h4>
-                      <p className="text-sm text-gray-500 mb-2">{activeDelivery.deliveryAddress.address}</p>
+                      <p className="text-sm text-gray-500 mb-2">{activeDelivery.deliveryAddress.formattedAddress || activeDelivery.deliveryAddress.address}</p>
+                      <a
+                        href={getNavigationUrl(activeDelivery)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100"
+                      >
+                        <Navigation size={13} /> Open navigation
+                      </a>
                       <a href={`tel:${activeDelivery.deliveryAddress.phone}`} className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:underline">
                         <Phone size={14} /> {activeDelivery.deliveryAddress.phone}
                       </a>
@@ -450,7 +489,7 @@ export default function RiderDashboard() {
                       height="100%"
                       frameBorder="0"
                       scrolling="no"
-                      src={getMapUrl(activeDelivery.deliveryAddress.address)}
+                      src={getMapUrl(activeDelivery)}
                       style={{ border: 0 }}
                     />
                   </div>

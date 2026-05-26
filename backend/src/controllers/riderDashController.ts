@@ -2,6 +2,23 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Order from '../models/Order';
 import User from '../models/User';
+import { geocodeAddress } from '../lib/tomtom';
+
+const ensureDeliveryLocation = async (order: any) => {
+  if (!order?.deliveryAddress?.address || order.deliveryAddress.lat || order.deliveryAddress.lng) {
+    return order;
+  }
+
+  const geocoded = await geocodeAddress(order.deliveryAddress.address);
+  if (!geocoded) return order;
+
+  order.deliveryAddress.formattedAddress = geocoded.formattedAddress;
+  order.deliveryAddress.lat = geocoded.lat;
+  order.deliveryAddress.lng = geocoded.lng;
+  order.deliveryAddress.locationConfidence = geocoded.confidence;
+  await order.save();
+  return order;
+};
 
 /**
  * GET /api/rider/available-orders
@@ -18,6 +35,7 @@ export const getAvailableOrders = async (req: AuthRequest, res: Response) => {
       .populate('items.foodId', 'name')
       .sort({ createdAt: -1 });
 
+    await Promise.all(orders.map(ensureDeliveryLocation));
     res.json(orders);
   } catch (error) {
     console.error('Get available orders error:', error);
@@ -73,6 +91,7 @@ export const acceptOrder = async (req: AuthRequest, res: Response) => {
     // Mark rider as busy
     await User.findByIdAndUpdate(riderId, { isAvailable: false });
 
+    await ensureDeliveryLocation(order);
     res.json({ message: 'Order accepted successfully', order });
   } catch (error) {
     console.error('Accept order error:', error);
@@ -109,6 +128,7 @@ export const startDelivery = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Order not found or not in correct state' });
     }
 
+    await ensureDeliveryLocation(order);
     res.json({ message: 'Delivery started! Head to the customer.', order });
   } catch (error) {
     console.error('Start delivery error:', error);
@@ -173,6 +193,7 @@ export const getMyDeliveries = async (req: AuthRequest, res: Response) => {
       .populate('items.foodId', 'name')
       .sort({ createdAt: -1 });
 
+    await Promise.all(deliveries.map(ensureDeliveryLocation));
     res.json(deliveries);
   } catch (error) {
     console.error('Get my deliveries error:', error);
@@ -195,6 +216,10 @@ export const getActiveDelivery = async (req: AuthRequest, res: Response) => {
       .populate('restaurantId', 'name address phone imageUrl')
       .populate('customerId', 'name phone address')
       .populate('items.foodId', 'name');
+
+    if (activeOrder) {
+      await ensureDeliveryLocation(activeOrder);
+    }
 
     res.json(activeOrder || null);
   } catch (error) {

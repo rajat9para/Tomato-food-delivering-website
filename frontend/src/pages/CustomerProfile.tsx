@@ -64,10 +64,8 @@ const CustomerProfile = () => {
         premiumMember: data.premiumMember || false,
         premiumExpiry: data.premiumExpiry
       });
-      if (data.profilePhoto) {
-        setPreviewPhoto(data.profilePhoto);
-        updateAuthProfile(data.profilePhoto, data.premiumMember);
-      }
+      setPreviewPhoto(data.profilePhoto || null);
+      updateAuthProfile(data.profilePhoto || null, Boolean(data.premiumMember), data.premiumExpiry || null);
     } catch (error) {
       console.error('Error loading profile:', error);
       showNotification('error', 'Failed to load profile data');
@@ -124,10 +122,10 @@ const CustomerProfile = () => {
       });
 
       // FIX: Ensure photo preview persists - only update if new photo returned
-      if (response.data.user?.profilePhoto) {
-        const newPhotoUrl = response.data.user.profilePhoto;
-        setPreviewPhoto(newPhotoUrl);
-        updateAuthProfile(newPhotoUrl, response.data.user.premiumMember);
+      const updatedUser = response.data.user;
+      if (updatedUser) {
+        setPreviewPhoto(updatedUser.profilePhoto || null);
+        updateAuthProfile(updatedUser.profilePhoto || null, Boolean(updatedUser.premiumMember), updatedUser.premiumExpiry || null);
       }
       // Keep existing preview if no new photo was uploaded and none returned
 
@@ -188,7 +186,7 @@ const CustomerProfile = () => {
         premiumMember: true,
         premiumExpiry: data.premiumExpiry
       }));
-      updateAuthProfile(undefined, true);
+      updateAuthProfile(undefined, true, data.premiumExpiry || null);
       showNotification('success', `Premium activated! Transaction ID: ${data.transactionId}`);
       setShowPremiumModal(false);
       loadProfile(); // Reload to get updated data
@@ -252,6 +250,7 @@ const CustomerProfile = () => {
                       src={getImageUrl(previewPhoto)}
                       alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={() => setPreviewPhoto(null)}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-primary text-white">
